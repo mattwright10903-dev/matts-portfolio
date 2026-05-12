@@ -126,3 +126,8 @@ input:focus, textarea:focus { border-color: rgba(255,255,255,0.35); }
   .hero { min-height: auto; padding: 70px 0 30px; }
   .account-head { align-items: flex-start; flex-direction: column; }
 }
+
+.nav-form {
+  margin: 0;
+  display: inline-flex;
+}

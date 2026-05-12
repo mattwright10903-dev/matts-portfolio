@@ -9,8 +9,8 @@
   <% if (sent) { %><div class="notice success">Message sent successfully.</div><% } %>
   <% if (typeof error !== 'undefined') { %><div class="notice error"><%= error %></div><% } %>
   <form method="post" action="/contact" class="form">
-    <label>Name<input name="name" value="<%= user?.name || '' %>" required></label>
-    <label>Email<input type="email" name="email" value="<%= user?.email || '' %>" required></label>
+    <label>Name<input name="name" value="" required></label>
+    <label>Email<input type="email" name="email" value="" required></label>
     <label>Subject<input name="subject" placeholder="Logo design, branding package, website work..." required></label>
     <label>Message<textarea name="body" rows="7" placeholder="Tell me what you need created..." required></textarea></label>
     <button class="btn" type="submit">Send Message</button>

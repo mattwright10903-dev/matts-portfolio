@@ -1,0 +1,16 @@
+<%- include('layout-start') %>
+<section class="page-head center">
+  <p class="eyebrow">Admin</p>
+  <h1>Admin Login</h1>
+  <p>Use the master admin email and password to manage portfolio projects and messages.</p>
+</section>
+
+<section class="form-wrap card">
+  <% if (error) { %><div class="notice error"><%= error %></div><% } %>
+  <form method="post" action="/admin/login" class="form">
+    <label>Email<input type="email" name="email" placeholder="mattwright10903@gmail.com" required></label>
+    <label>Password<input type="password" name="password" required></label>
+    <button class="btn" type="submit">Login to Admin</button>
+  </form>
+</section>
+<%- include('layout-end') %>

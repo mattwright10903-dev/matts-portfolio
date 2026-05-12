@@ -2,8 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
-import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,8 +14,8 @@ const app = express();
 const PgSession = connectPgSimple(session);
 
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -40,74 +38,20 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-  try {
-    const result = await query('SELECT * FROM users WHERE id = $1', [id]);
-    done(null, result.rows[0] || null);
-  } catch (error) {
-    done(error);
-  }
-});
-
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || `${BASE_URL}/auth/google/callback`,
-      },
-      async (_accessToken, _refreshToken, profile, done) => {
-        try {
-          const email = profile.emails?.[0]?.value?.toLowerCase();
-          const name = profile.displayName || 'Google User';
-          const avatar = profile.photos?.[0]?.value || '';
-          if (!email) return done(new Error('Google account did not return an email address.'));
-
-          const existing = await query('SELECT * FROM users WHERE google_id = $1 OR email = $2', [profile.id, email]);
-          if (existing.rows.length) {
-            const updated = await query(
-              'UPDATE users SET google_id = $1, name = $2, avatar = $3 WHERE id = $4 RETURNING *',
-              [profile.id, name, avatar, existing.rows[0].id]
-            );
-            return done(null, updated.rows[0]);
-          }
-
-          const created = await query(
-            'INSERT INTO users (google_id, email, name, avatar) VALUES ($1, $2, $3, $4) RETURNING *',
-            [profile.id, email, name, avatar]
-          );
-          return done(null, created.rows[0]);
-        } catch (error) {
-          return done(error);
-        }
-      }
-    )
-  );
-}
-
 function locals(req, extra = {}) {
   return {
-    user: req.user || null,
-    isAdmin: req.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+    user: null,
+    isAdmin: Boolean(req.session?.isAdmin),
     adminEmail: ADMIN_EMAIL,
     page: '',
     ...extra,
   };
 }
 
-function requireLogin(req, res, next) {
-  if (!req.user) return res.redirect('/login');
-  next();
-}
-
 function requireAdmin(req, res, next) {
-  if (!req.user) return res.redirect('/login');
-  if (req.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return res.status(403).render('error', locals(req, { message: 'You do not have admin access.' }));
+  if (!req.session?.isAdmin) {
+    return res.redirect('/admin');
+  }
   next();
 }
 
@@ -125,41 +69,54 @@ app.get('/about', (req, res) => res.render('about', locals(req, { page: 'about' 
 app.get('/contact', (req, res) => res.render('contact', locals(req, { page: 'contact', sent: false })));
 
 app.post('/contact', async (req, res) => {
-  const name = req.body.name || req.user?.name || 'Website Visitor';
-  const email = req.body.email || req.user?.email || '';
+  const name = req.body.name || 'Website Visitor';
+  const email = req.body.email || '';
   const subject = req.body.subject || 'New website message';
   const body = req.body.body || '';
-  if (!email || !body) return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.' }));
+  if (!email || !body) {
+    return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.' }));
+  }
 
-  await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [req.user?.id || null, name, email, subject, body]);
+  await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [null, name, email, subject, body]);
   await sendMessageEmail({ name, email, subject, body });
   res.render('contact', locals(req, { page: 'contact', sent: true }));
 });
 
-app.get('/login', (req, res) => res.render('login', locals(req, { page: 'login', googleReady: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) })));
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => res.redirect('/account'));
-app.post('/logout', (req, res) => req.logout(() => res.redirect('/')));
+app.get('/login', (_req, res) => res.redirect('/admin'));
+app.get('/account', (_req, res) => res.redirect('/contact'));
 
-app.get('/account', requireLogin, async (req, res) => {
-  const messages = await query('SELECT * FROM messages WHERE email = $1 ORDER BY created_at DESC', [req.user.email]);
-  res.render('account', locals(req, { page: 'account', messages: messages.rows, sent: false }));
-});
-
-app.post('/account/message', requireLogin, async (req, res) => {
-  const subject = req.body.subject || 'Account message';
-  const body = req.body.body || '';
-  if (body) {
-    await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [req.user.id, req.user.name, req.user.email, subject, body]);
-    await sendMessageEmail({ name: req.user.name, email: req.user.email, subject, body });
+app.get('/admin', async (req, res) => {
+  if (!req.session?.isAdmin) {
+    return res.render('admin-login', locals(req, { page: 'admin', error: null }));
   }
-  res.redirect('/account');
-});
 
-app.get('/admin', requireAdmin, async (req, res) => {
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
   const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 50');
   res.render('admin', locals(req, { page: 'admin', projects: projects.rows, messages: messages.rows }));
+});
+
+app.post('/admin/login', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const password = String(req.body.password || '');
+
+  if (!ADMIN_PASSWORD) {
+    return res.status(500).render('admin-login', locals(req, {
+      page: 'admin',
+      error: 'ADMIN_PASSWORD is not set in Render environment variables.',
+    }));
+  }
+
+  if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    req.session.adminEmail = ADMIN_EMAIL;
+    return res.redirect('/admin');
+  }
+
+  return res.status(401).render('admin-login', locals(req, { page: 'admin', error: 'Invalid admin email or password.' }));
+});
+
+app.post('/admin/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/admin'));
 });
 
 app.post('/admin/projects', requireAdmin, async (req, res) => {
