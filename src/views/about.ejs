@@ -1,22 +1,20 @@
 <%- include('layout-start') %>
-<section class="page-head">
+<section class="page-head slim-page-head">
   <p class="eyebrow">Matt Wright</p>
   <h1><%= content.about_title %></h1>
   <p><%= content.about_body %></p>
 </section>
 
-<section class="section about-split">
-  <div class="card">
-    <h2>What I Focus On</h2>
+<section class="section compact-section about-layout">
+  <div class="about-main">
+    <p class="eyebrow">About The Work</p>
+    <h2>Clean visuals built around the brand.</h2>
     <p><%= content.about_extra %></p>
   </div>
-  <div class="card">
-    <h2>Design Areas</h2>
-    <ul class="clean-list">
-      <% String(content.services_list || '').split('\n').filter(Boolean).forEach(service => { %>
-        <li><%= service %></li>
-      <% }) %>
-    </ul>
+  <div class="about-services">
+    <% String(content.services_list || '').split('\n').filter(Boolean).forEach((service, index) => { %>
+      <div class="service-row small"><span><%= String(index + 1).padStart(2, '0') %></span><strong><%= service %></strong></div>
+    <% }) %>
   </div>
 </section>
 <%- include('layout-end') %>

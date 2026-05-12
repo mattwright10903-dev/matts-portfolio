@@ -1,52 +1,44 @@
 <%- include('layout-start') %>
-<section class="page-head center">
+<section class="page-head slim-page-head center">
   <p class="eyebrow">Contact</p>
   <h1><%= content.contact_title %></h1>
   <p><%= content.contact_intro %></p>
 </section>
 
-<section class="contact-options">
-  <article class="card contact-card primary-contact-card">
-    <span class="contact-icon">💬</span>
-    <div>
-      <p class="eyebrow">Discord</p>
-      <h2>Add me on Discord</h2>
-      <p>Username: <strong>mjww0</strong></p>
-      <p class="muted-text">User ID: 1128708778343280713</p>
-      <div class="actions compact">
-        <a class="btn" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">Open Discord Profile</a>
-        <button class="btn ghost" type="button" onclick="navigator.clipboard.writeText('mjww0').then(() => this.textContent = 'Copied mjww0')">Copy Username</button>
-      </div>
-    </div>
-  </article>
-
-  <article class="card contact-card">
-    <span class="contact-icon">✉️</span>
-    <div>
-      <p class="eyebrow">Email</p>
-      <h2>Email me directly</h2>
-      <p>Send a project request straight to <strong>mattwright10903@gmail.com</strong>.</p>
-      <div class="actions compact">
-        <a class="btn" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry">Email Me</a>
-      </div>
-    </div>
-  </article>
+<section class="contact-strip">
+  <a class="contact-button" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">
+    <span>Discord</span>
+    <strong>mjww0</strong>
+    <small>User ID: 1128708778343280713</small>
+  </a>
+  <a class="contact-button" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry">
+    <span>Email</span>
+    <strong>mattwright10903@gmail.com</strong>
+    <small>Send a direct project inquiry</small>
+  </a>
+  <button class="contact-button copy-button" type="button" onclick="navigator.clipboard.writeText('mjww0').then(() => this.querySelector('small').textContent = 'Copied to clipboard')">
+    <span>Copy</span>
+    <strong>Discord Username</strong>
+    <small>Click to copy mjww0</small>
+  </button>
 </section>
 
-<section class="form-wrap card">
-  <div class="section-head small-head">
-    <p class="eyebrow">Project Form</p>
-    <h2>Send a message from the website</h2>
-    <p>This saves the message in your admin dashboard and can also email Matt when email settings are added in Render.</p>
+<section class="form-shell">
+  <div class="form-intro">
+    <p class="eyebrow">Project Request</p>
+    <h2>Tell me what you need.</h2>
+    <p>This saves in the admin dashboard and can email Matt when email settings are added in Render.</p>
   </div>
-  <% if (sent) { %><div class="notice success">Message sent. It has been saved for Matt.</div><% } %>
-  <% if (typeof error !== 'undefined' && error) { %><div class="notice error"><%= error %></div><% } %>
-  <form method="post" action="/contact" class="form">
-    <label>Name<input name="name" placeholder="Your name"></label>
-    <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
-    <label>Subject<input name="subject" placeholder="Logo design, branding pack, FiveM graphics..."></label>
-    <label>Message<textarea name="body" rows="7" placeholder="Tell me what you need, style, deadline, budget, and any links/images." required></textarea></label>
-    <button class="btn" type="submit">Send Project Request</button>
-  </form>
+  <div class="form-card clean-form-card">
+    <% if (sent) { %><div class="notice success">Message sent. It has been saved for Matt.</div><% } %>
+    <% if (typeof error !== 'undefined' && error) { %><div class="notice error"><%= error %></div><% } %>
+    <form method="post" action="/contact" class="form two-col-form">
+      <label>Name<input name="name" placeholder="Your name"></label>
+      <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label class="span-2">Subject<input name="subject" placeholder="Logo design, branding pack, FiveM graphics..."></label>
+      <label class="span-2">Message<textarea name="body" rows="7" placeholder="Tell me what you need, style, deadline, budget, and any links/images." required></textarea></label>
+      <button class="btn span-2" type="submit">Send Project Request</button>
+    </form>
+  </div>
 </section>
 <%- include('layout-end') %>

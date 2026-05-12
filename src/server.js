@@ -4,6 +4,7 @@ import session from 'express-session';
 import helmet from 'helmet';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
+import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
@@ -17,6 +18,14 @@ const PgSession = connectPgSimple(session);
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024 } });
+
+function getProjectImage(req, fallback = '') {
+  if (req.file && req.file.buffer) {
+    return `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  }
+  return String(req.body.image_url || fallback || '').trim();
+}
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -154,8 +163,10 @@ app.post('/admin/content', requireAdmin, async (req, res) => {
   res.redirect('/admin?saved=content');
 });
 
-app.post('/admin/projects/:id/update', requireAdmin, async (req, res) => {
-  const { title, category, description, image_url, project_url, featured } = req.body;
+app.post('/admin/projects/:id/update', requireAdmin, upload.single('image_file'), async (req, res) => {
+  const { title, category, description, project_url, featured } = req.body;
+  const existing = await query('SELECT image_url FROM projects WHERE id = $1', [req.params.id]);
+  const image_url = getProjectImage(req, existing.rows[0]?.image_url || '');
   await query(
     `UPDATE projects
      SET title = $1, category = $2, description = $3, image_url = $4, project_url = $5, featured = $6
@@ -165,8 +176,9 @@ app.post('/admin/projects/:id/update', requireAdmin, async (req, res) => {
   res.redirect('/admin?saved=project');
 });
 
-app.post('/admin/projects', requireAdmin, async (req, res) => {
-  const { title, category, description, image_url, project_url, featured } = req.body;
+app.post('/admin/projects', requireAdmin, upload.single('image_file'), async (req, res) => {
+  const { title, category, description, project_url, featured } = req.body;
+  const image_url = getProjectImage(req, '/assets/project-1.svg');
   await query('INSERT INTO projects (title, category, description, image_url, project_url, featured) VALUES ($1, $2, $3, $4, $5, $6)', [
     title,
     category || 'Design',
@@ -175,7 +187,7 @@ app.post('/admin/projects', requireAdmin, async (req, res) => {
     project_url || '',
     featured === 'on',
   ]);
-  res.redirect('/admin');
+  res.redirect('/admin?saved=project');
 });
 
 app.post('/admin/projects/:id/delete', requireAdmin, async (req, res) => {

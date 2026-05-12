@@ -5,14 +5,30 @@ Full-stack portfolio website for Matt Wright with:
 - Public home page
 - Public portfolio page
 - Public about page
-- Contact page with Discord button, email button, and project form
-- Private `/admin` login with fixed Render session handling
-- Admin dashboard
-- Website text editor
-- Add, edit, delete portfolio projects
-- View and close messages
+- Contact page with Discord and email buttons
+- Private `/admin` login
+- Admin dashboard website editor
+- Page text editing
+- Project add/edit/delete
+- Project image upload from admin dashboard
+- Client message inbox
 - PostgreSQL database
 - Render Web Service deployment
+
+## Latest Update
+
+This version rebuilds the layout to be cleaner and easier to manage:
+
+- Smaller, cleaner text sizing
+- Better page spacing
+- Cleaner project showcase layout
+- Better portfolio page structure
+- Better contact page layout
+- Admin dashboard split into clear sections
+- Admin sidebar navigation
+- Collapsible page text editor sections
+- Direct image upload for portfolio projects
+- Cleaner project editing forms
 
 ## Render Setup
 
@@ -47,16 +63,8 @@ Optional email settings for contact form email delivery:
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_PASS=your-gmail-app-password
 EMAIL_TO=mattwright10903@gmail.com
-```
-
-The public contact page also includes:
-
-```txt
-Discord username: mjww0
-Discord user ID: 1128708778343280713
-Email button: mattwright10903@gmail.com
 ```
 
 If email variables are missing, contact messages still save to the admin dashboard database.
@@ -69,12 +77,24 @@ Go to:
 /admin
 ```
 
-Login with the email/password you set in Render. Do not wrap the password in quotes in Render; paste the value directly:
+Login with the email/password set in Render.
+
+## Project Images
+
+In the admin dashboard, you can either:
+
+1. Upload an image file directly, or
+2. Paste an image URL.
+
+Uploaded images are converted into image data and stored in PostgreSQL with the project, so they do not rely on Render's temporary file system.
+
+Recommended image size:
 
 ```txt
-ADMIN_EMAIL
-ADMIN_PASSWORD
+1200x800 or 1600x1000
 ```
+
+Use compressed JPG/PNG/WebP images when possible.
 
 ## Updating the site
 
@@ -82,27 +102,8 @@ After replacing files locally:
 
 ```bash
 git add .
-git commit -m "Add admin website editor"
+git commit -m "Improve portfolio layout and admin dashboard"
 git push
 ```
 
 Then Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.
-
-
-## Latest Fixes
-
-This version includes two important fixes:
-
-1. Render admin sessions now work behind Render's proxy using `app.set('trust proxy', 1)` and safer session cookie settings.
-2. The full site styling has been changed to a black, white, and red design.
-
-If `/admin` refreshes back to the login page after entering the correct password, check these first:
-
-```txt
-ADMIN_EMAIL=mattwright10903@gmail.com
-ADMIN_PASSWORD=your exact password with no quotes
-SESSION_SECRET=any long random text
-DATABASE_URL=Render internal PostgreSQL URL
-```
-
-After changing environment variables, redeploy the service.

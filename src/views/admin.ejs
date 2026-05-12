@@ -1,118 +1,154 @@
 <%- include('layout-start') %>
-<section class="page-head">
-  <p class="eyebrow">Admin Dashboard</p>
-  <h1>Website Control Panel</h1>
-  <p>Edit the website pages, manage portfolio projects, and view incoming client messages.</p>
-  <% if (saved) { %><div class="notice">Saved successfully.</div><% } %>
+<section class="admin-hero">
+  <div>
+    <p class="eyebrow">Admin Dashboard</p>
+    <h1>Website Editor</h1>
+    <p>Update page text, upload project images, manage portfolio work, and view client messages from one clean dashboard.</p>
+    <% if (saved) { %><div class="notice success inline-notice">Saved successfully.</div><% } %>
+  </div>
+  <form method="post" action="/admin/logout"><button class="btn ghost" type="submit">Logout</button></form>
 </section>
 
-<section class="admin-tabs">
-  <a href="#content">Edit Website Text</a>
-  <a href="#projects">Manage Projects</a>
-  <a href="#messages">Messages</a>
-</section>
+<section class="admin-layout">
+  <aside class="admin-sidebar">
+    <a href="#pages">Pages</a>
+    <a href="#new-project">New Project</a>
+    <a href="#projects">Projects</a>
+    <a href="#messages">Messages</a>
+  </aside>
 
-<section id="content" class="section card admin-panel">
-  <div class="section-head">
-    <p class="eyebrow">Page Editor</p>
-    <h2>Edit Website Text</h2>
-  </div>
-  <form method="post" action="/admin/content" class="form admin-form-wide">
-    <h3>Homepage</h3>
-    <label>Hero Small Text<input name="hero_eyebrow" value="<%= content.hero_eyebrow %>"></label>
-    <label>Hero Main Title<input name="hero_title" value="<%= content.hero_title %>"></label>
-    <label>Hero Description<textarea name="hero_lead" rows="3"><%= content.hero_lead %></textarea></label>
-    <label>Homepage Card Title<input name="hero_card_title" value="<%= content.hero_card_title %>"></label>
-    <label>Homepage Card Text<textarea name="hero_card_body" rows="3"><%= content.hero_card_body %></textarea></label>
-
-    <h3>Services</h3>
-    <label>Services Title<input name="services_title" value="<%= content.services_title %>"></label>
-    <label>Services List <small>One service per line</small><textarea name="services_list" rows="7"><%= content.services_list %></textarea></label>
-
-    <h3>About Page</h3>
-    <label>About Title<input name="about_title" value="<%= content.about_title %>"></label>
-    <label>About Main Text<textarea name="about_body" rows="6"><%= content.about_body %></textarea></label>
-    <label>About Extra Text<textarea name="about_extra" rows="4"><%= content.about_extra %></textarea></label>
-
-    <h3>Contact Page</h3>
-    <label>Contact Title<input name="contact_title" value="<%= content.contact_title %>"></label>
-    <label>Contact Intro<textarea name="contact_intro" rows="3"><%= content.contact_intro %></textarea></label>
-
-    <button class="btn" type="submit">Save Website Text</button>
-  </form>
-</section>
-
-<section id="projects" class="section admin-grid">
-  <div class="card">
-    <h2>Add New Project</h2>
-    <form method="post" action="/admin/projects" class="form">
-      <label>Project Title<input name="title" required></label>
-      <label>Category<input name="category" placeholder="Logo Design, FiveM Graphics, Branding..." required></label>
-      <label>Image URL<input name="image_url" placeholder="/assets/project-1.svg or https://..." required></label>
-      <label>Project Link<input name="project_url" placeholder="Optional"></label>
-      <label>Description<textarea name="description" rows="6" required></textarea></label>
-      <label class="check"><input type="checkbox" name="featured"> Featured on home page</label>
-      <button class="btn" type="submit">Add Project</button>
-    </form>
-  </div>
-
-  <div class="card">
-    <h2>How Images Work</h2>
-    <p>For now, paste an image URL into the project image field. You can use:</p>
-    <ul class="clean-list">
-      <li>A direct image URL from your hosting/CDN</li>
-      <li>A file path like <code>/assets/project-1.svg</code></li>
-      <li>A GitHub-hosted image URL after uploading images into <code>public/assets</code></li>
-    </ul>
-    <p>For full image upload inside the dashboard, the next version would need cloud storage like Cloudinary/S3.</p>
-  </div>
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <p class="eyebrow">Manage Work</p>
-    <h2>Edit Portfolio Projects</h2>
-  </div>
-  <div class="project-edit-list">
-    <% projects.forEach(project => { %>
-      <article class="card project-edit-card">
-        <img src="<%= project.image_url %>" alt="<%= project.title %>">
-        <form method="post" action="/admin/projects/<%= project.id %>/update" class="form">
-          <label>Title<input name="title" value="<%= project.title %>" required></label>
-          <label>Category<input name="category" value="<%= project.category %>" required></label>
-          <label>Image URL<input name="image_url" value="<%= project.image_url %>" required></label>
-          <label>Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
-          <label>Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
-          <label class="check"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>
-          <div class="actions compact">
-            <button class="btn small" type="submit">Save Project</button>
-          </div>
-        </form>
-        <form method="post" action="/admin/projects/<%= project.id %>/delete" onsubmit="return confirm('Delete this project?')">
-          <button class="mini danger" type="submit">Delete Project</button>
-        </form>
-      </article>
-    <% }) %>
-  </div>
-</section>
-
-<section id="messages" class="section card">
-  <div class="section-head">
-    <p class="eyebrow">Inbox</p>
-    <h2>Client Messages</h2>
-  </div>
-  <div class="messages admin-messages">
-    <% if (!messages.length) { %><p>No messages yet.</p><% } %>
-    <% messages.forEach(message => { %>
-      <div class="message-item">
-        <strong><%= message.subject %></strong>
-        <span><%= message.name %> · <%= message.email %> · <%= message.status %></span>
-        <p><%= message.body %></p>
-        <% if (message.status !== 'closed') { %>
-          <form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Mark Closed</button></form>
-        <% } %>
+  <div class="admin-main">
+    <section id="pages" class="admin-section">
+      <div class="admin-section-head">
+        <span>01</span>
+        <div>
+          <p class="eyebrow">Page Content</p>
+          <h2>Edit Website Text</h2>
+          <p>Keep text shorter for a cleaner layout. Long text can make the page feel cramped.</p>
+        </div>
       </div>
-    <% }) %>
+      <form method="post" action="/admin/content" class="admin-editor-form">
+        <details open>
+          <summary>Homepage</summary>
+          <div class="field-grid">
+            <label>Small Label<input name="hero_eyebrow" value="<%= content.hero_eyebrow %>"></label>
+            <label>Main Headline<input name="hero_title" value="<%= content.hero_title %>"></label>
+            <label class="span-2">Hero Description<textarea name="hero_lead" rows="3"><%= content.hero_lead %></textarea></label>
+            <label>Feature Title<input name="hero_card_title" value="<%= content.hero_card_title %>"></label>
+            <label>Services Title<input name="services_title" value="<%= content.services_title %>"></label>
+            <label class="span-2">Feature Text<textarea name="hero_card_body" rows="3"><%= content.hero_card_body %></textarea></label>
+          </div>
+        </details>
+
+        <details>
+          <summary>Services</summary>
+          <label>Services List <small>One service per line</small><textarea name="services_list" rows="8"><%= content.services_list %></textarea></label>
+        </details>
+
+        <details>
+          <summary>About Page</summary>
+          <div class="field-grid">
+            <label class="span-2">About Title<input name="about_title" value="<%= content.about_title %>"></label>
+            <label class="span-2">About Main Text<textarea name="about_body" rows="6"><%= content.about_body %></textarea></label>
+            <label class="span-2">About Extra Text<textarea name="about_extra" rows="4"><%= content.about_extra %></textarea></label>
+          </div>
+        </details>
+
+        <details>
+          <summary>Contact Page</summary>
+          <div class="field-grid">
+            <label class="span-2">Contact Title<input name="contact_title" value="<%= content.contact_title %>"></label>
+            <label class="span-2">Contact Intro<textarea name="contact_intro" rows="3"><%= content.contact_intro %></textarea></label>
+          </div>
+        </details>
+
+        <button class="btn" type="submit">Save Page Text</button>
+      </form>
+    </section>
+
+    <section id="new-project" class="admin-section">
+      <div class="admin-section-head">
+        <span>02</span>
+        <div>
+          <p class="eyebrow">Portfolio</p>
+          <h2>Add New Project</h2>
+          <p>Upload an image directly or paste an image URL. Uploaded images are saved into the database as image data.</p>
+        </div>
+      </div>
+      <form method="post" action="/admin/projects" enctype="multipart/form-data" class="project-create-form">
+        <div class="field-grid">
+          <label>Project Title<input name="title" placeholder="Example: Business Logo Concept" required></label>
+          <label>Category<input name="category" placeholder="Logo Design, Branding, FiveM Graphics..." required></label>
+          <label class="span-2">Upload Image<input type="file" name="image_file" accept="image/*"></label>
+          <label class="span-2">Or Paste Image URL<input name="image_url" placeholder="https://... or /assets/project-1.svg"></label>
+          <label class="span-2">Project Link<input name="project_url" placeholder="Optional link"></label>
+          <label class="span-2">Description<textarea name="description" rows="5" placeholder="Keep this short and clear. Explain what the work is and what it was made for." required></textarea></label>
+          <label class="check span-2"><input type="checkbox" name="featured"> Featured on home page</label>
+        </div>
+        <button class="btn" type="submit">Add Project</button>
+      </form>
+    </section>
+
+    <section id="projects" class="admin-section">
+      <div class="admin-section-head">
+        <span>03</span>
+        <div>
+          <p class="eyebrow">Manage Work</p>
+          <h2>Edit Projects</h2>
+          <p>Update text, replace images, change categories, or remove old work.</p>
+        </div>
+      </div>
+      <div class="project-admin-list">
+        <% projects.forEach(project => { %>
+          <article class="project-admin-item">
+            <div class="project-admin-image"><img src="<%= project.image_url %>" alt="<%= project.title %>"></div>
+            <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-admin-form">
+              <div class="field-grid">
+                <label>Title<input name="title" value="<%= project.title %>" required></label>
+                <label>Category<input name="category" value="<%= project.category %>" required></label>
+                <label class="span-2">Replace Image<input type="file" name="image_file" accept="image/*"></label>
+                <label class="span-2">Image URL<input name="image_url" value="<%= project.image_url %>"></label>
+                <label class="span-2">Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
+                <label class="span-2">Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
+                <label class="check span-2"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>
+              </div>
+              <div class="admin-actions">
+                <button class="btn small" type="submit">Save Project</button>
+              </div>
+            </form>
+            <form method="post" action="/admin/projects/<%= project.id %>/delete" onsubmit="return confirm('Delete this project?')" class="delete-form">
+              <button class="mini danger" type="submit">Delete</button>
+            </form>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+
+    <section id="messages" class="admin-section">
+      <div class="admin-section-head">
+        <span>04</span>
+        <div>
+          <p class="eyebrow">Inbox</p>
+          <h2>Client Messages</h2>
+          <p>Messages submitted through the contact form appear here.</p>
+        </div>
+      </div>
+      <div class="message-list">
+        <% if (!messages.length) { %><p class="empty-state">No messages yet.</p><% } %>
+        <% messages.forEach(message => { %>
+          <article class="message-row">
+            <div>
+              <strong><%= message.subject %></strong>
+              <span><%= message.name %> · <%= message.email %> · <%= message.status %> · <%= new Date(message.created_at).toLocaleString() %></span>
+              <p><%= message.body %></p>
+            </div>
+            <% if (message.status !== 'closed') { %>
+              <form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Close</button></form>
+            <% } %>
+          </article>
+        <% }) %>
+      </div>
+    </section>
   </div>
 </section>
 <%- include('layout-end') %>
