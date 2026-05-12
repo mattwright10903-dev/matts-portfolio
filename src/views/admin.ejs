@@ -72,14 +72,25 @@
         <div>
           <p class="eyebrow">Portfolio</p>
           <h2>Add New Project</h2>
-          <p>Upload an image directly or paste an image URL. Uploaded images are saved into the database as image data.</p>
+          <p>Add the project details, then attach images one at a time so the portfolio gallery is easier to control.</p>
         </div>
       </div>
       <form method="post" action="/admin/projects" enctype="multipart/form-data" class="project-create-form">
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Business Logo Concept" required></label>
           <label>Category<input name="category" placeholder="Logo Design, Branding, FiveM Graphics..." required></label>
-          <label class="span-2">Upload Project Images <small>You can select more than one image</small><input type="file" name="image_files" accept="image/*" multiple></label>
+          <div class="span-2 admin-upload-group">
+            <div class="upload-group-head">
+              <div>
+                <strong>Project Images</strong>
+                <small>Add one image at a time. Click “Add another image” for more uploads.</small>
+              </div>
+              <button class="mini add-image-input" type="button">Add another image</button>
+            </div>
+            <div class="upload-stack" data-upload-stack>
+              <label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label>
+            </div>
+          </div>
           <label class="span-2">Or Paste Image URLs <small>One image URL per line</small><textarea name="image_urls" rows="4" placeholder="https://...
 /assets/project-1.svg"></textarea></label>
           <label class="span-2">Project Link<input name="project_url" placeholder="Optional link"></label>
@@ -96,7 +107,7 @@
         <div>
           <p class="eyebrow">Manage Work</p>
           <h2>Edit Projects</h2>
-          <p>Update text, replace images, change categories, or remove old work.</p>
+          <p>Update project text, add more images, keep existing image URLs, change categories, or remove old work.</p>
         </div>
       </div>
       <div class="project-admin-list">
@@ -104,13 +115,24 @@
           <article class="project-admin-item">
             <div class="project-admin-image">
               <img src="<%= project.image_url %>" alt="<%= project.title %>">
-              <% if (project.images && project.images.length > 1) { %><span><%= project.images.length %> images</span><% } %>
+              <% if (project.images && project.images.length > 1) { %><span><%= project.images.length %> images in gallery</span><% } %>
             </div>
             <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-admin-form">
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
                 <label>Category<input name="category" value="<%= project.category %>" required></label>
-                <label class="span-2">Add / Replace Images <small>Select multiple images. These will be added with the URLs below.</small><input type="file" name="image_files" accept="image/*" multiple></label>
+                <div class="span-2 admin-upload-group compact-upload-group">
+                  <div class="upload-group-head">
+                    <div>
+                      <strong>Add Project Images</strong>
+                      <small>Use separate upload slots so each image is easy to manage.</small>
+                    </div>
+                    <button class="mini add-image-input" type="button">Add another image</button>
+                  </div>
+                  <div class="upload-stack" data-upload-stack>
+                    <label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label>
+                  </div>
+                </div>
                 <label class="span-2">Project Image URLs <small>One image per line. Keep existing URLs here if you want them to stay.</small><textarea name="image_urls" rows="5"><%= (project.images || [project.image_url]).join('\n') %></textarea></label>
                 <label class="span-2">Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
                 <label class="span-2">Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>

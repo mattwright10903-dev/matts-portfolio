@@ -15,6 +15,28 @@
         });
       });
     });
+
+    document.querySelectorAll('.add-image-input').forEach((button) => {
+      button.addEventListener('click', () => {
+        const group = button.closest('.admin-upload-group');
+        const stack = group ? group.querySelector('[data-upload-stack]') : null;
+        if (!stack) return;
+        const next = stack.querySelectorAll('.upload-slot').length + 1;
+        const label = document.createElement('label');
+        label.className = 'upload-slot';
+        label.innerHTML = `<span>Image ${next}</span><input type="file" name="image_files" accept="image/*"><button class="remove-upload" type="button" aria-label="Remove image upload slot">Remove</button>`;
+        stack.appendChild(label);
+        const input = label.querySelector('input');
+        if (input) input.click();
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const remove = event.target.closest('.remove-upload');
+      if (!remove) return;
+      const slot = remove.closest('.upload-slot');
+      if (slot) slot.remove();
+    });
   </script>
 </body>
 </html>

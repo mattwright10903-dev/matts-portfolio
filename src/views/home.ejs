@@ -54,15 +54,33 @@
   </div>
 </section>
 
-<section class="section compact-section split-section">
-  <div class="section-head vertical">
-    <p class="eyebrow">Services</p>
-    <h2><%= content.services_title %></h2>
-    <p class="section-intro">Clean design support for brands, servers, creators, and businesses.</p>
+<section class="section services-pro-section">
+  <div class="services-pro-head">
+    <div>
+      <p class="eyebrow">Services</p>
+      <h2><%= content.services_title %></h2>
+    </div>
+    <p>Clean design support for brands, servers, creators, businesses, and online communities that need a sharper visual identity.</p>
   </div>
-  <div class="service-list">
+
+  <% const serviceDescriptions = [
+    'Clean, memorable logos built for websites, Discords, socials, and business use.',
+    'Full visual systems with colors, typography, logo usage, and matching assets.',
+    'Server banners, loading visuals, promotional graphics, icons, and RP branding.',
+    'Server icons, headers, announcement graphics, category visuals, and community branding.',
+    'Hero graphics, landing page visuals, UI sections, and clean website brand assets.',
+    'Posts, banners, thumbnails, promo graphics, and launch visuals made to stand out.'
+  ]; %>
+
+  <div class="services-pro-grid">
     <% String(content.services_list || '').split('\n').filter(Boolean).forEach((service, index) => { %>
-      <div class="service-row"><span><%= String(index + 1).padStart(2, '0') %></span><strong><%= service %></strong></div>
+      <article class="service-pro-card">
+        <div class="service-card-top">
+          <span><%= String(index + 1).padStart(2, '0') %></span>
+          <b><%= service %></b>
+        </div>
+        <p><%= serviceDescriptions[index] || 'Custom design support tailored around your project, brand, and audience.' %></p>
+      </article>
     <% }) %>
   </div>
 </section>
