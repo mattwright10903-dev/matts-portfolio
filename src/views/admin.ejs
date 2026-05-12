@@ -1,11 +1,48 @@
 <%- include('layout-start') %>
 <section class="page-head">
   <p class="eyebrow">Admin Dashboard</p>
-  <h1>Matt Wright Master Account</h1>
-  <p>Add new work, update the portfolio gallery, and view incoming client messages.</p>
+  <h1>Website Control Panel</h1>
+  <p>Edit the website pages, manage portfolio projects, and view incoming client messages.</p>
+  <% if (saved) { %><div class="notice">Saved successfully.</div><% } %>
 </section>
 
-<section class="grid admin-grid">
+<section class="admin-tabs">
+  <a href="#content">Edit Website Text</a>
+  <a href="#projects">Manage Projects</a>
+  <a href="#messages">Messages</a>
+</section>
+
+<section id="content" class="section card admin-panel">
+  <div class="section-head">
+    <p class="eyebrow">Page Editor</p>
+    <h2>Edit Website Text</h2>
+  </div>
+  <form method="post" action="/admin/content" class="form admin-form-wide">
+    <h3>Homepage</h3>
+    <label>Hero Small Text<input name="hero_eyebrow" value="<%= content.hero_eyebrow %>"></label>
+    <label>Hero Main Title<input name="hero_title" value="<%= content.hero_title %>"></label>
+    <label>Hero Description<textarea name="hero_lead" rows="3"><%= content.hero_lead %></textarea></label>
+    <label>Homepage Card Title<input name="hero_card_title" value="<%= content.hero_card_title %>"></label>
+    <label>Homepage Card Text<textarea name="hero_card_body" rows="3"><%= content.hero_card_body %></textarea></label>
+
+    <h3>Services</h3>
+    <label>Services Title<input name="services_title" value="<%= content.services_title %>"></label>
+    <label>Services List <small>One service per line</small><textarea name="services_list" rows="7"><%= content.services_list %></textarea></label>
+
+    <h3>About Page</h3>
+    <label>About Title<input name="about_title" value="<%= content.about_title %>"></label>
+    <label>About Main Text<textarea name="about_body" rows="6"><%= content.about_body %></textarea></label>
+    <label>About Extra Text<textarea name="about_extra" rows="4"><%= content.about_extra %></textarea></label>
+
+    <h3>Contact Page</h3>
+    <label>Contact Title<input name="contact_title" value="<%= content.contact_title %>"></label>
+    <label>Contact Intro<textarea name="contact_intro" rows="3"><%= content.contact_intro %></textarea></label>
+
+    <button class="btn" type="submit">Save Website Text</button>
+  </form>
+</section>
+
+<section id="projects" class="section admin-grid">
   <div class="card">
     <h2>Add New Project</h2>
     <form method="post" action="/admin/projects" class="form">
@@ -20,39 +57,61 @@
   </div>
 
   <div class="card">
-    <h2>Messages</h2>
-    <div class="messages admin-messages">
-      <% if (!messages.length) { %><p>No messages yet.</p><% } %>
-      <% messages.forEach(message => { %>
-        <div class="message-item">
-          <strong><%= message.subject %></strong>
-          <span><%= message.name %> · <%= message.email %> · <%= message.status %></span>
-          <p><%= message.body %></p>
-          <% if (message.status !== 'closed') { %>
-            <form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Mark Closed</button></form>
-          <% } %>
-        </div>
-      <% }) %>
-    </div>
+    <h2>How Images Work</h2>
+    <p>For now, paste an image URL into the project image field. You can use:</p>
+    <ul class="clean-list">
+      <li>A direct image URL from your hosting/CDN</li>
+      <li>A file path like <code>/assets/project-1.svg</code></li>
+      <li>A GitHub-hosted image URL after uploading images into <code>public/assets</code></li>
+    </ul>
+    <p>For full image upload inside the dashboard, the next version would need cloud storage like Cloudinary/S3.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="section-head">
     <p class="eyebrow">Manage Work</p>
-    <h2>Portfolio Projects</h2>
+    <h2>Edit Portfolio Projects</h2>
   </div>
-  <div class="grid cards">
+  <div class="project-edit-list">
     <% projects.forEach(project => { %>
-      <article class="card project-card">
+      <article class="card project-edit-card">
         <img src="<%= project.image_url %>" alt="<%= project.title %>">
-        <div>
-          <p class="tag"><%= project.category %></p>
-          <h3><%= project.title %></h3>
-          <p><%= project.description %></p>
-          <form method="post" action="/admin/projects/<%= project.id %>/delete"><button class="mini danger" type="submit">Delete</button></form>
-        </div>
+        <form method="post" action="/admin/projects/<%= project.id %>/update" class="form">
+          <label>Title<input name="title" value="<%= project.title %>" required></label>
+          <label>Category<input name="category" value="<%= project.category %>" required></label>
+          <label>Image URL<input name="image_url" value="<%= project.image_url %>" required></label>
+          <label>Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
+          <label>Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
+          <label class="check"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>
+          <div class="actions compact">
+            <button class="btn small" type="submit">Save Project</button>
+          </div>
+        </form>
+        <form method="post" action="/admin/projects/<%= project.id %>/delete" onsubmit="return confirm('Delete this project?')">
+          <button class="mini danger" type="submit">Delete Project</button>
+        </form>
       </article>
+    <% }) %>
+  </div>
+</section>
+
+<section id="messages" class="section card">
+  <div class="section-head">
+    <p class="eyebrow">Inbox</p>
+    <h2>Client Messages</h2>
+  </div>
+  <div class="messages admin-messages">
+    <% if (!messages.length) { %><p>No messages yet.</p><% } %>
+    <% messages.forEach(message => { %>
+      <div class="message-item">
+        <strong><%= message.subject %></strong>
+        <span><%= message.name %> · <%= message.email %> · <%= message.status %></span>
+        <p><%= message.body %></p>
+        <% if (message.status !== 'closed') { %>
+          <form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Mark Closed</button></form>
+        <% } %>
+      </div>
     <% }) %>
   </div>
 </section>

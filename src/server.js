@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDb, pool, query } from './lib/db.js';
+import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -57,16 +57,25 @@ function requireAdmin(req, res, next) {
 
 app.get('/', async (req, res) => {
   const projects = await query('SELECT * FROM projects WHERE featured = true ORDER BY created_at DESC LIMIT 6');
-  res.render('home', locals(req, { page: 'home', projects: projects.rows }));
+  const content = await getContent();
+  res.render('home', locals(req, { page: 'home', projects: projects.rows, content }));
 });
 
 app.get('/portfolio', async (req, res) => {
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
-  res.render('portfolio', locals(req, { page: 'portfolio', projects: projects.rows }));
+  const content = await getContent();
+  res.render('portfolio', locals(req, { page: 'portfolio', projects: projects.rows, content }));
 });
 
-app.get('/about', (req, res) => res.render('about', locals(req, { page: 'about' })));
-app.get('/contact', (req, res) => res.render('contact', locals(req, { page: 'contact', sent: false })));
+app.get('/about', async (req, res) => {
+  const content = await getContent();
+  res.render('about', locals(req, { page: 'about', content }));
+});
+
+app.get('/contact', async (req, res) => {
+  const content = await getContent();
+  res.render('contact', locals(req, { page: 'contact', sent: false, content }));
+});
 
 app.post('/contact', async (req, res) => {
   const name = req.body.name || 'Website Visitor';
@@ -74,12 +83,14 @@ app.post('/contact', async (req, res) => {
   const subject = req.body.subject || 'New website message';
   const body = req.body.body || '';
   if (!email || !body) {
-    return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.' }));
+    const content = await getContent();
+    return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.', content }));
   }
 
   await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [null, name, email, subject, body]);
   await sendMessageEmail({ name, email, subject, body });
-  res.render('contact', locals(req, { page: 'contact', sent: true }));
+  const content = await getContent();
+  res.render('contact', locals(req, { page: 'contact', sent: true, content }));
 });
 
 app.get('/login', (_req, res) => res.redirect('/admin'));
@@ -92,7 +103,8 @@ app.get('/admin', async (req, res) => {
 
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
   const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 50');
-  res.render('admin', locals(req, { page: 'admin', projects: projects.rows, messages: messages.rows }));
+  const content = await getContent();
+  res.render('admin', locals(req, { page: 'admin', projects: projects.rows, messages: messages.rows, content, saved: req.query.saved || null }));
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -117,6 +129,38 @@ app.post('/admin/login', async (req, res) => {
 
 app.post('/admin/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/admin'));
+});
+
+
+app.post('/admin/content', requireAdmin, async (req, res) => {
+  const allowedKeys = [
+    'hero_eyebrow', 'hero_title', 'hero_lead', 'hero_card_title', 'hero_card_body',
+    'services_title', 'services_list', 'about_title', 'about_body', 'about_extra',
+    'contact_title', 'contact_intro'
+  ];
+
+  for (const key of allowedKeys) {
+    const value = String(req.body[key] || '').trim();
+    await query(
+      `INSERT INTO site_content (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      [key, value]
+    );
+  }
+
+  res.redirect('/admin?saved=content');
+});
+
+app.post('/admin/projects/:id/update', requireAdmin, async (req, res) => {
+  const { title, category, description, image_url, project_url, featured } = req.body;
+  await query(
+    `UPDATE projects
+     SET title = $1, category = $2, description = $3, image_url = $4, project_url = $5, featured = $6
+     WHERE id = $7`,
+    [title, category || 'Design', description, image_url, project_url || '', featured === 'on', req.params.id]
+  );
+  res.redirect('/admin?saved=project');
 });
 
 app.post('/admin/projects', requireAdmin, async (req, res) => {

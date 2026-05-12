@@ -10,15 +10,39 @@ export async function query(text, params = []) {
   return pool.query(text, params);
 }
 
+async function upsertContent(key, value) {
+  await query(
+    `INSERT INTO site_content (key, value)
+     VALUES ($1, $2)
+     ON CONFLICT (key) DO NOTHING`,
+    [key, value]
+  );
+}
+
+export async function getContent() {
+  const result = await query('SELECT key, value FROM site_content ORDER BY key ASC');
+  return result.rows.reduce((acc, row) => {
+    acc[row.key] = row.value;
+    return acc;
+  }, {});
+}
+
 export async function initDb() {
   await query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
-      google_id TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
+      name TEXT,
       avatar TEXT,
       created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS site_content (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW()
     );
   `);
 
@@ -47,6 +71,25 @@ export async function initDb() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+
+  const defaults = {
+    hero_eyebrow: 'Portfolio Website',
+    hero_title: 'Creative work by Matt Wright.',
+    hero_lead: 'A clean portfolio for logo design, branding, FiveM graphics, website visuals, and custom project work.',
+    hero_card_title: 'Clean visuals. Strong branding. Easy project updates.',
+    hero_card_body: 'This site is built so new projects, descriptions, and page content can be updated through the admin dashboard.',
+    services_title: 'What I Can Create',
+    services_list: 'Logo Design\nBranding Packages\nFiveM Graphics\nDiscord Graphics\nWebsite Visuals\nSocial Media Designs',
+    about_title: 'About Me',
+    about_body: 'I am Matt Wright, a freelance graphic designer focused on clean, modern visuals for businesses, FiveM communities, Discord brands, content creators, and online projects. I create logos, branding packs, social media graphics, website visuals, and custom project designs built around each client’s style.',
+    about_extra: 'My goal is to make every design look professional, clear, and easy to use across websites, Discord servers, social pages, and business branding.',
+    contact_title: 'Contact Me',
+    contact_intro: 'Add me on Discord, email me directly, or send a project request through the website.'
+  };
+
+  for (const [key, value] of Object.entries(defaults)) {
+    await upsertContent(key, value);
+  }
 
   const count = await query('SELECT COUNT(*)::int AS total FROM projects');
   if (count.rows[0].total === 0) {

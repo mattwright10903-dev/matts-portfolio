@@ -1,19 +1,52 @@
 <%- include('layout-start') %>
-<section class="page-head">
+<section class="page-head center">
   <p class="eyebrow">Contact</p>
-  <h1>Start a Project</h1>
-  <p>Send a project message. It will save to the website database and email the master account.</p>
+  <h1><%= content.contact_title %></h1>
+  <p><%= content.contact_intro %></p>
+</section>
+
+<section class="contact-options">
+  <article class="card contact-card primary-contact-card">
+    <span class="contact-icon">💬</span>
+    <div>
+      <p class="eyebrow">Discord</p>
+      <h2>Add me on Discord</h2>
+      <p>Username: <strong>mjww0</strong></p>
+      <p class="muted-text">User ID: 1128708778343280713</p>
+      <div class="actions compact">
+        <a class="btn" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">Open Discord Profile</a>
+        <button class="btn ghost" type="button" onclick="navigator.clipboard.writeText('mjww0').then(() => this.textContent = 'Copied mjww0')">Copy Username</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="card contact-card">
+    <span class="contact-icon">✉️</span>
+    <div>
+      <p class="eyebrow">Email</p>
+      <h2>Email me directly</h2>
+      <p>Send a project request straight to <strong>mattwright10903@gmail.com</strong>.</p>
+      <div class="actions compact">
+        <a class="btn" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry">Email Me</a>
+      </div>
+    </div>
+  </article>
 </section>
 
 <section class="form-wrap card">
-  <% if (sent) { %><div class="notice success">Message sent successfully.</div><% } %>
-  <% if (typeof error !== 'undefined') { %><div class="notice error"><%= error %></div><% } %>
+  <div class="section-head small-head">
+    <p class="eyebrow">Project Form</p>
+    <h2>Send a message from the website</h2>
+    <p>This saves the message in your admin dashboard and can also email Matt when email settings are added in Render.</p>
+  </div>
+  <% if (sent) { %><div class="notice success">Message sent. It has been saved for Matt.</div><% } %>
+  <% if (typeof error !== 'undefined' && error) { %><div class="notice error"><%= error %></div><% } %>
   <form method="post" action="/contact" class="form">
-    <label>Name<input name="name" value="" required></label>
-    <label>Email<input type="email" name="email" value="" required></label>
-    <label>Subject<input name="subject" placeholder="Logo design, branding package, website work..." required></label>
-    <label>Message<textarea name="body" rows="7" placeholder="Tell me what you need created..." required></textarea></label>
-    <button class="btn" type="submit">Send Message</button>
+    <label>Name<input name="name" placeholder="Your name"></label>
+    <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+    <label>Subject<input name="subject" placeholder="Logo design, branding pack, FiveM graphics..."></label>
+    <label>Message<textarea name="body" rows="7" placeholder="Tell me what you need, style, deadline, budget, and any links/images." required></textarea></label>
+    <button class="btn" type="submit">Send Project Request</button>
   </form>
 </section>
 <%- include('layout-end') %>

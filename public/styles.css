@@ -131,3 +131,92 @@ input:focus, textarea:focus { border-color: rgba(255,255,255,0.35); }
   margin: 0;
   display: inline-flex;
 }
+
+/* Admin dashboard upgrades */
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: -20px auto 36px;
+  max-width: 1180px;
+  padding: 0 24px;
+}
+.admin-tabs a {
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  text-decoration: none;
+}
+.admin-panel { max-width: 1180px; margin-inline: auto; }
+.admin-form-wide h3 {
+  margin: 26px 0 4px;
+  color: var(--accent);
+}
+.admin-form-wide small { color: var(--muted); display:block; margin-top: 4px; }
+.project-edit-list {
+  display: grid;
+  gap: 18px;
+}
+.project-edit-card {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: start;
+  gap: 18px;
+}
+.project-edit-card img {
+  width: 100%;
+  min-height: 150px;
+  object-fit: cover;
+  border-radius: 18px;
+  background: rgba(255,255,255,.05);
+}
+.actions.compact { margin-top: 8px; }
+.clean-list code {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 2px 6px;
+}
+@media (max-width: 900px) {
+  .project-edit-card { grid-template-columns: 1fr; }
+  .project-edit-card img { max-height: 240px; }
+}
+
+
+/* Contact page CTA upgrades */
+.contact-options {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.contact-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.primary-contact-card {
+  background: linear-gradient(135deg, rgba(25,46,62,.92), rgba(255,255,255,.045));
+}
+.contact-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(255,255,255,.09);
+  border: 1px solid var(--line);
+  font-size: 1.45rem;
+}
+.muted-text, .small-head p { color: var(--muted); }
+.small-head h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  letter-spacing: -0.05em;
+}
+@media (max-width: 850px) {
+  .contact-options, .contact-card { grid-template-columns: 1fr; }
+}
