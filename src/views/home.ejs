@@ -14,6 +14,7 @@
     <% const heroProject = projects[0]; %>
     <% if (heroProject) { %>
       <img src="<%= heroProject.image_url %>" alt="<%= heroProject.title %>">
+      <% if (heroProject.images && heroProject.images.length > 1) { %><div class="image-count"><%= heroProject.images.length %> images</div><% } %>
       <div class="preview-info">
         <p class="tag"><%= heroProject.category %></p>
         <h2><%= heroProject.title %></h2>
@@ -41,6 +42,7 @@
     <% projects.forEach(project => { %>
       <article class="project-tile">
         <img src="<%= project.image_url %>" alt="<%= project.title %>">
+        <% if (project.images && project.images.length > 1) { %><div class="image-count"><%= project.images.length %> images</div><% } %>
         <div class="project-overlay">
           <p class="tag"><%= project.category %></p>
           <h3><%= project.title %></h3>

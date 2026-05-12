@@ -53,11 +53,15 @@ export async function initDb() {
       category TEXT NOT NULL DEFAULT 'Design',
       description TEXT NOT NULL,
       image_url TEXT NOT NULL,
+      project_images TEXT[] DEFAULT ARRAY[]::TEXT[],
       project_url TEXT,
       featured BOOLEAN DEFAULT false,
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+
+  await query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_images TEXT[] DEFAULT ARRAY[]::TEXT[];`);
+  await query(`UPDATE projects SET project_images = ARRAY[image_url] WHERE (project_images IS NULL OR cardinality(project_images) = 0) AND image_url IS NOT NULL AND image_url <> '';`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS messages (

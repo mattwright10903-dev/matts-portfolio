@@ -8,7 +8,16 @@
 <section class="portfolio-wall">
   <% projects.forEach(project => { %>
     <article class="portfolio-item">
-      <img src="<%= project.image_url %>" alt="<%= project.title %>">
+      <div class="portfolio-gallery" data-gallery>
+        <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>">
+        <% if (project.images && project.images.length > 1) { %>
+          <div class="gallery-thumbs">
+            <% project.images.forEach((image, index) => { %>
+              <button type="button" class="gallery-thumb <%= index === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= index + 1 %> for <%= project.title %>"><img src="<%= image %>" alt=""></button>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
       <div class="portfolio-text">
         <p class="tag"><%= project.category %></p>
         <h2><%= project.title %></h2>

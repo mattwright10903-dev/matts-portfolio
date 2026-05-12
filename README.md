@@ -107,3 +107,15 @@ git push
 ```
 
 Then Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.
+
+## Multi-image portfolio projects
+
+The admin dashboard now supports multiple images per project.
+
+- Go to `/admin`
+- Open **Add New Project**
+- Use **Upload Project Images** to select multiple image files at once
+- Or paste multiple image URLs, one URL per line
+- Existing projects also have an image URL textarea; keep URLs in that box if you want them to remain attached to the project
+
+Portfolio visitors can click thumbnails on each project to switch between images.

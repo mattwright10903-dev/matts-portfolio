@@ -2,5 +2,19 @@
   <footer class="footer">
     <p>© <%= new Date().getFullYear() %> Matt Wright. Portfolio, design work, branding, and creative projects.</p>
   </footer>
+  <script>
+    document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+      const main = gallery.querySelector('.gallery-main');
+      gallery.querySelectorAll('.gallery-thumb').forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          const image = thumb.getAttribute('data-image');
+          if (!image || !main) return;
+          main.src = image;
+          gallery.querySelectorAll('.gallery-thumb').forEach((btn) => btn.classList.remove('active'));
+          thumb.classList.add('active');
+        });
+      });
+    });
+  </script>
 </body>
 </html>

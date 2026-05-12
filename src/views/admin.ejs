@@ -79,8 +79,9 @@
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Business Logo Concept" required></label>
           <label>Category<input name="category" placeholder="Logo Design, Branding, FiveM Graphics..." required></label>
-          <label class="span-2">Upload Image<input type="file" name="image_file" accept="image/*"></label>
-          <label class="span-2">Or Paste Image URL<input name="image_url" placeholder="https://... or /assets/project-1.svg"></label>
+          <label class="span-2">Upload Project Images <small>You can select more than one image</small><input type="file" name="image_files" accept="image/*" multiple></label>
+          <label class="span-2">Or Paste Image URLs <small>One image URL per line</small><textarea name="image_urls" rows="4" placeholder="https://...
+/assets/project-1.svg"></textarea></label>
           <label class="span-2">Project Link<input name="project_url" placeholder="Optional link"></label>
           <label class="span-2">Description<textarea name="description" rows="5" placeholder="Keep this short and clear. Explain what the work is and what it was made for." required></textarea></label>
           <label class="check span-2"><input type="checkbox" name="featured"> Featured on home page</label>
@@ -101,13 +102,16 @@
       <div class="project-admin-list">
         <% projects.forEach(project => { %>
           <article class="project-admin-item">
-            <div class="project-admin-image"><img src="<%= project.image_url %>" alt="<%= project.title %>"></div>
+            <div class="project-admin-image">
+              <img src="<%= project.image_url %>" alt="<%= project.title %>">
+              <% if (project.images && project.images.length > 1) { %><span><%= project.images.length %> images</span><% } %>
+            </div>
             <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-admin-form">
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
                 <label>Category<input name="category" value="<%= project.category %>" required></label>
-                <label class="span-2">Replace Image<input type="file" name="image_file" accept="image/*"></label>
-                <label class="span-2">Image URL<input name="image_url" value="<%= project.image_url %>"></label>
+                <label class="span-2">Add / Replace Images <small>Select multiple images. These will be added with the URLs below.</small><input type="file" name="image_files" accept="image/*" multiple></label>
+                <label class="span-2">Project Image URLs <small>One image per line. Keep existing URLs here if you want them to stay.</small><textarea name="image_urls" rows="5"><%= (project.images || [project.image_url]).join('\n') %></textarea></label>
                 <label class="span-2">Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
                 <label class="span-2">Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
                 <label class="check span-2"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>

@@ -18,13 +18,37 @@ const PgSession = connectPgSimple(session);
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024, files: 10 } });
 
-function getProjectImage(req, fallback = '') {
-  if (req.file && req.file.buffer) {
-    return `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-  }
-  return String(req.body.image_url || fallback || '').trim();
+function splitImageUrls(value) {
+  return String(value || '')
+    .split(/\r?\n|,/g)
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
+function uploadedImages(req) {
+  return (req.files || [])
+    .filter((file) => file && file.buffer)
+    .map((file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+}
+
+function getProjectImages(req, fallbackImages = []) {
+  const manualUrls = splitImageUrls(req.body.image_urls || req.body.image_url);
+  const files = uploadedImages(req);
+  const images = [...manualUrls, ...files].filter(Boolean);
+  return images.length ? images : fallbackImages.filter(Boolean);
+}
+
+function normalizeProject(project) {
+  const images = Array.isArray(project.project_images) && project.project_images.length
+    ? project.project_images.filter(Boolean)
+    : [project.image_url].filter(Boolean);
+  return { ...project, images, image_url: images[0] || project.image_url || '/assets/project-1.svg' };
+}
+
+function normalizeProjects(rows) {
+  return rows.map(normalizeProject);
 }
 
 app.set('view engine', 'ejs');
@@ -69,13 +93,13 @@ function requireAdmin(req, res, next) {
 app.get('/', async (req, res) => {
   const projects = await query('SELECT * FROM projects WHERE featured = true ORDER BY created_at DESC LIMIT 6');
   const content = await getContent();
-  res.render('home', locals(req, { page: 'home', projects: projects.rows, content }));
+  res.render('home', locals(req, { page: 'home', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/portfolio', async (req, res) => {
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
   const content = await getContent();
-  res.render('portfolio', locals(req, { page: 'portfolio', projects: projects.rows, content }));
+  res.render('portfolio', locals(req, { page: 'portfolio', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/about', async (req, res) => {
@@ -115,7 +139,7 @@ app.get('/admin', async (req, res) => {
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
   const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 50');
   const content = await getContent();
-  res.render('admin', locals(req, { page: 'admin', projects: projects.rows, messages: messages.rows, content, saved: req.query.saved || null }));
+  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), messages: messages.rows, content, saved: req.query.saved || null }));
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -163,27 +187,31 @@ app.post('/admin/content', requireAdmin, async (req, res) => {
   res.redirect('/admin?saved=content');
 });
 
-app.post('/admin/projects/:id/update', requireAdmin, upload.single('image_file'), async (req, res) => {
+app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files', 10), async (req, res) => {
   const { title, category, description, project_url, featured } = req.body;
-  const existing = await query('SELECT image_url FROM projects WHERE id = $1', [req.params.id]);
-  const image_url = getProjectImage(req, existing.rows[0]?.image_url || '');
+  const existing = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
+  const fallbackImages = normalizeProject(existing.rows[0] || {}).images;
+  const images = getProjectImages(req, fallbackImages);
+  const image_url = images[0] || '/assets/project-1.svg';
   await query(
     `UPDATE projects
-     SET title = $1, category = $2, description = $3, image_url = $4, project_url = $5, featured = $6
-     WHERE id = $7`,
-    [title, category || 'Design', description, image_url, project_url || '', featured === 'on', req.params.id]
+     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5, project_url = $6, featured = $7
+     WHERE id = $8`,
+    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on', req.params.id]
   );
   res.redirect('/admin?saved=project');
 });
 
-app.post('/admin/projects', requireAdmin, upload.single('image_file'), async (req, res) => {
+app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async (req, res) => {
   const { title, category, description, project_url, featured } = req.body;
-  const image_url = getProjectImage(req, '/assets/project-1.svg');
-  await query('INSERT INTO projects (title, category, description, image_url, project_url, featured) VALUES ($1, $2, $3, $4, $5, $6)', [
+  const images = getProjectImages(req, ['/assets/project-1.svg']);
+  const image_url = images[0] || '/assets/project-1.svg';
+  await query('INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
     title,
     category || 'Design',
     description,
     image_url,
+    images,
     project_url || '',
     featured === 'on',
   ]);
