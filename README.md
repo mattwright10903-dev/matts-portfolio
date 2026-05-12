@@ -30,6 +30,40 @@ This version rebuilds the layout to be cleaner and easier to manage:
 - Direct image upload for portfolio projects
 - Cleaner project editing forms
 
+
+## Custom Domain Setup
+
+Primary domain for this site:
+
+```txt
+https://mattwright.online
+```
+
+Set this in Render under **Environment**:
+
+```txt
+BASE_URL=https://mattwright.online
+```
+
+All internal website links use relative paths, so these will work automatically after the domain is connected:
+
+```txt
+https://mattwright.online/
+https://mattwright.online/portfolio
+https://mattwright.online/about
+https://mattwright.online/contact
+https://mattwright.online/admin
+```
+
+In Render, add these custom domains to the same Web Service:
+
+```txt
+mattwright.online
+www.mattwright.online
+```
+
+Then update your domain DNS using the records Render gives you on the Custom Domains page. After Render verifies the domain, redeploy the latest commit.
+
 ## Render Setup
 
 Deploy as a **Web Service**, not a Static Site.
@@ -52,6 +86,7 @@ Set these in Render under **Environment**:
 
 ```txt
 DATABASE_URL=your_render_postgres_internal_database_url
+BASE_URL=https://mattwright.online
 SESSION_SECRET=change-this-to-a-long-random-secret
 ADMIN_EMAIL=mattwright10903@gmail.com
 ADMIN_PASSWORD=change-this-password
@@ -119,3 +154,15 @@ The admin dashboard now supports multiple images per project.
 - Existing projects also have an image URL textarea; keep URLs in that box if you want them to remain attached to the project
 
 Portfolio visitors can click thumbnails on each project to switch between images.
+
+## Latest update: FiveM development services
+
+This version positions the portfolio around both design and FiveM server development. It adds:
+
+- FiveM Server Development as a main service
+- FiveM UI & Script Design as a main service
+- Project categories for FiveM Development and FiveM UI / Script Design
+- A cleaner homepage services section
+- A process section explaining how project work is handled
+
+After pushing to GitHub, Render will redeploy automatically if auto-deploy is enabled.

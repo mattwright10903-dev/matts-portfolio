@@ -18,6 +18,7 @@ const PgSession = connectPgSimple(session);
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const BASE_URL = (process.env.BASE_URL || 'https://mattwright.online').replace(/\/$/, '');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024, files: 10 } });
 
 function splitImageUrls(value) {
@@ -78,6 +79,8 @@ function locals(req, extra = {}) {
     user: null,
     isAdmin: Boolean(req.session?.isAdmin),
     adminEmail: ADMIN_EMAIL,
+    baseUrl: BASE_URL,
+    currentPath: req.originalUrl ? req.originalUrl.split('?')[0] : '/',
     page: '',
     ...extra,
   };

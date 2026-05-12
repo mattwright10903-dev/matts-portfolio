@@ -1,4 +1,5 @@
 <%- include('layout-start') %>
+<% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other']; %>
 <section class="admin-hero">
   <div>
     <p class="eyebrow">Admin Dashboard</p>
@@ -78,7 +79,9 @@
       <form method="post" action="/admin/projects" enctype="multipart/form-data" class="project-create-form">
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Business Logo Concept" required></label>
-          <label>Category<input name="category" placeholder="Logo Design, Branding, FiveM Graphics..." required></label>
+          <label>Category<select name="category" required>
+              <% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %>
+            </select></label>
           <div class="span-2 admin-upload-group">
             <div class="upload-group-head">
               <div>
@@ -120,7 +123,9 @@
             <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-admin-form">
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
-                <label>Category<input name="category" value="<%= project.category %>" required></label>
+                <label>Category<select name="category" required>
+                  <% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %>
+                </select></label>
                 <div class="span-2 admin-upload-group compact-upload-group">
                   <div class="upload-group-head">
                     <div>

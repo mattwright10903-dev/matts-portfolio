@@ -4,8 +4,13 @@
     <p class="eyebrow"><%= content.hero_eyebrow %></p>
     <h1><%= content.hero_title %></h1>
     <p class="lead"><%= content.hero_lead %></p>
+    <div class="hero-stats">
+      <span><b>4+</b> Years Experience</span>
+      <span><b>Design</b> Branding & Graphics</span>
+      <span><b>FiveM</b> Server Development</span>
+    </div>
     <div class="actions">
-      <a class="btn" href="/portfolio">View Work</a>
+      <a class="btn" href="/portfolio">View Portfolio</a>
       <a class="btn ghost" href="/contact">Contact Me</a>
     </div>
   </div>
@@ -54,34 +59,71 @@
   </div>
 </section>
 
-<section class="section services-pro-section">
-  <div class="services-pro-head">
+<section class="section services-modern-section">
+  <div class="services-modern-head">
     <div>
       <p class="eyebrow">Services</p>
       <h2><%= content.services_title %></h2>
     </div>
-    <p>Clean design support for brands, servers, creators, businesses, and online communities that need a sharper visual identity.</p>
+    <p>Design and development support for brands, Discord communities, FiveM servers, creators, and businesses that want a cleaner and more professional online presence.</p>
   </div>
 
-  <% const serviceDescriptions = [
-    'Clean, memorable logos built for websites, Discords, socials, and business use.',
-    'Full visual systems with colors, typography, logo usage, and matching assets.',
-    'Server banners, loading visuals, promotional graphics, icons, and RP branding.',
-    'Server icons, headers, announcement graphics, category visuals, and community branding.',
-    'Hero graphics, landing page visuals, UI sections, and clean website brand assets.',
-    'Posts, banners, thumbnails, promo graphics, and launch visuals made to stand out.'
+  <% const serviceData = [
+    { name: 'Logo Design', type: 'Design', desc: 'Clean, memorable logos built for businesses, communities, Discords, socials, and websites.' },
+    { name: 'Branding Packages', type: 'Branding', desc: 'Complete visual systems with logo usage, colors, typography, banners, and matching assets.' },
+    { name: 'FiveM Graphics', type: 'FiveM Design', desc: 'Server logos, loading screens, Discord banners, Tebex graphics, launch visuals, and RP branding.' },
+    { name: 'FiveM Server Development', type: 'FiveM Dev', desc: 'QBCore/QBox setup, script configuration, bug fixes, database work, server optimization, and custom features.' },
+    { name: 'FiveM UI & Script Design', type: 'FiveM Dev', desc: 'Modern NUI menus, management panels, dashboards, in-game systems, and polished player workflows.' },
+    { name: 'Discord Graphics', type: 'Community', desc: 'Server icons, headers, announcements, role visuals, bot branding, and community presentation assets.' },
+    { name: 'Website Visuals', type: 'Web', desc: 'Hero graphics, landing page visuals, UI sections, portfolio layouts, and clean website brand assets.' },
+    { name: 'Social Media Designs', type: 'Marketing', desc: 'Posts, banners, thumbnails, promotional graphics, and launch visuals made to stand out.' }
   ]; %>
 
-  <div class="services-pro-grid">
-    <% String(content.services_list || '').split('\n').filter(Boolean).forEach((service, index) => { %>
-      <article class="service-pro-card">
-        <div class="service-card-top">
+  <div class="service-feature-row">
+    <article>
+      <span>01</span>
+      <h3>Brand Identity</h3>
+      <p>Logos, color direction, graphics, and brand assets that make your project look consistent everywhere.</p>
+    </article>
+    <article>
+      <span>02</span>
+      <h3>FiveM Development</h3>
+      <p>Server setup, script edits, UI systems, database work, QBCore/QBox fixes, and feature improvements.</p>
+    </article>
+    <article>
+      <span>03</span>
+      <h3>Community Presentation</h3>
+      <p>Discord graphics, launch visuals, Tebex/store assets, social media graphics, and professional project pages.</p>
+    </article>
+  </div>
+
+  <div class="services-modern-grid">
+    <% serviceData.forEach((service, index) => { %>
+      <article class="service-modern-card">
+        <div class="service-modern-meta">
           <span><%= String(index + 1).padStart(2, '0') %></span>
-          <b><%= service %></b>
+          <small><%= service.type %></small>
         </div>
-        <p><%= serviceDescriptions[index] || 'Custom design support tailored around your project, brand, and audience.' %></p>
+        <h3><%= service.name %></h3>
+        <p><%= service.desc %></p>
       </article>
     <% }) %>
+  </div>
+</section>
+
+<section class="section process-section">
+  <div class="section-head slim">
+    <div>
+      <p class="eyebrow">Process</p>
+      <h2>How Projects Work</h2>
+    </div>
+    <p class="section-intro">A simple workflow for design work, FiveM development, and custom project requests.</p>
+  </div>
+  <div class="process-grid">
+    <article><span>01</span><h3>Tell me what you need</h3><p>Send the idea, references, server details, brand direction, or issue you need fixed.</p></article>
+    <article><span>02</span><h3>I build the concept</h3><p>I create the design, development update, server fix, or visual direction around your goals.</p></article>
+    <article><span>03</span><h3>You review it</h3><p>You check the work and request any changes before the final delivery.</p></article>
+    <article><span>04</span><h3>Final files or update</h3><p>You receive the finished graphics, website assets, or server-ready development changes.</p></article>
   </div>
 </section>
 <%- include('layout-end') %>

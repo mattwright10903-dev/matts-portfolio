@@ -77,22 +77,37 @@ export async function initDb() {
   `);
 
   const defaults = {
-    hero_eyebrow: 'Portfolio Website',
-    hero_title: 'Creative work by Matt Wright.',
-    hero_lead: 'A clean portfolio for logo design, branding, FiveM graphics, website visuals, and custom project work.',
-    hero_card_title: 'Clean visuals. Strong branding. Easy project updates.',
+    hero_eyebrow: 'Graphic Design • FiveM Development',
+    hero_title: 'Design and development work by Matt Wright.',
+    hero_lead: 'A professional portfolio for logo design, branding, FiveM graphics, Discord visuals, website assets, and custom FiveM server development.',
+    hero_card_title: 'Clean visuals. Strong branding. Better FiveM experiences.',
     hero_card_body: 'This site is built so new projects, descriptions, and page content can be updated through the admin dashboard.',
     services_title: 'What I Can Create',
-    services_list: 'Logo Design\nBranding Packages\nFiveM Graphics\nDiscord Graphics\nWebsite Visuals\nSocial Media Designs',
+    services_list: 'Logo Design\nBranding Packages\nFiveM Graphics\nFiveM Server Development\nFiveM UI & Script Design\nDiscord Graphics\nWebsite Visuals\nSocial Media Designs',
     about_title: 'About Me',
-    about_body: 'I am Matt Wright, a freelance graphic designer focused on clean, modern visuals for businesses, FiveM communities, Discord brands, content creators, and online projects. I create logos, branding packs, social media graphics, website visuals, and custom project designs built around each client’s style.',
-    about_extra: 'My goal is to make every design look professional, clear, and easy to use across websites, Discord servers, social pages, and business branding.',
+    about_body: 'I am Matt Wright, a graphic designer and FiveM server developer focused on clean visuals, polished community branding, and better player experiences. I create logos, branding packs, Discord graphics, website visuals, FiveM graphics, and custom FiveM server development work.',
+    about_extra: 'My goal is to make every project look professional and feel easy to use, whether it is a business brand, a Discord community, a FiveM server, a website, or a custom in-game system.',
     contact_title: 'Contact Me',
     contact_intro: 'Add me on Discord, email me directly, or send a project request through the website.'
   };
 
   for (const [key, value] of Object.entries(defaults)) {
     await upsertContent(key, value);
+  }
+
+
+
+  const existingServices = await query('SELECT value FROM site_content WHERE key = $1', ['services_list']);
+  if (existingServices.rows[0] && !existingServices.rows[0].value.includes('FiveM Server Development')) {
+    const updatedServices = `${existingServices.rows[0].value}
+FiveM Server Development
+FiveM UI & Script Design`;
+    await query('UPDATE site_content SET value = $1, updated_at = NOW() WHERE key = $2', [updatedServices, 'services_list']);
+  }
+
+  const oldHero = await query('SELECT value FROM site_content WHERE key = $1', ['hero_lead']);
+  if (oldHero.rows[0] && oldHero.rows[0].value === 'A clean portfolio for logo design, branding, FiveM graphics, website visuals, and custom project work.') {
+    await query('UPDATE site_content SET value = $1, updated_at = NOW() WHERE key = $2', ['A professional portfolio for logo design, branding, FiveM graphics, Discord visuals, website assets, and custom FiveM server development.', 'hero_lead']);
   }
 
   const count = await query('SELECT COUNT(*)::int AS total FROM projects');
@@ -109,9 +124,9 @@ export async function initDb() {
         'A sharp and professional logo concept designed for businesses that need a clean, modern identity.',
         '/assets/project-1.svg',
         '',
-        'FiveM Server Branding Pack',
-        'FiveM Graphics',
-        'A full graphic pack concept for a FiveM community, including banners, icons, and social branding.',
+        'FiveM Server Development Concept',
+        'FiveM Development',
+        'A custom server development concept covering script configuration, UI improvements, and better RP workflows.',
         '/assets/project-2.svg',
         '',
         'Social Media Brand Kit',
