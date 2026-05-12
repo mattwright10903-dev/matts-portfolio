@@ -75,6 +75,260 @@
       const slot = remove.closest('.upload-slot');
       if (slot) slot.remove();
     });
+
+
+    document.querySelectorAll('[data-copy-value]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const value = button.getAttribute('data-copy-value') || '';
+        const label = button.querySelector('[data-copy-label]');
+        try {
+          await navigator.clipboard.writeText(value);
+          if (label) label.textContent = 'Copied to clipboard';
+          button.classList.add('copied');
+          setTimeout(() => {
+            if (label) label.textContent = 'Click to copy username';
+            button.classList.remove('copied');
+          }, 1800);
+        } catch (_error) {
+          if (label) label.textContent = value;
+        }
+      });
+    });
+
+    const liveInbox = document.querySelector('[data-live-inbox]');
+    const liveCount = document.querySelector('[data-live-count]');
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+    function renderMessages(messages) {
+      if (!liveInbox) return;
+      if (!messages.length) {
+        liveInbox.innerHTML = '<p class="empty-state">No messages yet.</p>';
+        if (liveCount) liveCount.textContent = '0 open';
+        return;
+      }
+      const open = messages.filter((message) => message.status !== 'closed').length;
+      if (liveCount) liveCount.textContent = `${open} open`;
+      liveInbox.innerHTML = messages.map((message) => {
+        const subject = escapeHtml(message.subject || 'Website message');
+        const name = escapeHtml(message.name || 'Website Visitor');
+        const email = escapeHtml(message.email || '');
+        const status = escapeHtml(message.status || 'open');
+        const body = escapeHtml(message.body || '');
+        const created = message.created_at ? new Date(message.created_at).toLocaleString() : '';
+        const reply = `mailto:${encodeURIComponent(message.email || '')}?subject=Re:%20${encodeURIComponent(message.subject || 'Website message')}`;
+        const closeForm = message.status !== 'closed'
+          ? `<form method="post" action="/admin/messages/${message.id}/close"><button class="mini" type="submit">Close</button></form>`
+          : '';
+        return `
+          <article class="message-row-pro ${message.status === 'closed' ? 'closed-message' : 'open-message'}">
+            <div class="message-main">
+              <div class="message-topline"><strong>${subject}</strong><span class="message-status">${status}</span></div>
+              <span>${name} · <a href="mailto:${email}">${email}</a> · ${created}</span>
+              <p>${body}</p>
+            </div>
+            <div class="message-actions">
+              <a class="mini" href="${reply}">Reply Email</a>
+              ${closeForm}
+            </div>
+          </article>`;
+      }).join('');
+    }
+    if (liveInbox) {
+      setInterval(async () => {
+        try {
+          const response = await fetch('/admin/messages/live', { headers: { Accept: 'application/json' } });
+          if (!response.ok) return;
+          const data = await response.json();
+          renderMessages(data.messages || []);
+        } catch (_error) {}
+      }, 10000);
+    }
+
+
+    // In-house website chat: visitor side
+    const publicChat = document.querySelector('[data-public-chat]');
+    if (publicChat) {
+      const state = publicChat.querySelector('[data-chat-state]');
+      const windowEl = publicChat.querySelector('[data-public-chat-window]');
+      const startForm = publicChat.querySelector('[data-start-chat-form]');
+      const replyForm = publicChat.querySelector('[data-public-reply-form]');
+      let token = publicChat.getAttribute('data-existing-token') || localStorage.getItem('mw_chat_token') || '';
+
+      function setPublicState(text) { if (state) state.textContent = text; }
+      function renderPublicChat(messages, thread) {
+        if (!windowEl) return;
+        windowEl.hidden = false;
+        if (startForm) startForm.hidden = true;
+        if (replyForm) replyForm.hidden = thread && thread.status === 'closed';
+        windowEl.innerHTML = messages.map((message) => `
+          <div class="chat-bubble ${message.sender === 'admin' ? 'admin-bubble' : 'visitor-bubble'}">
+            <strong>${message.sender === 'admin' ? 'Matt' : 'You'}</strong>
+            <p>${escapeHtml(message.body)}</p>
+            <small>${message.created_at ? new Date(message.created_at).toLocaleString() : ''}</small>
+          </div>
+        `).join('') + (thread && thread.status === 'closed' ? '<div class="chat-closed-note">This chat has been closed by Matt.</div>' : '');
+        windowEl.scrollTop = windowEl.scrollHeight;
+      }
+      async function loadPublicChat() {
+        if (!token) return;
+        try {
+          const response = await fetch(`/chat/${token}/messages`);
+          if (!response.ok) return;
+          const data = await response.json();
+          localStorage.setItem('mw_chat_token', token);
+          setPublicState(data.thread.status === 'closed' ? 'Closed' : 'Live');
+          renderPublicChat(data.messages || [], data.thread);
+        } catch (_error) {}
+      }
+      if (token) loadPublicChat();
+      const tokenFromServer = publicChat.getAttribute('data-existing-token');
+      if (tokenFromServer) {
+        token = tokenFromServer;
+        localStorage.setItem('mw_chat_token', token);
+        loadPublicChat();
+      }
+      if (replyForm) {
+        replyForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!token) return;
+          const input = replyForm.querySelector('textarea[name="body"]');
+          const body = input ? input.value.trim() : '';
+          if (!body) return;
+          const response = await fetch(`/chat/${token}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ body }),
+          });
+          if (response.ok) {
+            input.value = '';
+            loadPublicChat();
+          }
+        });
+      }
+      setInterval(loadPublicChat, 4000);
+    }
+
+    // In-house website chat: admin side
+    const adminChatList = document.querySelector('[data-admin-chat-list]');
+    const adminChatWindow = document.querySelector('[data-admin-chat-window]');
+    const adminReplyForm = document.querySelector('[data-admin-chat-reply]');
+    const adminCloseButton = document.querySelector('[data-admin-close-chat]');
+    const adminChatCount = document.querySelector('[data-chat-count]');
+    let activeAdminChatId = null;
+
+    function renderAdminChatMessages(thread, messages) {
+      if (!adminChatWindow) return;
+      adminChatWindow.innerHTML = `
+        <div class="chat-admin-header">
+          <div>
+            <p class="eyebrow">${escapeHtml(thread.status)}</p>
+            <h3>${escapeHtml(thread.subject || 'Website chat')}</h3>
+            <span>${escapeHtml(thread.name)} · ${escapeHtml(thread.email)}</span>
+          </div>
+        </div>
+        <div class="chat-admin-messages">
+          ${messages.map((message) => `
+            <div class="chat-bubble ${message.sender === 'admin' ? 'admin-bubble' : 'visitor-bubble'}">
+              <strong>${message.sender === 'admin' ? 'Matt' : escapeHtml(thread.name || 'Visitor')}</strong>
+              <p>${escapeHtml(message.body)}</p>
+              <small>${message.created_at ? new Date(message.created_at).toLocaleString() : ''}</small>
+            </div>
+          `).join('')}
+        </div>`;
+      const box = adminChatWindow.querySelector('.chat-admin-messages');
+      if (box) box.scrollTop = box.scrollHeight;
+    }
+
+    async function loadAdminChat(id) {
+      if (!id) return;
+      activeAdminChatId = id;
+      document.querySelectorAll('.chat-thread-item').forEach((item) => item.classList.toggle('active', item.getAttribute('data-chat-id') === String(id)));
+      try {
+        const response = await fetch(`/admin/chats/${id}/messages`);
+        if (!response.ok) return;
+        const data = await response.json();
+        renderAdminChatMessages(data.thread, data.messages || []);
+      } catch (_error) {}
+    }
+
+    function renderAdminChatList(chats) {
+      if (!adminChatList) return;
+      const open = chats.filter((chat) => chat.status !== 'closed').length;
+      if (adminChatCount) adminChatCount.textContent = `${open} open`;
+      if (!chats.length) {
+        adminChatList.innerHTML = '<p class="empty-state">No live chats yet.</p>';
+        return;
+      }
+      adminChatList.innerHTML = chats.map((chat, index) => `
+        <button class="chat-thread-item ${String(chat.id) === String(activeAdminChatId) || (!activeAdminChatId && index === 0) ? 'active' : ''} ${chat.status === 'closed' ? 'closed-chat' : ''}" type="button" data-chat-id="${chat.id}">
+          <span class="thread-top"><strong>${escapeHtml(chat.name)}</strong><em>${escapeHtml(chat.status)}</em></span>
+          <span>${escapeHtml(chat.subject || 'Website chat')}</span>
+          <small>${escapeHtml(chat.last_message || 'No messages yet')}</small>
+          ${Number(chat.unread_count || 0) > 0 ? `<b>${chat.unread_count} new</b>` : ''}
+        </button>
+      `).join('');
+      if (!activeAdminChatId && chats[0]) loadAdminChat(chats[0].id);
+    }
+
+    async function loadAdminChats() {
+      if (!adminChatList) return;
+      try {
+        const response = await fetch('/admin/chats/live');
+        if (!response.ok) return;
+        const data = await response.json();
+        renderAdminChatList(data.chats || []);
+      } catch (_error) {}
+    }
+
+    if (adminChatList) {
+      adminChatList.addEventListener('click', (event) => {
+        const item = event.target.closest('[data-chat-id]');
+        if (!item) return;
+        loadAdminChat(item.getAttribute('data-chat-id'));
+      });
+      const first = adminChatList.querySelector('[data-chat-id]');
+      if (first) loadAdminChat(first.getAttribute('data-chat-id'));
+      setInterval(() => {
+        loadAdminChats();
+        if (activeAdminChatId) loadAdminChat(activeAdminChatId);
+      }, 5000);
+    }
+
+    if (adminReplyForm) {
+      adminReplyForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!activeAdminChatId) return;
+        const input = adminReplyForm.querySelector('textarea[name="body"]');
+        const body = input ? input.value.trim() : '';
+        if (!body) return;
+        const response = await fetch(`/admin/chats/${activeAdminChatId}/reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ body }),
+        });
+        if (response.ok) {
+          input.value = '';
+          await loadAdminChat(activeAdminChatId);
+          await loadAdminChats();
+        }
+      });
+    }
+
+    if (adminCloseButton) {
+      adminCloseButton.addEventListener('click', async () => {
+        if (!activeAdminChatId) return;
+        await fetch(`/admin/chats/${activeAdminChatId}/close`, { method: 'POST', headers: { Accept: 'application/json' } });
+        await loadAdminChat(activeAdminChatId);
+        await loadAdminChats();
+      });
+    }
+
   </script>
 </body>
 </html>

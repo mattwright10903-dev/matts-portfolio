@@ -76,6 +76,32 @@ export async function initDb() {
     );
   `);
 
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_threads (
+      id SERIAL PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      subject TEXT NOT NULL DEFAULT 'Website chat',
+      status TEXT NOT NULL DEFAULT 'open',
+      last_seen_visitor TIMESTAMP DEFAULT NOW(),
+      last_seen_admin TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id SERIAL PRIMARY KEY,
+      thread_id INTEGER NOT NULL REFERENCES chat_threads(id) ON DELETE CASCADE,
+      sender TEXT NOT NULL CHECK (sender IN ('visitor', 'admin')),
+      body TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+
   const defaults = {
     hero_eyebrow: 'Graphic Design • FiveM Development',
     hero_title: 'Design and development work by Matt Wright.',

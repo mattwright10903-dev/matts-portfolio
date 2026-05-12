@@ -6,6 +6,7 @@ import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
 
@@ -118,17 +119,44 @@ app.get('/contact', async (req, res) => {
 app.post('/contact', async (req, res) => {
   const name = req.body.name || 'Website Visitor';
   const email = req.body.email || '';
-  const subject = req.body.subject || 'New website message';
+  const subject = req.body.subject || 'Website chat';
   const body = req.body.body || '';
   if (!email || !body) {
     const content = await getContent();
     return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.', content }));
   }
 
+  const token = crypto.randomBytes(24).toString('hex');
+  const thread = await query(
+    'INSERT INTO chat_threads (token, name, email, subject) VALUES ($1, $2, $3, $4) RETURNING *',
+    [token, name, email, subject]
+  );
+  await query('INSERT INTO chat_messages (thread_id, sender, body) VALUES ($1, $2, $3)', [thread.rows[0].id, 'visitor', body]);
+
+  // Keep a simple inbox record too, so old dashboard/message history still works.
   await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [null, name, email, subject, body]);
-  await sendMessageEmail({ name, email, subject, body });
+
   const content = await getContent();
-  res.render('contact', locals(req, { page: 'contact', sent: true, content }));
+  res.render('contact', locals(req, { page: 'contact', sent: true, chatToken: token, content }));
+});
+
+app.get('/chat/:token/messages', async (req, res) => {
+  const thread = await query('SELECT * FROM chat_threads WHERE token = $1', [req.params.token]);
+  if (!thread.rows.length) return res.status(404).json({ error: 'Chat not found.' });
+  await query('UPDATE chat_threads SET last_seen_visitor = NOW() WHERE id = $1', [thread.rows[0].id]);
+  const messages = await query('SELECT id, sender, body, created_at FROM chat_messages WHERE thread_id = $1 ORDER BY created_at ASC', [thread.rows[0].id]);
+  res.json({ thread: thread.rows[0], messages: messages.rows });
+});
+
+app.post('/chat/:token/messages', async (req, res) => {
+  const body = String(req.body.body || '').trim();
+  if (!body) return res.status(400).json({ error: 'Message is required.' });
+  const thread = await query('SELECT * FROM chat_threads WHERE token = $1', [req.params.token]);
+  if (!thread.rows.length) return res.status(404).json({ error: 'Chat not found.' });
+  if (thread.rows[0].status === 'closed') return res.status(400).json({ error: 'This chat is closed.' });
+  await query('INSERT INTO chat_messages (thread_id, sender, body) VALUES ($1, $2, $3)', [thread.rows[0].id, 'visitor', body]);
+  await query('UPDATE chat_threads SET updated_at = NOW(), last_seen_visitor = NOW() WHERE id = $1', [thread.rows[0].id]);
+  res.json({ ok: true });
 });
 
 app.get('/login', (_req, res) => res.redirect('/admin'));
@@ -141,8 +169,17 @@ app.get('/admin', async (req, res) => {
 
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
   const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 50');
+  const chats = await query(`
+    SELECT t.*, 
+      (SELECT body FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message,
+      (SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message_at,
+      (SELECT COUNT(*)::int FROM chat_messages WHERE thread_id = t.id AND sender = 'visitor' AND (t.last_seen_admin IS NULL OR created_at > t.last_seen_admin)) AS unread_count
+    FROM chat_threads t
+    ORDER BY COALESCE((SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1), t.updated_at) DESC
+    LIMIT 75
+  `);
   const content = await getContent();
-  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), messages: messages.rows, content, saved: req.query.saved || null }));
+  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), messages: messages.rows, chats: chats.rows, content, saved: req.query.saved || null }));
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -224,6 +261,49 @@ app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async
 app.post('/admin/projects/:id/delete', requireAdmin, async (req, res) => {
   await query('DELETE FROM projects WHERE id = $1', [req.params.id]);
   res.redirect('/admin');
+});
+
+
+
+app.get('/admin/chats/live', requireAdmin, async (_req, res) => {
+  const chats = await query(`
+    SELECT t.*, 
+      (SELECT body FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message,
+      (SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message_at,
+      (SELECT COUNT(*)::int FROM chat_messages WHERE thread_id = t.id AND sender = 'visitor' AND (t.last_seen_admin IS NULL OR created_at > t.last_seen_admin)) AS unread_count
+    FROM chat_threads t
+    ORDER BY COALESCE((SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1), t.updated_at) DESC
+    LIMIT 100
+  `);
+  res.json({ chats: chats.rows });
+});
+
+app.get('/admin/chats/:id/messages', requireAdmin, async (req, res) => {
+  const thread = await query('SELECT * FROM chat_threads WHERE id = $1', [req.params.id]);
+  if (!thread.rows.length) return res.status(404).json({ error: 'Chat not found.' });
+  await query('UPDATE chat_threads SET last_seen_admin = NOW() WHERE id = $1', [req.params.id]);
+  const messages = await query('SELECT id, sender, body, created_at FROM chat_messages WHERE thread_id = $1 ORDER BY created_at ASC', [req.params.id]);
+  res.json({ thread: thread.rows[0], messages: messages.rows });
+});
+
+app.post('/admin/chats/:id/reply', requireAdmin, async (req, res) => {
+  const body = String(req.body.body || '').trim();
+  if (!body) return res.status(400).json({ error: 'Reply is required.' });
+  const thread = await query('SELECT * FROM chat_threads WHERE id = $1', [req.params.id]);
+  if (!thread.rows.length) return res.status(404).json({ error: 'Chat not found.' });
+  await query('INSERT INTO chat_messages (thread_id, sender, body) VALUES ($1, $2, $3)', [req.params.id, 'admin', body]);
+  await query('UPDATE chat_threads SET updated_at = NOW(), last_seen_admin = NOW(), status = $2 WHERE id = $1', [req.params.id, 'open']);
+  res.json({ ok: true });
+});
+
+app.post('/admin/chats/:id/close', requireAdmin, async (req, res) => {
+  await query("UPDATE chat_threads SET status = 'closed', updated_at = NOW() WHERE id = $1", [req.params.id]);
+  res.json({ ok: true });
+});
+
+app.get('/admin/messages/live', requireAdmin, async (_req, res) => {
+  const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 75');
+  res.json({ messages: messages.rows });
 });
 
 app.post('/admin/messages/:id/close', requireAdmin, async (req, res) => {

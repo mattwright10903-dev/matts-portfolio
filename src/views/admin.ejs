@@ -1,6 +1,7 @@
 <%- include('layout-start') %>
 <% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other'];
 const openMessages = messages.filter(message => message.status !== 'closed').length;
+const openChats = (typeof chats !== 'undefined' ? chats : []).filter(chat => chat.status !== 'closed').length;
 %>
 <section class="admin-shell">
   <aside class="admin-rail">
@@ -14,7 +15,8 @@ const openMessages = messages.filter(message => message.status !== 'closed').len
       <a href="#pages">Pages</a>
       <a href="#new-project">New Project</a>
       <a href="#projects">Projects</a>
-      <a href="#messages">Messages</a>
+      <a href="#chats">Live Chats</a>
+      <a href="#messages">Old Messages</a>
     </nav>
     <form method="post" action="/admin/logout"><button class="btn ghost full" type="submit">Logout</button></form>
   </aside>
@@ -31,7 +33,7 @@ const openMessages = messages.filter(message => message.status !== 'closed').len
       <div class="admin-stats">
         <article><span><%= projects.length %></span><p>Total Projects</p></article>
         <article><span><%= projects.filter(project => project.featured).length %></span><p>Featured</p></article>
-        <article><span><%= openMessages %></span><p>Open Messages</p></article>
+        <article><span><%= openChats %></span><p>Open Chats</p></article>
       </div>
     </section>
 
@@ -152,21 +154,76 @@ const openMessages = messages.filter(message => message.status !== 'closed').len
       </div>
     </section>
 
-    <section id="messages" class="admin-panel">
+    <section id="chats" class="admin-panel live-chat-admin-panel">
       <div class="admin-panel-head">
-        <div><p class="eyebrow">Inbox</p><h2>Client messages</h2></div>
-        <span>04</span>
+        <div>
+          <p class="eyebrow">In-House Live Chat</p>
+          <h2>Website chat threads</h2>
+          <p>Reply directly inside this dashboard. No email, Google login, Discord bot, or outside system required.</p>
+        </div>
+        <div class="live-inbox-meta">
+          <span class="live-pill"><i></i> Live</span>
+          <small data-chat-count><%= openChats %> open</small>
+        </div>
       </div>
-      <div class="message-list-pro">
-        <% if (!messages.length) { %><p class="empty-state">No messages yet.</p><% } %>
+
+      <div class="admin-chat-console">
+        <div class="chat-thread-list" data-admin-chat-list>
+          <% if (!chats.length) { %><p class="empty-state">No live chats yet.</p><% } %>
+          <% chats.forEach((chat, index) => { %>
+            <button class="chat-thread-item <%= index === 0 ? 'active' : '' %> <%= chat.status === 'closed' ? 'closed-chat' : '' %>" type="button" data-chat-id="<%= chat.id %>">
+              <span class="thread-top"><strong><%= chat.name %></strong><em><%= chat.status %></em></span>
+              <span><%= chat.subject %></span>
+              <small><%= chat.last_message || 'No messages yet' %></small>
+              <% if (chat.unread_count > 0) { %><b><%= chat.unread_count %> new</b><% } %>
+            </button>
+          <% }) %>
+        </div>
+
+        <div class="chat-admin-window" data-admin-chat-window>
+          <div class="chat-admin-empty">
+            <p class="eyebrow">Select a chat</p>
+            <h3>Choose a project conversation.</h3>
+            <p>Messages will load here and you can reply directly from the website dashboard.</p>
+          </div>
+        </div>
+
+        <form class="chat-admin-reply" data-admin-chat-reply>
+          <textarea name="body" rows="4" placeholder="Type your reply to the client..."></textarea>
+          <div>
+            <button class="mini" type="button" data-admin-close-chat>Close Chat</button>
+            <button class="btn primary" type="submit">Send Website Reply</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="messages" class="admin-panel live-inbox-panel">
+      <div class="admin-panel-head">
+        <div>
+          <p class="eyebrow">Old Message Archive</p>
+          <h2>Legacy project requests</h2>
+          <p>These are archived form submissions kept for reference. Use Live Chats for the new in-house workflow.</p>
+        </div>
+        <div class="live-inbox-meta">
+          <small><%= openMessages %> open</small>
+        </div>
+      </div>
+      <div class="message-list-pro live-message-list" data-live-inbox>
+        <% if (!messages.length) { %><p class="empty-state">No archived messages yet.</p><% } %>
         <% messages.forEach(message => { %>
-          <article class="message-row-pro">
-            <div>
-              <strong><%= message.subject %></strong>
-              <span><%= message.name %> · <%= message.email %> · <%= message.status %> · <%= new Date(message.created_at).toLocaleString() %></span>
+          <article class="message-row-pro <%= message.status === 'closed' ? 'closed-message' : 'open-message' %>">
+            <div class="message-main">
+              <div class="message-topline">
+                <strong><%= message.subject %></strong>
+                <span class="message-status"><%= message.status %></span>
+              </div>
+              <span><%= message.name %> · <%= message.email %> · <%= new Date(message.created_at).toLocaleString() %></span>
               <p><%= message.body %></p>
             </div>
-            <% if (message.status !== 'closed') { %><form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Close</button></form><% } %>
+            <div class="message-actions">
+              <% if (message.status !== 'closed') { %><form method="post" action="/admin/messages/<%= message.id %>/close"><button class="mini" type="submit">Close</button></form><% } %>
+            </div>
           </article>
         <% }) %>
       </div>

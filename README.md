@@ -1,39 +1,47 @@
 # Matt Wright Portfolio
 
-Full-stack portfolio website for Matt Wright with:
+Full-stack portfolio website for Matt Wright with an in-house admin dashboard and website chat system.
 
-- Public home page
-- Public portfolio page
-- Public about page
-- Contact page with Discord and email buttons
+## Features
+
+- Home page
+- Portfolio page
+- About page
+- Contact page
+- Discord and email contact buttons
 - Private `/admin` login
 - Admin dashboard website editor
 - Page text editing
 - Project add/edit/delete
+- Multi-image project galleries
 - Project image upload from admin dashboard
-- Client message inbox
+- In-house website chat system
+- Admin live chat inbox
 - PostgreSQL database
 - Render Web Service deployment
 
-## Latest Update
+## In-House Website Chat
 
-This version rebuilds the layout to be cleaner and easier to manage:
+The contact page now uses a built-in website chat flow.
 
-- Smaller, cleaner text sizing
-- Better page spacing
-- Cleaner project showcase layout
-- Better portfolio page structure
-- Better contact page layout
-- Admin dashboard split into clear sections
-- Admin sidebar navigation
-- Collapsible page text editor sections
-- Direct image upload for portfolio projects
-- Cleaner project editing forms
+Visitors can:
 
+- Start a project chat from `/contact`
+- Send follow-up messages on the same browser
+- See replies from Matt directly on the website
+
+Admin can:
+
+- Open `/admin`
+- View live chat threads
+- Reply directly from the dashboard
+- Close chats when finished
+
+No Google login, Discord bot, external chat app, or email setup is required for the live chat system. Everything is stored in PostgreSQL.
 
 ## Custom Domain Setup
 
-Primary domain for this site:
+Primary domain:
 
 ```txt
 https://mattwright.online
@@ -45,7 +53,7 @@ Set this in Render under **Environment**:
 BASE_URL=https://mattwright.online
 ```
 
-All internal website links use relative paths, so these will work automatically after the domain is connected:
+These links will work once the domain is connected:
 
 ```txt
 https://mattwright.online/
@@ -62,7 +70,7 @@ mattwright.online
 www.mattwright.online
 ```
 
-Then update your domain DNS using the records Render gives you on the Custom Domains page. After Render verifies the domain, redeploy the latest commit.
+Then update your DNS with the records Render gives you.
 
 ## Render Setup
 
@@ -92,18 +100,6 @@ ADMIN_EMAIL=mattwright10903@gmail.com
 ADMIN_PASSWORD=change-this-password
 ```
 
-Optional email settings for contact form email delivery:
-
-```txt
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-gmail-app-password
-EMAIL_TO=mattwright10903@gmail.com
-```
-
-If email variables are missing, contact messages still save to the admin dashboard database.
-
 ## Admin Login
 
 Go to:
@@ -116,12 +112,16 @@ Login with the email/password set in Render.
 
 ## Project Images
 
-In the admin dashboard, you can either:
+The admin dashboard supports multiple images per project.
 
-1. Upload an image file directly, or
-2. Paste an image URL.
+- Go to `/admin`
+- Open **Add New Project**
+- Click **Add another image** to add more file pickers
+- Upload one image per picker
+- Or paste image URLs, one URL per line
+- Existing projects can also be updated with more images
 
-Uploaded images are converted into image data and stored in PostgreSQL with the project, so they do not rely on Render's temporary file system.
+Uploaded images are converted into image data and stored in PostgreSQL, so they do not rely on Render's temporary file system.
 
 Recommended image size:
 
@@ -129,40 +129,14 @@ Recommended image size:
 1200x800 or 1600x1000
 ```
 
-Use compressed JPG/PNG/WebP images when possible.
-
 ## Updating the site
 
 After replacing files locally:
 
 ```bash
 git add .
-git commit -m "Improve portfolio layout and admin dashboard"
+git commit -m "Add in-house live chat system"
 git push
 ```
 
-Then Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.
-
-## Multi-image portfolio projects
-
-The admin dashboard now supports multiple images per project.
-
-- Go to `/admin`
-- Open **Add New Project**
-- Use **Upload Project Images** to select multiple image files at once
-- Or paste multiple image URLs, one URL per line
-- Existing projects also have an image URL textarea; keep URLs in that box if you want them to remain attached to the project
-
-Portfolio visitors can click thumbnails on each project to switch between images.
-
-## Latest update: FiveM development services
-
-This version positions the portfolio around both design and FiveM server development. It adds:
-
-- FiveM Server Development as a main service
-- FiveM UI & Script Design as a main service
-- Project categories for FiveM Development and FiveM UI / Script Design
-- A cleaner homepage services section
-- A process section explaining how project work is handled
-
-After pushing to GitHub, Render will redeploy automatically if auto-deploy is enabled.
+Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.

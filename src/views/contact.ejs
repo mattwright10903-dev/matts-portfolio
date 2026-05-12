@@ -1,43 +1,87 @@
 <%- include('layout-start') %>
-<section class="page-head slim-page-head center">
+<section class="page-head slim-page-head center contact-hero-head">
   <p class="eyebrow">Contact</p>
   <h1><%= content.contact_title %></h1>
   <p><%= content.contact_intro %></p>
 </section>
 
-<section class="contact-strip">
-  <a class="contact-button" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">
-    <span>Discord</span>
-    <strong>mjww0</strong>
-    <small>User ID: 1128708778343280713</small>
+<section class="contact-action-grid upgraded-contact-actions">
+  <a class="contact-action discord-action premium-contact-card" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">
+    <span class="contact-icon discord-icon">◐</span>
+    <div>
+      <p>Discord</p>
+      <strong>mjww0</strong>
+      <small>Open profile and add me directly</small>
+    </div>
+    <i>Open</i>
   </a>
-  <a class="contact-button" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry">
-    <span>Email</span>
-    <strong>mattwright10903@gmail.com</strong>
-    <small>Send a direct project inquiry</small>
+
+  <a class="contact-action email-action premium-contact-card" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry">
+    <span class="contact-icon email-icon">✉</span>
+    <div>
+      <p>Email</p>
+      <strong>mattwright10903@gmail.com</strong>
+      <small>Start a direct project email</small>
+    </div>
+    <i>Email</i>
   </a>
-  <button class="contact-button copy-button" type="button" onclick="navigator.clipboard.writeText('mjww0').then(() => this.querySelector('small').textContent = 'Copied to clipboard')">
-    <span>Copy</span>
-    <strong>Discord Username</strong>
-    <small>Click to copy mjww0</small>
+
+  <button class="contact-action copy-action premium-contact-card" type="button" data-copy-value="mjww0">
+    <span class="contact-icon copy-icon">⌘</span>
+    <div>
+      <p>Copy</p>
+      <strong>Discord Username</strong>
+      <small data-copy-label>Click to copy mjww0</small>
+    </div>
+    <i>Copy</i>
   </button>
 </section>
 
-<section class="form-shell">
-  <div class="form-intro">
-    <p class="eyebrow">Project Request</p>
-    <h2>Tell me what you need.</h2>
-    <p>This saves in the admin dashboard and can email Matt when email settings are added in Render.</p>
+<section class="contact-live-section inhouse-live-section">
+  <div class="live-copy">
+    <p class="eyebrow">In-House Project Chat</p>
+    <h2>Start a project conversation.</h2>
+    <p>
+      This chat is built into the website. Your message creates a private project thread that stays connected to this page, while Matt replies from the admin dashboard.
+    </p>
+    <div class="live-points">
+      <span>Website-only chat system</span>
+      <span>Replies show here</span>
+      <span>No Google login or outside chat app needed</span>
+    </div>
   </div>
-  <div class="form-card clean-form-card">
-    <% if (sent) { %><div class="notice success">Message sent. It has been saved for Matt.</div><% } %>
-    <% if (typeof error !== 'undefined' && error) { %><div class="notice error"><%= error %></div><% } %>
-    <form method="post" action="/contact" class="form two-col-form">
-      <label>Name<input name="name" placeholder="Your name"></label>
-      <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
-      <label class="span-2">Subject<input name="subject" placeholder="Logo design, branding pack, FiveM graphics..."></label>
-      <label class="span-2">Message<textarea name="body" rows="7" placeholder="Tell me what you need, style, deadline, budget, and any links/images." required></textarea></label>
-      <button class="btn span-2" type="submit">Send Project Request</button>
+
+  <div class="live-chat-card website-chat-card" data-public-chat data-existing-token="<%= typeof chatToken !== 'undefined' && chatToken ? chatToken : '' %>">
+    <div class="chat-card-top">
+      <div>
+        <span class="chat-status-dot"></span>
+        <strong>Website Project Chat</strong>
+      </div>
+      <small data-chat-state>Ready</small>
+    </div>
+
+    <% if (sent) { %>
+      <div class="notice success">Chat started. Keep this page open or come back on this browser to see replies.</div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="notice error"><%= error %></div>
+    <% } %>
+
+    <div class="public-chat-window" data-public-chat-window hidden></div>
+
+    <form method="post" action="/contact" class="chat-form start-chat-form" data-start-chat-form>
+      <div class="chat-two">
+        <label>Name<input name="name" placeholder="Your name"></label>
+        <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+      </div>
+      <label>Project Type<input name="subject" placeholder="Logo, FiveM server work, Discord graphics, website visuals..."></label>
+      <label>Project Details<textarea name="body" rows="7" placeholder="Tell me what you need, style, deadline, budget, references, Discord username, and any links/images." required></textarea></label>
+      <button class="btn primary full" type="submit">Start Website Chat</button>
+    </form>
+
+    <form class="chat-reply-form" data-public-reply-form hidden>
+      <label>Reply to Matt<textarea name="body" rows="4" placeholder="Type your follow-up message..."></textarea></label>
+      <button class="btn primary full" type="submit">Send Reply</button>
     </form>
   </div>
 </section>
