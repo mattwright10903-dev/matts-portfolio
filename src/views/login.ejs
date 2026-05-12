@@ -1,0 +1,12 @@
+<%- include('layout-start') %>
+<section class="page-head center">
+  <p class="eyebrow">Login</p>
+  <h1>Account Access</h1>
+  <p>Login with Google to access your account page. The master account email is <strong><%= adminEmail %></strong>.</p>
+  <% if (googleReady) { %>
+    <a class="btn" href="/auth/google">Continue with Google</a>
+  <% } else { %>
+    <div class="notice error">Google OAuth is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Render.</div>
+  <% } %>
+</section>
+<%- include('layout-end') %>

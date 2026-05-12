@@ -1,0 +1,33 @@
+<%- include('layout-start') %>
+<section class="page-head account-head">
+  <div>
+    <p class="eyebrow">Account</p>
+    <h1>Welcome, <%= user.name %></h1>
+    <p><%= user.email %></p>
+  </div>
+  <form method="post" action="/logout"><button class="btn ghost" type="submit">Logout</button></form>
+</section>
+
+<section class="grid account-grid">
+  <div class="card">
+    <h2>Live Chat / Message</h2>
+    <p>This sends the message to the site database and emails Matt Wright’s master account.</p>
+    <form method="post" action="/account/message" class="form">
+      <label>Subject<input name="subject" placeholder="Project question"></label>
+      <label>Message<textarea name="body" rows="6" required></textarea></label>
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </div>
+  <div class="card messages">
+    <h2>Your Messages</h2>
+    <% if (!messages.length) { %><p>No messages yet.</p><% } %>
+    <% messages.forEach(message => { %>
+      <div class="message-item">
+        <strong><%= message.subject %></strong>
+        <span><%= message.status %> · <%= new Date(message.created_at).toLocaleString() %></span>
+        <p><%= message.body %></p>
+      </div>
+    <% }) %>
+  </div>
+</section>
+<%- include('layout-end') %>

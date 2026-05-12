@@ -1,0 +1,52 @@
+<%- include('layout-start') %>
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Portfolio Website</p>
+    <h1>Creative work by Matt Wright.</h1>
+    <p class="lead">A clean portfolio for logo design, branding, FiveM graphics, website visuals, and custom project work.</p>
+    <div class="actions">
+      <a class="btn" href="/portfolio">View Portfolio</a>
+      <a class="btn ghost" href="/contact">Start a Project</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <span>Featured Focus</span>
+    <h2>Clean visuals. Strong branding. Easy project updates.</h2>
+    <p>Login with Google, manage projects through the admin page, and keep client messages linked to your master account.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <p class="eyebrow">Featured Work</p>
+    <h2>Recent Projects</h2>
+  </div>
+  <div class="grid cards">
+    <% projects.forEach(project => { %>
+      <article class="card project-card">
+        <img src="<%= project.image_url %>" alt="<%= project.title %>">
+        <div>
+          <p class="tag"><%= project.category %></p>
+          <h3><%= project.title %></h3>
+          <p><%= project.description %></p>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<section class="section services">
+  <div class="section-head">
+    <p class="eyebrow">Services</p>
+    <h2>What I Can Create</h2>
+  </div>
+  <div class="grid service-grid">
+    <div class="service">Logo Design</div>
+    <div class="service">Branding Packages</div>
+    <div class="service">FiveM Graphics</div>
+    <div class="service">Discord Graphics</div>
+    <div class="service">Website Visuals</div>
+    <div class="service">Social Media Designs</div>
+  </div>
+</section>
+<%- include('layout-end') %>

@@ -1,0 +1,21 @@
+<%- include('layout-start') %>
+<section class="page-head">
+  <p class="eyebrow">Portfolio</p>
+  <h1>Project Gallery</h1>
+  <p>Photos, graphics, project details, descriptions, and links can be managed from the admin page.</p>
+</section>
+
+<section class="grid cards portfolio-grid">
+  <% projects.forEach(project => { %>
+    <article class="card project-card large">
+      <img src="<%= project.image_url %>" alt="<%= project.title %>">
+      <div>
+        <p class="tag"><%= project.category %></p>
+        <h2><%= project.title %></h2>
+        <p><%= project.description %></p>
+        <% if (project.project_url) { %><a href="<%= project.project_url %>" target="_blank" rel="noreferrer">View Project</a><% } %>
+      </div>
+    </article>
+  <% }) %>
+</section>
+<%- include('layout-end') %>
