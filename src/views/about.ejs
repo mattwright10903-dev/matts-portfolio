@@ -1,80 +1,54 @@
 <%- include('layout-start') %>
+<% const skills = [
+  ['Logo & Brand Design', 92],
+  ['FiveM Graphics', 95],
+  ['FiveM Development', 84],
+  ['Discord Branding', 90],
+  ['Web Visuals', 82],
+  ['UI / NUI Design', 86]
+];
+const tools = ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua', 'QBCore', 'QBox', 'Discord']; %>
 
-<section class="about-pro-section">
-  <div class="about-pro-copy reveal-up">
+<section class="about-pro-page">
+  <div class="about-copy-pro reveal-up">
     <p class="eyebrow">About Me</p>
-    <h1>Turning ideas into <span>visuals</span> and FiveM experiences that hit.</h1>
-    <div class="about-pro-text">
-      <p><%= content.about_body || "I'm a freelance creative designer and FiveM server developer focused on clean visuals, polished community branding, and better player experiences." %></p>
-      <p><%= content.about_extra || "I specialize in bold, modern designs, custom FiveM work, Discord branding, loading screens, websites, and clean server presentation." %></p>
-      <p>I work directly with every client from concept to delivery, so the work stays clear, consistent, and built around the actual goal of the project.</p>
+    <h1>Turning ideas into <span>visuals and systems</span> that feel professional.</h1>
+    <div class="about-text-stack">
+      <p><%= content.about_body %></p>
+      <p><%= content.about_extra %></p>
+      <p>I work across both creative design and FiveM server development, which means I can help with the look, the branding, and the actual in-game/community experience.</p>
     </div>
-
-    <div class="tool-chip-wrap">
-      <% ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua', 'QBCore', 'QBox'].forEach(tool => { %>
-        <span><%= tool %></span>
-      <% }) %>
+    <div class="tool-cloud">
+      <% tools.forEach(tool => { %><span><%= tool %></span><% }) %>
     </div>
   </div>
 
-  <aside class="about-skill-panel reveal-up delay-one">
-    <div class="skill-panel-head">
-      <p class="eyebrow">Skill Level</p>
-      <p>Design, FiveM development, and community branding experience.</p>
-    </div>
-    <% const skills = [
-      { name: 'Logo & Brand Design', level: 92 },
-      { name: 'FiveM Graphics', level: 95 },
-      { name: 'FiveM Server Development', level: 88 },
-      { name: 'Discord Branding', level: 90 },
-      { name: 'Website Visuals', level: 84 },
-      { name: 'UI / NUI Design', level: 86 }
-    ]; %>
-    <div class="skill-list">
-      <% skills.forEach((skill, index) => { %>
-        <div class="skill-item" style="--level:<%= skill.level %>%; --delay:<%= index * 90 %>ms;">
-          <div class="skill-row"><span><%= skill.name %></span><b><%= skill.level %>%</b></div>
-          <div class="skill-track"><span></span></div>
-        </div>
-      <% }) %>
-    </div>
-  </aside>
-</section>
-
-<section class="section about-proof-section">
-  <div class="about-proof-card wide">
-    <span>01</span>
-    <h2>Creative Design</h2>
-    <p>Logos, branding packages, Discord graphics, FiveM visuals, loading screens, website assets, and social media designs with a clean modern style.</p>
-  </div>
-  <div class="about-proof-card">
-    <span>02</span>
-    <h2>FiveM Development</h2>
-    <p>Server setup, QBCore/QBox configuration, UI improvements, bug fixes, script setup, database work, and custom feature development.</p>
-  </div>
-  <div class="about-proof-card">
-    <span>03</span>
-    <h2>Direct Workflow</h2>
-    <p>You work with one person from idea to final delivery, making the process easier, faster, and more consistent.</p>
-  </div>
-</section>
-
-<section class="section about-service-strip">
-  <div class="section-head slim">
-    <div>
-      <p class="eyebrow">What I Do</p>
-      <h2>Design and development support in one place.</h2>
-    </div>
-    <a class="btn ghost" href="/contact">Contact Me</a>
-  </div>
-  <div class="about-service-list">
-    <% String(content.services_list || '').split('\n').filter(Boolean).forEach((service, index) => { %>
-      <div class="about-service-line">
-        <span><%= String(index + 1).padStart(2, '0') %></span>
-        <strong><%= service %></strong>
+  <div class="skills-panel reveal-up delay-1">
+    <p class="eyebrow">Skill Level</p>
+    <% skills.forEach(([name, level], index) => { %>
+      <div class="skill-row" style="--level:<%= level %>%; --delay:<%= index * 80 %>ms">
+        <div><span><%= name %></span><strong><%= level %>%</strong></div>
+        <i><b></b></i>
       </div>
     <% }) %>
   </div>
 </section>
 
+<section class="section-block about-cards">
+  <article>
+    <span>01</span>
+    <h3>Design Direction</h3>
+    <p>Logos, branding packs, social graphics, and portfolio visuals made with a clean modern direction.</p>
+  </article>
+  <article>
+    <span>02</span>
+    <h3>FiveM Development</h3>
+    <p>Server setup, script configuration, UI improvements, workflows, and bug fixing for roleplay communities.</p>
+  </article>
+  <article>
+    <span>03</span>
+    <h3>One-Person Workflow</h3>
+    <p>You work directly with me from concept to delivery, keeping the project simple and clear.</p>
+  </article>
+</section>
 <%- include('layout-end') %>

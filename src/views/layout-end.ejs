@@ -1,6 +1,6 @@
   </main>
   <footer class="footer">
-    <p>© <%= new Date().getFullYear() %> Matt Wright. Portfolio, design work, branding, and creative projects.</p>
+    <p>© <%= new Date().getFullYear() %> Matt Wright. Graphic design, FiveM development, branding, and digital portfolio work.</p>
   </footer>
   <script>
     document.querySelectorAll('[data-gallery]').forEach((gallery) => {
@@ -16,6 +16,40 @@
       });
     });
 
+    document.querySelectorAll('[data-filter-bar]').forEach((bar) => {
+      const grid = document.querySelector('[data-project-grid]');
+      if (!grid) return;
+      bar.querySelectorAll('[data-filter]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const filter = button.getAttribute('data-filter');
+          bar.querySelectorAll('[data-filter]').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          grid.querySelectorAll('[data-category]').forEach((card) => {
+            const match = filter === 'all' || card.getAttribute('data-category') === filter;
+            card.classList.toggle('hidden', !match);
+          });
+        });
+      });
+    });
+
+    function attachPreview(input) {
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+        const slot = input.closest('.upload-slot');
+        if (!file || !slot) return;
+        let preview = slot.querySelector('.upload-preview');
+        if (!preview) {
+          preview = document.createElement('img');
+          preview.className = 'upload-preview';
+          preview.style.cssText = 'width:100%;max-height:140px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid rgba(255,255,255,.09);';
+          slot.appendChild(preview);
+        }
+        preview.src = URL.createObjectURL(file);
+      });
+    }
+
+    document.querySelectorAll('input[type="file"][name="image_files"]').forEach(attachPreview);
+
     document.querySelectorAll('.add-image-input').forEach((button) => {
       button.addEventListener('click', () => {
         const group = button.closest('.admin-upload-group');
@@ -27,13 +61,17 @@
         label.innerHTML = `<span>Image ${next}</span><input type="file" name="image_files" accept="image/*"><button class="remove-upload" type="button" aria-label="Remove image upload slot">Remove</button>`;
         stack.appendChild(label);
         const input = label.querySelector('input');
-        if (input) input.click();
+        if (input) {
+          attachPreview(input);
+          input.click();
+        }
       });
     });
 
     document.addEventListener('click', (event) => {
       const remove = event.target.closest('.remove-upload');
       if (!remove) return;
+      event.preventDefault();
       const slot = remove.closest('.upload-slot');
       if (slot) slot.remove();
     });
