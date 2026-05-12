@@ -11,6 +11,7 @@ import { sendMessageEmail } from './lib/mailer.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
+app.set('trust proxy', 1);
 const PgSession = connectPgSimple(session);
 
 const PORT = process.env.PORT || 3000;
@@ -31,7 +32,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production' ? 'auto' : false,
+      sameSite: 'lax',
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
@@ -121,7 +123,7 @@ app.post('/admin/login', async (req, res) => {
   if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
     req.session.isAdmin = true;
     req.session.adminEmail = ADMIN_EMAIL;
-    return res.redirect('/admin');
+    return req.session.save(() => res.redirect('/admin'));
   }
 
   return res.status(401).render('admin-login', locals(req, { page: 'admin', error: 'Invalid admin email or password.' }));

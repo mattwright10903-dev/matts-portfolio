@@ -6,7 +6,7 @@ Full-stack portfolio website for Matt Wright with:
 - Public portfolio page
 - Public about page
 - Contact page with Discord button, email button, and project form
-- Private `/admin` login
+- Private `/admin` login with fixed Render session handling
 - Admin dashboard
 - Website text editor
 - Add, edit, delete portfolio projects
@@ -69,7 +69,7 @@ Go to:
 /admin
 ```
 
-Login with the email/password you set in Render:
+Login with the email/password you set in Render. Do not wrap the password in quotes in Render; paste the value directly:
 
 ```txt
 ADMIN_EMAIL
@@ -87,3 +87,22 @@ git push
 ```
 
 Then Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.
+
+
+## Latest Fixes
+
+This version includes two important fixes:
+
+1. Render admin sessions now work behind Render's proxy using `app.set('trust proxy', 1)` and safer session cookie settings.
+2. The full site styling has been changed to a black, white, and red design.
+
+If `/admin` refreshes back to the login page after entering the correct password, check these first:
+
+```txt
+ADMIN_EMAIL=mattwright10903@gmail.com
+ADMIN_PASSWORD=your exact password with no quotes
+SESSION_SECRET=any long random text
+DATABASE_URL=Render internal PostgreSQL URL
+```
+
+After changing environment variables, redeploy the service.
