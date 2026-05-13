@@ -160,6 +160,20 @@
         if (item) item.classList.remove('image-removed');
       }
     });
+
+
+    // Border glow animation inspired by React Bits' Border Glow concept, adapted without React.
+    const glowTargets = $$('.bento-card, .portfolio-card-pro, .service-pro-card, .spotlight-card, .contact-channel-card, .cta-panel, .admin-panel, .form-card, .admin-rail, .focus-panel, .focus-card, .showcase-panel, .hero-showcase-clean');
+    if (glowTargets.length && !prefersReduced) {
+      let glowAngle = 0;
+      const runGlow = () => {
+        glowAngle = (glowAngle + 0.35) % 360;
+        glowTargets.forEach((el, i) => el.style.setProperty('--glow-angle', `${(glowAngle + i * 18) % 360}deg`));
+        requestAnimationFrame(runGlow);
+      };
+      requestAnimationFrame(runGlow);
+    }
+
   </script>
 </body>
 </html>

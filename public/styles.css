@@ -491,3 +491,257 @@ html, body {
   .showcase-main h2 { font-size: 30px; }
   .capability-list article { grid-template-columns: 1fr; }
 }
+
+/* CLEANER SELECTED FOCUS PANEL FIX */
+.hero-showcase {
+  min-height: auto !important;
+  padding: clamp(20px, 2.2vw, 28px) !important;
+  border-radius: 28px !important;
+  display: grid !important;
+  gap: 22px !important;
+  align-content: start !important;
+  justify-content: stretch !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,36,69,.16), transparent 36%),
+    linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.018)) !important;
+}
+.hero-showcase::after { width: 220px !important; height: 220px !important; opacity: .45 !important; filter: blur(42px) !important; }
+.showcase-topline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.showcase-status,
+.showcase-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  background: rgba(0,0,0,.26);
+  color: rgba(255,255,255,.72);
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.showcase-pill { color: #fff; background: rgba(255,36,69,.11); border-color: rgba(255,36,69,.22); }
+.showcase-header { display: none !important; }
+.showcase-main {
+  position: relative;
+  z-index: 2;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 2px 0 0;
+}
+.showcase-main h2 {
+  font-size: clamp(28px, 2.65vw, 40px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.055em !important;
+  max-width: 620px;
+}
+.showcase-main p:not(.eyebrow) {
+  max-width: 600px;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  margin-top: 14px !important;
+}
+.compact-capabilities {
+  position: relative;
+  z-index: 2;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 9px !important;
+}
+.compact-capabilities article {
+  grid-template-columns: 38px 1fr !important;
+  gap: 12px !important;
+  padding: 13px 14px !important;
+  border-radius: 16px !important;
+  background: rgba(0,0,0,.24) !important;
+}
+.compact-capabilities span {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 11px !important;
+  font-size: 10px !important;
+}
+.compact-capabilities strong { font-size: 13px !important; }
+.compact-capabilities p { font-size: 11.5px !important; line-height: 1.45 !important; margin-top: 4px !important; }
+.showcase-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+@media (min-width: 981px) {
+  .hero { align-items: center !important; }
+  .hero-showcase { max-width: 520px; justify-self: end; }
+}
+@media (max-width: 620px) {
+  .showcase-topline, .showcase-footer { align-items: flex-start; flex-direction: column; }
+  .showcase-status, .showcase-pill { white-space: normal; }
+  .showcase-main h2 { font-size: 28px !important; }
+  .compact-capabilities article { grid-template-columns: 34px 1fr !important; }
+}
+
+/* React Bits inspired Border Glow polish - adapted for this Express/EJS portfolio */
+.glow-border,
+.bento-card,
+.portfolio-card-pro,
+.service-pro-card,
+.spotlight-card,
+.contact-channel-card,
+.cta-panel,
+.admin-panel,
+.form-card,
+.admin-rail,
+.focus-panel,
+.focus-card,
+.showcase-panel,
+.hero-showcase-clean {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.glow-border::after,
+.bento-card::after,
+.portfolio-card-pro::after,
+.service-pro-card::after,
+.spotlight-card::after,
+.contact-channel-card::after,
+.cta-panel::after,
+.admin-panel::after,
+.form-card::after,
+.admin-rail::after,
+.focus-panel::after,
+.focus-card::after,
+.showcase-panel::after,
+.hero-showcase-clean::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    conic-gradient(from var(--glow-angle, 0deg),
+      transparent 0deg,
+      transparent 70deg,
+      rgba(255, 36, 69, 0.14) 112deg,
+      rgba(255, 255, 255, 0.18) 145deg,
+      rgba(255, 36, 69, 0.38) 178deg,
+      rgba(255, 255, 255, 0.12) 216deg,
+      transparent 270deg,
+      transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 260ms ease, filter 260ms ease;
+  pointer-events: none;
+}
+
+.bento-card:hover::after,
+.portfolio-card-pro:hover::after,
+.service-pro-card:hover::after,
+.spotlight-card:hover::after,
+.contact-channel-card:hover::after,
+.cta-panel:hover::after,
+.admin-panel:hover::after,
+.form-card:hover::after,
+.admin-rail:hover::after,
+.focus-panel:hover::after,
+.focus-card:hover::after,
+.showcase-panel:hover::after,
+.hero-showcase-clean:hover::after,
+.glow-border:hover::after {
+  opacity: 1;
+  filter: drop-shadow(0 0 18px rgba(255, 36, 69, 0.22));
+}
+
+/* Always-on, softer glow for key homepage/featured cards */
+.bento-card.featured::after,
+.portfolio-card-pro.featured::after,
+.cta-panel::after {
+  opacity: .45;
+}
+
+.project-card-image,
+.portfolio-card-pro img,
+.bento-card img {
+  transition: transform 700ms cubic-bezier(.16,1,.3,1), filter 700ms cubic-bezier(.16,1,.3,1);
+}
+
+.portfolio-card-pro:hover img,
+.bento-card:hover img {
+  transform: scale(1.035);
+  filter: contrast(1.05) saturate(1.08);
+}
+
+.channel-button,
+.btn,
+.filter-pill,
+.project-image-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.channel-button::after,
+.btn::after,
+.filter-pill::after,
+.project-image-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.22) 45%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 650ms cubic-bezier(.16,1,.3,1);
+  pointer-events: none;
+}
+
+.channel-button:hover::after,
+.btn:hover::after,
+.filter-pill:hover::after,
+.project-image-link:hover::after {
+  transform: translateX(120%);
+}
+
+/* Cleaner premium motion layer */
+body::before {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255,36,69,.14), transparent 32%),
+    radial-gradient(circle at 82% 20%, rgba(255,255,255,.04), transparent 28%),
+    radial-gradient(circle at 50% 85%, rgba(255,36,69,.08), transparent 34%);
+}
+
+.section-block {
+  scroll-margin-top: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-border::after,
+  .bento-card::after,
+  .portfolio-card-pro::after,
+  .service-pro-card::after,
+  .spotlight-card::after,
+  .contact-channel-card::after,
+  .cta-panel::after,
+  .admin-panel::after,
+  .form-card::after,
+  .admin-rail::after,
+  .focus-panel::after,
+  .focus-card::after,
+  .showcase-panel::after,
+  .hero-showcase-clean::after {
+    animation: none !important;
+  }
+}
