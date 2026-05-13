@@ -13,17 +13,23 @@
 <body class="page-<%= page || 'default' %>">
   <div class="scroll-progress" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
-  <nav class="nav" data-nav>
-    <a class="brand" href="/">Matt Wright</a>
-    <div class="nav-links">
-      <a class="<%= page === 'home' ? 'active' : '' %>" href="/">Home</a>
-      <a class="<%= page === 'portfolio' ? 'active' : '' %>" href="/portfolio">Portfolio</a>
-      <a class="<%= page === 'about' ? 'active' : '' %>" href="/about">About</a>
-      <a class="<%= page === 'contact' ? 'active' : '' %>" href="/contact">Contact</a>
-      <% if (isAdmin) { %>
-        <a class="admin-nav-link" href="/admin">Admin</a>
-        <form method="post" action="/admin/logout" class="nav-form"><button type="submit">Logout</button></form>
-      <% } %>
+  <nav class="nav gooey-shell" data-nav data-active-page="<%= page || 'home' %>">
+    <a class="brand" href="/" aria-label="Matt Wright home">Matt Wright</a>
+    <div class="gooey-nav-container" data-gooey-nav>
+      <div class="gooey-track">
+        <a data-gooey-item data-page="home" class="<%= page === 'home' ? 'active' : '' %>" href="/">Home</a>
+        <a data-gooey-item data-page="portfolio" class="<%= page === 'portfolio' ? 'active' : '' %>" href="/portfolio">Portfolio</a>
+        <a data-gooey-item data-page="about" class="<%= page === 'about' ? 'active' : '' %>" href="/about">About Me</a>
+        <a data-gooey-item data-page="contact" class="<%= page === 'contact' ? 'active' : '' %>" href="/contact">Contact</a>
+        <% if (isAdmin) { %>
+          <a data-gooey-item data-page="admin" class="admin-nav-link <%= page === 'admin' ? 'active' : '' %>" href="/admin">Admin</a>
+        <% } %>
+      </div>
+      <span class="gooey-effect gooey-filter" aria-hidden="true"></span>
+      <span class="gooey-effect gooey-text" aria-hidden="true"></span>
     </div>
+    <% if (isAdmin) { %>
+      <form method="post" action="/admin/logout" class="nav-form nav-logout"><button type="submit">Logout</button></form>
+    <% } %>
   </nav>
   <main>

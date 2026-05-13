@@ -27,6 +27,108 @@
     window.addEventListener('scroll', onScrollFrame, { passive: true });
     onScrollFrame();
 
+    // Gooey navigation inspired by React Bits' Gooey Nav, rebuilt in plain JS for this EJS site.
+    function initGooeyNav() {
+      const container = $('[data-gooey-nav]');
+      if (!container) return;
+      const track = $('.gooey-track', container);
+      const items = $$('[data-gooey-item]', container);
+      const filter = $('.gooey-filter', container);
+      const text = $('.gooey-text', container);
+      if (!track || !items.length || !filter || !text) return;
+
+      const colors = ['#ff2445', '#ffffff', '#ff6b7d', '#b70b25', '#ff2445', '#ffffff'];
+      const particleCount = 14;
+      const particleDistances = [64, 9];
+      const animationTime = 520;
+      const timeVariance = 240;
+      const noise = (n = 1) => n / 2 - Math.random() * n;
+      const getXY = (distance, pointIndex, totalPoints) => {
+        const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
+        return [distance * Math.cos(angle), distance * Math.sin(angle)];
+      };
+
+      const positionEffect = (element) => {
+        const containerRect = container.getBoundingClientRect();
+        const pos = element.getBoundingClientRect();
+        const styles = {
+          left: `${pos.x - containerRect.x}px`,
+          top: `${pos.y - containerRect.y}px`,
+          width: `${pos.width}px`,
+          height: `${pos.height}px`
+        };
+        Object.assign(filter.style, styles);
+        Object.assign(text.style, styles);
+        text.textContent = element.textContent.trim();
+      };
+
+      const makeParticles = () => {
+        if (prefersReduced) return;
+        $$('.gooey-particle', filter).forEach((particle) => particle.remove());
+        const bubbleTime = animationTime * 2 + timeVariance;
+        filter.style.setProperty('--time', `${bubbleTime}ms`);
+
+        for (let i = 0; i < particleCount; i++) {
+          const t = animationTime * 2 + noise(timeVariance * 2);
+          const start = getXY(particleDistances[0], particleCount - i, particleCount);
+          const end = getXY(particleDistances[1] + noise(7), particleCount - i, particleCount);
+          const scale = 1 + noise(0.25);
+          const rotate = noise(80);
+          const color = colors[Math.floor(Math.random() * colors.length)];
+
+          setTimeout(() => {
+            const particle = document.createElement('span');
+            const point = document.createElement('span');
+            particle.className = 'gooey-particle';
+            point.className = 'gooey-point';
+            particle.style.setProperty('--start-x', `${start[0]}px`);
+            particle.style.setProperty('--start-y', `${start[1]}px`);
+            particle.style.setProperty('--end-x', `${end[0]}px`);
+            particle.style.setProperty('--end-y', `${end[1]}px`);
+            particle.style.setProperty('--time', `${t}ms`);
+            particle.style.setProperty('--scale', `${scale}`);
+            particle.style.setProperty('--rotate', `${rotate}deg`);
+            particle.style.setProperty('--color', color);
+            point.style.setProperty('--color', color);
+            particle.appendChild(point);
+            filter.appendChild(particle);
+            setTimeout(() => particle.remove(), Math.max(400, t));
+          }, 20);
+        }
+      };
+
+      const activate = (item, burst = false) => {
+        items.forEach((link) => link.classList.remove('active'));
+        item.classList.add('active');
+        positionEffect(item);
+        text.classList.remove('active');
+        void text.offsetWidth;
+        text.classList.add('active');
+        if (burst) makeParticles();
+      };
+
+      const activeItem = items.find((item) => item.classList.contains('active')) || items[0];
+      activate(activeItem, false);
+
+      items.forEach((item) => {
+        item.addEventListener('pointerenter', () => {
+          positionEffect(item);
+          if (!prefersReduced) makeParticles();
+        });
+        item.addEventListener('focus', () => positionEffect(item));
+        item.addEventListener('pointerdown', () => activate(item, true));
+      });
+      track.addEventListener('pointerleave', () => {
+        const current = items.find((item) => item.classList.contains('active')) || activeItem;
+        positionEffect(current);
+      });
+      window.addEventListener('resize', () => {
+        const current = items.find((item) => item.classList.contains('active')) || activeItem;
+        positionEffect(current);
+      });
+    }
+    initGooeyNav();
+
     const cursorGlow = $('.cursor-glow');
     if (cursorGlow && !prefersReduced) {
       window.addEventListener('pointermove', (event) => {
