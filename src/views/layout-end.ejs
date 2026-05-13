@@ -37,11 +37,11 @@
       const text = $('.gooey-text', container);
       if (!track || !items.length || !filter || !text) return;
 
-      const colors = ['#ff2445', '#ffffff', '#ff6b7d', '#b70b25', '#ff2445', '#ffffff'];
-      const particleCount = 14;
-      const particleDistances = [64, 9];
-      const animationTime = 520;
-      const timeVariance = 240;
+      const colors = ['#ff2445', '#d41435', '#ff5a70', '#9a0924'];
+      const particleCount = 9;
+      const particleDistances = [28, 7];
+      const animationTime = 380;
+      const timeVariance = 120;
       const noise = (n = 1) => n / 2 - Math.random() * n;
       const getXY = (distance, pointIndex, totalPoints) => {
         const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
@@ -113,7 +113,6 @@
       items.forEach((item) => {
         item.addEventListener('pointerenter', () => {
           positionEffect(item);
-          if (!prefersReduced) makeParticles();
         });
         item.addEventListener('focus', () => positionEffect(item));
         item.addEventListener('pointerdown', () => activate(item, true));
