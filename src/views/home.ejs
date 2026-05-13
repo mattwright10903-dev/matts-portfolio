@@ -29,17 +29,41 @@ const featured = projects.slice(0, 5);
     </div>
   </div>
 
-  <div class="hero-orbit reveal-up delay-1" aria-label="Portfolio preview">
-    <div class="orbit-ring"></div>
-    <div class="orbit-card orbit-card-main spotlight-card">
-      <small>Selected Focus</small>
-      <h2><%= content.hero_card_title %></h2>
-      <p><%= content.hero_card_body %></p>
-      <div class="showcase-services"><span>Brand Identity</span><span>FiveM Systems</span><span>UI Design</span></div>
+  <div class="hero-showcase reveal-up delay-1" aria-label="Portfolio preview">
+    <div class="showcase-header">
+      <span class="status-dot"></span>
+      <p>Available for selected projects</p>
     </div>
-    <div class="floating-chip chip-a">Logo Systems</div>
-    <div class="floating-chip chip-b">QBCore / QBox</div>
-    <div class="floating-chip chip-c">Discord Assets</div>
+
+    <div class="showcase-main">
+      <p class="eyebrow">Selected Focus</p>
+      <h2>Design systems, FiveM builds, and clean digital branding.</h2>
+      <p>Portfolio work built around sharp visuals, easy project updates, and practical systems that look good in use.</p>
+    </div>
+
+    <div class="capability-list">
+      <article>
+        <span>01</span>
+        <div>
+          <strong>Brand Identity</strong>
+          <p>Logos, style direction, colors, banners, and full visual packs.</p>
+        </div>
+      </article>
+      <article>
+        <span>02</span>
+        <div>
+          <strong>FiveM Development</strong>
+          <p>QBCore/QBox setup, UI polish, script configuration, and bug fixes.</p>
+        </div>
+      </article>
+      <article>
+        <span>03</span>
+        <div>
+          <strong>Discord & Web Visuals</strong>
+          <p>Community graphics, profile assets, website sections, and launch visuals.</p>
+        </div>
+      </article>
+    </div>
   </div>
 </section>
 
