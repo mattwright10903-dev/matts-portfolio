@@ -22,13 +22,7 @@
       const pct = Math.min(1, Math.max(0, window.scrollY / max));
       if (progress) progress.style.transform = `scaleX(${pct})`;
       if (nav) nav.classList.toggle('scrolled', window.scrollY > 22);
-      $$('.timewarp-section').forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        const center = rect.top + rect.height / 2 - window.innerHeight / 2;
-        const strength = Math.max(-1, Math.min(1, center / window.innerHeight));
-        section.style.setProperty('--warp', String(Math.abs(strength)));
-        section.style.setProperty('--warp-y', `${strength * -22}px`);
-      });
+      // Normal scrolling restored: no section transforms on scroll.
     }
     window.addEventListener('scroll', onScrollFrame, { passive: true });
     onScrollFrame();

@@ -319,3 +319,36 @@ input:focus, textarea:focus, select:focus { border-color: rgba(255,36,69,.42); b
 .about-cards h3 { margin: 20px 0 10px; font-size: 24px; letter-spacing: -.05em; }
 .about-cards p { color: var(--soft); line-height: 1.65; font-size: 13px; margin: 0; }
 @media (max-width: 980px) { .about-pro-page, .about-cards { grid-template-columns: 1fr; } }
+
+/* NORMAL SCROLL FIX — removed timewarp transforms that made sections hard to see */
+.timewarp-section,
+.timewarp-section.is-visible,
+.timewarp-section:hover {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+}
+
+.reveal-up,
+.section-block,
+.portfolio-card-pro,
+.service-pro-card,
+.bento-card,
+.reveal-up.is-visible,
+.section-block.is-visible,
+.portfolio-card-pro.is-visible,
+.service-pro-card.is-visible,
+.bento-card.is-visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+main, section, .section-block, .hero, .page-head {
+  visibility: visible !important;
+}
+
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto !important;
+}
