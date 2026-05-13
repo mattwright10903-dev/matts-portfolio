@@ -1246,3 +1246,208 @@ details label + label { margin-top: 12px; }
   .contact-methods-simple .method-icon { width: 48px; height: 48px; }
   .contact-start-actions .btn { width: 100%; }
 }
+
+/* Contact polish — Discord/Gmail branded cards */
+.contact-polished-page {
+  max-width: 1260px;
+  padding-top: 78px;
+}
+.contact-polished-hero {
+  max-width: 850px;
+  margin-bottom: 54px;
+}
+.contact-polished-hero h1 {
+  font-size: clamp(54px, 8.5vw, 108px);
+  letter-spacing: -.065em;
+  line-height: .88;
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+  text-shadow: 0 0 48px rgba(255, 255, 255, .08);
+}
+.contact-polished-hero p:not(.eyebrow) {
+  max-width: 680px;
+  font-size: clamp(15px, 1.15vw, 18px);
+  color: rgba(255, 255, 255, .62);
+}
+.contact-methods-polished {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0 auto 54px;
+}
+.contact-channel-card {
+  position: relative;
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 26px;
+  align-items: start;
+  padding: 34px;
+  border-radius: 30px;
+  overflow: hidden;
+  text-decoration: none !important;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, .11);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .36);
+  transition: transform .28s cubic-bezier(.16, 1, .3, 1), border-color .28s ease, box-shadow .28s ease, background .28s ease;
+}
+.contact-channel-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -2;
+  opacity: .92;
+  transition: opacity .28s ease, transform .28s ease;
+}
+.contact-channel-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.018));
+  backdrop-filter: blur(18px);
+}
+.contact-channel-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 36px 110px rgba(0, 0, 0, .48);
+}
+.discord-card::before {
+  background:
+    radial-gradient(circle at 16% 24%, rgba(88, 101, 242, .42), transparent 35%),
+    radial-gradient(circle at 88% 86%, rgba(139, 92, 246, .18), transparent 42%);
+}
+.discord-card:hover {
+  border-color: rgba(88, 101, 242, .5);
+  box-shadow: 0 36px 110px rgba(0, 0, 0, .48), 0 0 70px rgba(88, 101, 242, .14);
+}
+.email-card::before {
+  background:
+    radial-gradient(circle at 14% 22%, rgba(66, 133, 244, .22), transparent 34%),
+    radial-gradient(circle at 72% 22%, rgba(234, 67, 53, .20), transparent 36%),
+    radial-gradient(circle at 78% 84%, rgba(52, 168, 83, .16), transparent 42%),
+    radial-gradient(circle at 20% 88%, rgba(251, 188, 5, .16), transparent 38%);
+}
+.email-card:hover {
+  border-color: rgba(255, 255, 255, .22);
+  box-shadow: 0 36px 110px rgba(0, 0, 0, .48), 0 0 70px rgba(66, 133, 244, .10);
+}
+.channel-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .32);
+}
+.channel-icon svg {
+  width: 35px;
+  height: 35px;
+  display: block;
+}
+.discord-icon {
+  background: linear-gradient(135deg, #5865F2 0%, #7C3AED 100%);
+  box-shadow: 0 22px 46px rgba(88, 101, 242, .32);
+}
+.discord-icon svg { fill: #fff; }
+.email-icon {
+  background: rgba(255, 255, 255, .95);
+  box-shadow: 0 22px 46px rgba(255, 255, 255, .08);
+}
+.email-icon .g-blue { fill: #4285F4; }
+.email-icon .g-red { fill: #EA4335; }
+.email-icon .g-yellow { fill: #FBBC05; }
+.email-icon .g-green { fill: #34A853; }
+.channel-copy small {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+.discord-card .channel-copy small { color: #8EA0FF; }
+.email-card .channel-copy small { color: #FF6D62; }
+.channel-copy strong {
+  display: block;
+  color: #fff;
+  font-size: clamp(24px, 2.3vw, 34px);
+  line-height: 1.03;
+  letter-spacing: -.04em;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.channel-copy p {
+  max-width: 440px;
+  margin: 13px 0 0;
+  color: rgba(255,255,255,.61);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.channel-button {
+  grid-column: 2;
+  width: fit-content;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.07);
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+}
+.discord-card .channel-button { background: rgba(88, 101, 242, .18); border-color: rgba(88, 101, 242, .35); }
+.email-card .channel-button { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); }
+.contact-channel-card:hover .channel-button {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.13);
+}
+.contact-polished-cta {
+  margin-top: 6px;
+  padding: clamp(28px, 4vw, 46px);
+  border-radius: 32px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.contact-polished-cta h2 {
+  font-size: clamp(34px, 5vw, 68px);
+  line-height: .94;
+  letter-spacing: -.065em;
+}
+.contact-polished-cta .contact-start-actions .btn {
+  min-height: 54px;
+  border-radius: 999px;
+  padding-inline: 24px;
+  font-weight: 900;
+}
+.contact-polished-cta .contact-start-actions .btn.primary {
+  box-shadow: 0 18px 46px rgba(255, 42, 75, .20);
+}
+@media (max-width: 980px) {
+  .contact-methods-polished { grid-template-columns: 1fr; }
+  .contact-channel-card { min-height: auto; }
+  .contact-polished-cta { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .contact-polished-page { padding-top: 48px; }
+  .contact-polished-hero { text-align: left; margin-bottom: 34px; }
+  .contact-methods-polished { gap: 16px; margin-bottom: 36px; }
+  .contact-channel-card {
+    grid-template-columns: 58px 1fr;
+    gap: 16px;
+    padding: 22px;
+    border-radius: 24px;
+  }
+  .channel-icon { width: 54px; height: 54px; border-radius: 18px; }
+  .channel-icon svg { width: 28px; height: 28px; }
+  .channel-copy strong { font-size: 22px; }
+  .channel-copy p { font-size: 13px; }
+  .channel-button { grid-column: 1 / -1; width: 100%; }
+  .contact-polished-cta .contact-start-actions .btn { width: 100%; }
+}
