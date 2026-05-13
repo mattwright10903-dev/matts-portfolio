@@ -91,9 +91,9 @@ const featured = projects.slice(0, 5);
     <% } %>
     <% featured.forEach((project, index) => { %>
       <article class="bento-card <%= index === 0 ? 'bento-large' : index === 1 ? 'bento-tall' : '' %>" data-stagger>
-        <a href="/portfolio" class="bento-image project-image-link">
+        <a href="/portfolio/<%= project.id %>" class="bento-image project-image-link">
           <img src="<%= project.image_url %>" alt="<%= project.title %>">
-          <span class="project-overlay">View Project</span>
+          <span class="project-overlay">View Case Study</span>
           <% if (project.images && project.images.length > 1) { %><span class="image-count"><%= project.images.length %> images</span><% } %>
         </a>
         <div class="bento-copy">

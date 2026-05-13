@@ -106,15 +106,23 @@ function requireAdmin(req, res, next) {
 }
 
 app.get('/', async (req, res) => {
-  const projects = await query('SELECT * FROM projects WHERE featured = true ORDER BY created_at DESC LIMIT 6');
+  const projects = await query('SELECT * FROM projects WHERE featured = true AND published = true ORDER BY sort_order ASC, created_at DESC LIMIT 6');
   const content = await getContent();
   res.render('home', locals(req, { page: 'home', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/portfolio', async (req, res) => {
-  const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
+  const projects = await query('SELECT * FROM projects WHERE published = true ORDER BY sort_order ASC, created_at DESC');
   const content = await getContent();
   res.render('portfolio', locals(req, { page: 'portfolio', projects: normalizeProjects(projects.rows), content }));
+});
+
+app.get('/portfolio/:id', async (req, res) => {
+  const project = await query('SELECT * FROM projects WHERE id = $1 AND published = true', [req.params.id]);
+  if (!project.rows.length) return res.status(404).render('error', locals(req, { message: 'Project not found.' }));
+  const more = await query('SELECT * FROM projects WHERE published = true AND id <> $1 ORDER BY featured DESC, sort_order ASC, created_at DESC LIMIT 3', [req.params.id]);
+  const content = await getContent();
+  res.render('project-detail', locals(req, { page: 'portfolio', project: normalizeProject(project.rows[0]), moreProjects: normalizeProjects(more.rows), content }));
 });
 
 app.get('/about', async (req, res) => {
@@ -178,7 +186,7 @@ app.get('/admin', async (req, res) => {
     return res.render('admin-login', locals(req, { page: 'admin', error: null }));
   }
 
-  const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
+  const projects = await query('SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC');
   const content = await getContent();
   res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), content, saved: req.query.saved || null }));
 });
@@ -229,25 +237,25 @@ app.post('/admin/content', requireAdmin, async (req, res) => {
 });
 
 app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files', 10), async (req, res) => {
-  const { title, category, description, project_url, featured } = req.body;
+  const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
   const existing = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
   const fallbackImages = normalizeProject(existing.rows[0] || {}).images;
   const images = getProjectImages(req, fallbackImages, { useKeepImages: true });
   const image_url = images[0] || '/assets/project-1.svg';
   await query(
     `UPDATE projects
-     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5, project_url = $6, featured = $7
-     WHERE id = $8`,
-    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on', req.params.id]
+     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5, project_url = $6, featured = $7, tools = $8, goal = $9, result = $10, published = $11, sort_order = $12
+     WHERE id = $13`,
+    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on', tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0), req.params.id]
   );
   res.redirect('/admin?saved=project');
 });
 
 app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async (req, res) => {
-  const { title, category, description, project_url, featured } = req.body;
+  const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
   const images = getProjectImages(req, ['/assets/project-1.svg']);
   const image_url = images[0] || '/assets/project-1.svg';
-  await query('INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured) VALUES ($1, $2, $3, $4, $5, $6, $7)', [
+  await query('INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured, tools, goal, result, published, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [
     title,
     category || 'Design',
     description,
@@ -255,6 +263,11 @@ app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async
     images,
     project_url || '',
     featured === 'on',
+    tools || '',
+    goal || '',
+    result || '',
+    published !== 'off',
+    Number(sort_order || 0),
   ]);
   res.redirect('/admin?saved=project');
 });

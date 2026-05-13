@@ -1,6 +1,21 @@
   </main>
-  <footer class="footer">
-    <p>© <%= new Date().getFullYear() %> Matt Wright. Graphic design, FiveM development, branding, and digital portfolio work.</p>
+  <footer class="footer footer-pro">
+    <div class="footer-brand">
+      <a class="brand footer-logo" href="/">Matt Wright</a>
+      <p>Graphic design, FiveM development, branding, and digital portfolio work.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/portfolio">Portfolio</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <% if (isAdmin) { %><a href="/admin">Admin</a><% } %>
+    </div>
+    <div class="footer-contact">
+      <span>Discord: mjww0</span>
+      <span>Email: mattwright10903@gmail.com</span>
+      <button class="back-top" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to top ↑</button>
+    </div>
+    <p class="footer-copy">© <%= new Date().getFullYear() %> Matt Wright. All rights reserved.</p>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js"></script>
   <script>
@@ -8,6 +23,14 @@
     const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
     const animeEngine = window.anime || null;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const loader = $('[data-site-loader]');
+    if (loader) {
+      window.addEventListener('load', () => {
+        setTimeout(() => loader.classList.add('is-hidden'), 450);
+        setTimeout(() => loader.remove(), 1100);
+      });
+    }
 
     function animate(options) {
       if (prefersReduced) return;
@@ -259,6 +282,32 @@
         const checkbox = item ? $('input[type="checkbox"]', item) : null;
         if (checkbox) checkbox.checked = true;
         if (item) item.classList.remove('image-removed');
+      }
+      const setMain = event.target.closest('.set-main-image');
+      if (setMain) {
+        event.preventDefault();
+        const item = setMain.closest('.existing-image-item');
+        const grid = item ? item.parentElement : null;
+        if (item && grid) {
+          grid.prepend(item);
+          $$('.existing-image-item', grid).forEach((row, index) => {
+            const label = $('span', row);
+            if (label) label.textContent = index === 0 ? 'Main image' : `Image ${index + 1}`;
+            row.classList.toggle('main-image', index === 0);
+          });
+        }
+      }
+      const moveUp = event.target.closest('.move-image-up');
+      if (moveUp) {
+        event.preventDefault();
+        const item = moveUp.closest('.existing-image-item');
+        if (item && item.previousElementSibling) item.parentElement.insertBefore(item, item.previousElementSibling);
+      }
+      const moveDown = event.target.closest('.move-image-down');
+      if (moveDown) {
+        event.preventDefault();
+        const item = moveDown.closest('.existing-image-item');
+        if (item && item.nextElementSibling) item.parentElement.insertBefore(item.nextElementSibling, item);
       }
     });
 

@@ -5,7 +5,7 @@
     <div>
       <p class="eyebrow">Admin</p>
       <h1>Website Studio</h1>
-      <p>Manage page text, portfolio projects, image galleries, featured work, and categories.</p>
+      <p>Manage page text, portfolio projects, image galleries, featured work, publishing, case studies, and image order.</p>
     </div>
     <nav class="admin-nav">
       <a href="#overview">Overview</a>
@@ -23,7 +23,7 @@
       <div>
         <p class="eyebrow">Dashboard</p>
         <h2>Portfolio control panel</h2>
-        <p>Keep descriptions sharp, use strong images, mark your best work as featured, and remove old gallery images you do not want anymore.</p>
+        <p>Keep descriptions sharp, choose a main image, reorder galleries, publish/draft projects, and turn stronger work into simple case studies.</p>
       </div>
       <div class="admin-stats">
         <article><span><%= projects.length %></span><p>Total Projects</p></article>
@@ -67,14 +67,18 @@
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Server Rebrand Package" required></label>
           <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %></select></label>
-          <label class="span-2">Project Link<input name="project_url" placeholder="Optional link"></label>
-          <label class="span-2">Description<textarea name="description" rows="5" placeholder="Explain what the project is, what was created, and what problem it solved." required></textarea></label>
+          <label>Project Link<input name="project_url" placeholder="Optional link"></label>
+          <label>Sort Order<input name="sort_order" type="number" value="0" placeholder="0"></label>
+          <label class="span-2">Short Description<textarea name="description" rows="4" placeholder="Short card description shown on portfolio grids." required></textarea></label>
+          <label class="span-2">Tools Used <small>Example: Photoshop, Figma, Lua, QBCore</small><input name="tools" placeholder="Photoshop, Figma, Lua, QBCore"></label>
+          <label class="span-2">Project Goal<textarea name="goal" rows="3" placeholder="What was the goal of this project?"></textarea></label>
+          <label class="span-2">Final Result<textarea name="result" rows="3" placeholder="What was delivered or improved?"></textarea></label>
           <div class="span-2 admin-upload-group">
             <div class="upload-group-head"><div><strong>Project Images</strong><small>Click “Add another image” to choose another file picker.</small></div><button class="mini add-image-input" type="button">+ Add another image</button></div>
             <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
           </div>
           <label class="span-2">Image URLs <small>Optional. One URL per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
-          <label class="check span-2"><input type="checkbox" name="featured"> Featured on home page</label>
+          <div class="check-row span-2"><label class="check"><input type="checkbox" name="featured"> Featured on home page</label><label class="check"><input type="checkbox" name="published" checked> Published</label></div>
         </div>
         <button class="btn primary" type="submit">Add Project</button>
       </form>
@@ -94,8 +98,12 @@
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
                 <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %></select></label>
-                <label class="span-2">Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
-                <label class="span-2">Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
+                <label>Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
+                <label>Sort Order<input name="sort_order" type="number" value="<%= project.sort_order || 0 %>"></label>
+                <label class="span-2">Short Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
+                <label class="span-2">Tools Used<input name="tools" value="<%= project.tools || '' %>" placeholder="Photoshop, Figma, Lua, QBCore"></label>
+                <label class="span-2">Project Goal<textarea name="goal" rows="3"><%= project.goal || '' %></textarea></label>
+                <label class="span-2">Final Result<textarea name="result" rows="3"><%= project.result || '' %></textarea></label>
                 <div class="span-2 existing-images">
                   <div class="upload-group-head"><div><strong>Current Gallery</strong><small>Click remove on any image you do not want, then save project.</small></div></div>
                   <div class="existing-image-grid">
@@ -103,7 +111,7 @@
                       <div class="existing-image-item">
                         <input type="checkbox" name="keep_images" value="<%= image %>" checked hidden>
                         <img src="<%= image %>" alt="Project image <%= index + 1 %>">
-                        <div><span>Image <%= index + 1 %></span><button class="mini danger remove-existing-image" type="button">Remove</button><button class="mini undo-existing-image" type="button">Undo</button></div>
+                        <div><span>Image <%= index + 1 %></span><button class="mini set-main-image" type="button">Main</button><button class="mini move-image-up" type="button">↑</button><button class="mini move-image-down" type="button">↓</button><button class="mini danger remove-existing-image" type="button">Remove</button><button class="mini undo-existing-image" type="button">Undo</button></div>
                       </div>
                     <% }) %>
                   </div>
@@ -113,7 +121,7 @@
                   <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
                 </div>
                 <label class="span-2">Add Image URLs <small>Optional. New URLs only, one per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
-                <label class="check span-2"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>
+                <div class="check-row span-2"><label class="check"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label><label class="check"><input type="checkbox" name="published" <%= project.published === false ? '' : 'checked' %>> Published</label></div>
               </div>
               <div class="admin-actions"><button class="btn small primary" type="submit">Save Project</button></div>
             </form>
