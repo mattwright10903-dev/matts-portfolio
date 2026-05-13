@@ -35,11 +35,22 @@ function uploadedImages(req) {
     .map((file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
 }
 
-function getProjectImages(req, fallbackImages = []) {
+function arrayFromBody(value) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function getProjectImages(req, fallbackImages = [], options = {}) {
+  const keptImages = options.useKeepImages ? arrayFromBody(req.body.keep_images).map((url) => String(url || '').trim()).filter(Boolean) : [];
   const manualUrls = splitImageUrls(req.body.image_urls || req.body.image_url);
   const files = uploadedImages(req);
-  const images = [...manualUrls, ...files].filter(Boolean);
-  return images.length ? images : fallbackImages.filter(Boolean);
+  const base = options.useKeepImages ? keptImages : fallbackImages.filter(Boolean);
+  const images = [...base, ...manualUrls, ...files].filter(Boolean);
+  const unique = [];
+  for (const image of images) {
+    if (!unique.includes(image)) unique.push(image);
+  }
+  return unique.length ? unique : ['/assets/project-1.svg'];
 }
 
 function normalizeProject(project) {
@@ -168,18 +179,8 @@ app.get('/admin', async (req, res) => {
   }
 
   const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
-  const messages = await query('SELECT * FROM messages ORDER BY created_at DESC LIMIT 50');
-  const chats = await query(`
-    SELECT t.*, 
-      (SELECT body FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message,
-      (SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message_at,
-      (SELECT COUNT(*)::int FROM chat_messages WHERE thread_id = t.id AND sender = 'visitor' AND (t.last_seen_admin IS NULL OR created_at > t.last_seen_admin)) AS unread_count
-    FROM chat_threads t
-    ORDER BY COALESCE((SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1), t.updated_at) DESC
-    LIMIT 75
-  `);
   const content = await getContent();
-  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), messages: messages.rows, chats: chats.rows, content, saved: req.query.saved || null }));
+  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), content, saved: req.query.saved || null }));
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -231,7 +232,7 @@ app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files',
   const { title, category, description, project_url, featured } = req.body;
   const existing = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
   const fallbackImages = normalizeProject(existing.rows[0] || {}).images;
-  const images = getProjectImages(req, fallbackImages);
+  const images = getProjectImages(req, fallbackImages, { useKeepImages: true });
   const image_url = images[0] || '/assets/project-1.svg';
   await query(
     `UPDATE projects

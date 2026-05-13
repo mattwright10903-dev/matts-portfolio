@@ -1,14 +1,13 @@
 <%- include('layout-start') %>
-<% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other'];
-%>
+<% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other']; %>
 <section class="admin-shell">
   <aside class="admin-rail">
     <div>
       <p class="eyebrow">Admin</p>
       <h1>Website Studio</h1>
-      <p>Manage pages, services, portfolio projects, galleries, and uploaded images.</p>
+      <p>Manage page text, portfolio projects, image galleries, featured work, and categories.</p>
     </div>
-    <nav>
+    <nav class="admin-nav">
       <a href="#overview">Overview</a>
       <a href="#pages">Pages</a>
       <a href="#new-project">New Project</a>
@@ -23,47 +22,37 @@
     <section id="overview" class="admin-panel admin-overview">
       <div>
         <p class="eyebrow">Dashboard</p>
-        <h2>Quick overview</h2>
-        <p>Keep project descriptions short, upload strong images, and use featured projects for the homepage.</p>
+        <h2>Portfolio control panel</h2>
+        <p>Keep descriptions sharp, use strong images, mark your best work as featured, and remove old gallery images you do not want anymore.</p>
       </div>
       <div class="admin-stats">
         <article><span><%= projects.length %></span><p>Total Projects</p></article>
         <article><span><%= projects.filter(project => project.featured).length %></span><p>Featured</p></article>
-        <article><span><%= projects.reduce((total, project) => total + ((project.images || []).length || 1), 0) %></span><p>Gallery Images</p></article>
+        <article><span><%= projects.reduce((total, project) => total + ((project.images || []).length || 1), 0) %></span><p>Images</p></article>
       </div>
     </section>
 
     <section id="pages" class="admin-panel">
-      <div class="admin-panel-head">
-        <div><p class="eyebrow">Page Content</p><h2>Edit website text</h2></div>
-        <span>01</span>
-      </div>
+      <div class="admin-panel-head"><div><p class="eyebrow">Page Content</p><h2>Edit website text</h2></div><span>01</span></div>
       <form method="post" action="/admin/content" class="admin-editor-form">
         <div class="editor-grid">
-          <details open>
-            <summary>Homepage</summary>
+          <details open><summary>Homepage</summary>
             <label>Small Label<input name="hero_eyebrow" value="<%= content.hero_eyebrow %>"></label>
             <label>Main Headline<input name="hero_title" value="<%= content.hero_title %>"></label>
             <label>Hero Description<textarea name="hero_lead" rows="4"><%= content.hero_lead %></textarea></label>
             <label>Showcase Title<input name="hero_card_title" value="<%= content.hero_card_title %>"></label>
             <label>Showcase Text<textarea name="hero_card_body" rows="4"><%= content.hero_card_body %></textarea></label>
           </details>
-
-          <details>
-            <summary>Services</summary>
+          <details><summary>Services</summary>
             <label>Section Title<input name="services_title" value="<%= content.services_title %>"></label>
             <label>Services List <small>One service per line</small><textarea name="services_list" rows="10"><%= content.services_list %></textarea></label>
           </details>
-
-          <details>
-            <summary>About Page</summary>
+          <details><summary>About Page</summary>
             <label>About Title<input name="about_title" value="<%= content.about_title %>"></label>
             <label>About Main Text<textarea name="about_body" rows="7"><%= content.about_body %></textarea></label>
             <label>About Extra Text<textarea name="about_extra" rows="5"><%= content.about_extra %></textarea></label>
           </details>
-
-          <details>
-            <summary>Contact Page</summary>
+          <details><summary>Contact Page</summary>
             <label>Contact Title<input name="contact_title" value="<%= content.contact_title %>"></label>
             <label>Contact Intro<textarea name="contact_intro" rows="5"><%= content.contact_intro %></textarea></label>
           </details>
@@ -73,26 +62,16 @@
     </section>
 
     <section id="new-project" class="admin-panel">
-      <div class="admin-panel-head">
-        <div><p class="eyebrow">Portfolio</p><h2>Add new project</h2></div>
-        <span>02</span>
-      </div>
+      <div class="admin-panel-head"><div><p class="eyebrow">Portfolio</p><h2>Add new project</h2></div><span>02</span></div>
       <form method="post" action="/admin/projects" enctype="multipart/form-data" class="project-form-pro">
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Server Rebrand Package" required></label>
-          <label>Category<select name="category" required>
-              <% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %>
-            </select></label>
+          <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %></select></label>
           <label class="span-2">Project Link<input name="project_url" placeholder="Optional link"></label>
           <label class="span-2">Description<textarea name="description" rows="5" placeholder="Explain what the project is, what was created, and what problem it solved." required></textarea></label>
           <div class="span-2 admin-upload-group">
-            <div class="upload-group-head">
-              <div><strong>Project Images</strong><small>Click the button to add another file picker. Each picker adds one image to the gallery.</small></div>
-              <button class="mini add-image-input" type="button">+ Add another image</button>
-            </div>
-            <div class="upload-stack" data-upload-stack>
-              <label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label>
-            </div>
+            <div class="upload-group-head"><div><strong>Project Images</strong><small>Click “Add another image” to choose another file picker.</small></div><button class="mini add-image-input" type="button">+ Add another image</button></div>
+            <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
           </div>
           <label class="span-2">Image URLs <small>Optional. One URL per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
           <label class="check span-2"><input type="checkbox" name="featured"> Featured on home page</label>
@@ -102,10 +81,7 @@
     </section>
 
     <section id="projects" class="admin-panel">
-      <div class="admin-panel-head">
-        <div><p class="eyebrow">Manage Work</p><h2>Edit projects</h2></div>
-        <span>03</span>
-      </div>
+      <div class="admin-panel-head"><div><p class="eyebrow">Manage Work</p><h2>Edit projects and galleries</h2></div><span>03</span></div>
       <div class="project-admin-list-pro">
         <% if (!projects.length) { %><p class="empty-state">No projects yet.</p><% } %>
         <% projects.forEach(project => { %>
@@ -117,29 +93,26 @@
             <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-form-pro compact">
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
-                <label>Category<select name="category" required>
-                  <% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %>
-                </select></label>
+                <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %></select></label>
                 <label class="span-2">Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
                 <label class="span-2">Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
                 <div class="span-2 existing-images">
-                  <strong>Current Gallery</strong>
-                  <div>
+                  <div class="upload-group-head"><div><strong>Current Gallery</strong><small>Click remove on any image you do not want, then save project.</small></div></div>
+                  <div class="existing-image-grid">
                     <% (project.images || [project.image_url]).forEach((image, index) => { %>
-                      <img src="<%= image %>" alt="Project image <%= index + 1 %>">
+                      <div class="existing-image-item">
+                        <input type="checkbox" name="keep_images" value="<%= image %>" checked hidden>
+                        <img src="<%= image %>" alt="Project image <%= index + 1 %>">
+                        <div><span>Image <%= index + 1 %></span><button class="mini danger remove-existing-image" type="button">Remove</button><button class="mini undo-existing-image" type="button">Undo</button></div>
+                      </div>
                     <% }) %>
                   </div>
                 </div>
                 <div class="span-2 admin-upload-group compact-upload-group">
-                  <div class="upload-group-head">
-                    <div><strong>Add More Images</strong><small>New uploads are added to this project gallery.</small></div>
-                    <button class="mini add-image-input" type="button">+ Add another image</button>
-                  </div>
-                  <div class="upload-stack" data-upload-stack>
-                    <label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label>
-                  </div>
+                  <div class="upload-group-head"><div><strong>Add More Images</strong><small>New uploads are added to this project gallery.</small></div><button class="mini add-image-input" type="button">+ Add another image</button></div>
+                  <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
                 </div>
-                <label class="span-2">Image URLs <small>Keep existing URLs here if you want them to stay.</small><textarea name="image_urls" rows="5"><%= (project.images || [project.image_url]).join('\n') %></textarea></label>
+                <label class="span-2">Add Image URLs <small>Optional. New URLs only, one per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
                 <label class="check span-2"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label>
               </div>
               <div class="admin-actions"><button class="btn small primary" type="submit">Save Project</button></div>
@@ -149,7 +122,6 @@
         <% }) %>
       </div>
     </section>
-
   </div>
 </section>
 <%- include('layout-end') %>

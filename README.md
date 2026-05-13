@@ -140,19 +140,3 @@ git push
 ```
 
 Render should auto-deploy, or use **Manual Deploy → Deploy latest commit**.
-
-## Animation / visual polish update
-
-This version adds a full visual motion pass using a lightweight local `/animations.js` file and Anime.js from CDN for extra page-load text animation. The site still runs on the same Render Node setup and does not require React.
-
-Added polish:
-- Scroll progress bar
-- Frosted/shrinking nav on scroll
-- Soft cursor glow and ambient grid
-- Scroll reveal animations
-- Magnetic button hover movement
-- Subtle card tilt / spotlight hover
-- Project image parallax hover
-- Cleaner contact/service card motion
-
-If the Anime.js CDN is blocked, the site still works and falls back to CSS/vanilla JavaScript animations.
