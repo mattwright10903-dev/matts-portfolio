@@ -165,7 +165,7 @@
         if (!windowEl) return;
         windowEl.hidden = false;
         if (startForm) startForm.hidden = true;
-        if (replyForm) replyForm.hidden = thread && thread.status === 'closed';
+        if (replyForm) replyForm.hidden = Boolean(thread && thread.status === 'closed');
         windowEl.innerHTML = messages.map((message) => `
           <div class="chat-bubble ${message.sender === 'admin' ? 'admin-bubble' : 'visitor-bubble'}">
             <strong>${message.sender === 'admin' ? 'Matt' : 'You'}</strong>
@@ -182,7 +182,7 @@
           if (!response.ok) return;
           const data = await response.json();
           localStorage.setItem('mw_chat_token', token);
-          setPublicState(data.thread.status === 'closed' ? 'Closed' : 'Live');
+          setPublicState(data.thread.status === 'closed' ? 'Closed' : 'Active');
           renderPublicChat(data.messages || [], data.thread);
         } catch (_error) {}
       }
