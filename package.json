@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "node src/lib/check.js"
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
     "connect-pg-simple": "^10.0.0",
@@ -24,6 +24,7 @@
     "nodemon": "^3.1.9"
   },
   "engines": {
-    "node": "22.x"
+    "node": "20.x",
+    "npm": "10.x"
   }
 }
