@@ -307,7 +307,7 @@
     /* ─────────────────────────────────────────────────────────────
        CARD SPOTLIGHT HOVER (--mx / --my CSS vars)
     ─────────────────────────────────────────────────────────────── */
-    $$('.portfolio-card-pro, .bento-card, .contact-card, .split-panel').forEach(function (card) {
+    $$('.portfolio-card-pro, .bento-card, .contact-card, .split-panel, .spotlight-card').forEach(function (card) {
       card.addEventListener('pointermove', function (e) {
         var r = card.getBoundingClientRect();
         card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
