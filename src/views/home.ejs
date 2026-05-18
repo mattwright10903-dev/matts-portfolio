@@ -29,13 +29,6 @@ const featured = projects.slice(0, 4);
       <span>Design + Development</span>
       <span>FiveM / Branding / Web</span>
     </div>
-    <p class="hero-focus-strip">
-      <span>Logo Design</span>
-      <span>Branding</span>
-      <span>FiveM Development</span>
-      <span>Discord Graphics</span>
-      <span>Website Visuals</span>
-    </p>
   </div>
 </section>
 
@@ -49,7 +42,7 @@ const featured = projects.slice(0, 4);
     <a class="text-link" href="/portfolio">View all work</a>
   </div>
 
-  <div class="bento-grid">
+  <div class="bento-grid bento-count-<%= featured.length %>">
     <% if (!featured.length) { %>
       <article class="bento-card bento-large">
         <div class="bento-copy">
@@ -60,7 +53,7 @@ const featured = projects.slice(0, 4);
     <% } %>
     <% featured.forEach((project, index) => { %>
       <article class="bento-card <%= index === 0 ? 'bento-large' : index === 3 ? 'bento-wide' : '' %>">
-        <a href="/portfolio/<%= project.id %>" class="bento-image project-image-link">
+        <a href="/portfolio/<%= project.id %>" class="bento-image">
           <img src="<%= project.image_url %>" alt="<%= project.title %>">
           <span class="project-overlay">View Case Study</span>
           <% if (project.images && project.images.length > 1) { %>
