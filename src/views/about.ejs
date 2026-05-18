@@ -15,8 +15,8 @@ const tools = ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua'
     <h1>Turning ideas into <span>visuals and systems</span> that feel professional.</h1>
     <div class="about-text-stack">
       <p><%= content.about_body %></p>
-      <p><%= content.about_extra %></p>
-      <p>I work across both creative design and FiveM server development, which means I can help with the look, the branding, and the actual in-game/community experience.</p>
+      <% if (content.about_extra) { %><p><%= content.about_extra %></p><% } %>
+      <p>I work across both creative design and FiveM server development, which means I can help with the look, the branding, and the actual in-game and community experience.</p>
     </div>
     <div class="tool-cloud">
       <% tools.forEach(tool => { %><span><%= tool %></span><% }) %>
@@ -50,5 +50,17 @@ const tools = ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua'
     <h3>One-Person Workflow</h3>
     <p>You work directly with me from concept to delivery, keeping the project simple and clear.</p>
   </article>
+</section>
+
+<section class="about-cta-section">
+  <div class="about-cta-panel">
+    <p class="eyebrow">Ready to start?</p>
+    <h2>Let's build something you're proud of.</h2>
+    <p>Design, branding, FiveM graphics, or full server development — reach out via Discord or email and we'll get started.</p>
+    <div class="hero-actions">
+      <a class="btn discord" href="/contact">Discord</a>
+      <a class="btn email" href="mailto:mattwright10903@gmail.com">Email Me</a>
+    </div>
+  </div>
 </section>
 <%- include('layout-end') %>

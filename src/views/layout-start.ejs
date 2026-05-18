@@ -3,11 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Matt Wright Portfolio</title>
+  <%
+    const pageTitles = {
+      home: 'Matt Wright — Graphic Designer & FiveM Server Developer',
+      portfolio: 'Portfolio — Matt Wright',
+      about: 'About — Matt Wright',
+      contact: 'Contact — Matt Wright',
+      admin: 'Admin — Matt Wright'
+    };
+    const pageDescriptions = {
+      home: 'Matt Wright — Freelance graphic designer and FiveM server developer. Clean branding, Discord graphics, FiveM UI, and custom server development for communities and creators.',
+      portfolio: 'Portfolio of design and FiveM development work by Matt Wright — branding, Discord graphics, website visuals, FiveM graphics, and roleplay server projects.',
+      about: 'About Matt Wright — freelance graphic designer and FiveM developer with 5+ years of experience in branding, graphics, and server development.',
+      contact: 'Contact Matt Wright for design, branding, FiveM development, Discord graphics, and website visual projects. Reach out via Discord or email.'
+    };
+    const pageTitle = pageTitles[page] || 'Matt Wright — Design & FiveM Development';
+    const pageDesc = pageDescriptions[page] || 'Matt Wright — Graphic Designer & FiveM Server Developer.';
+  %>
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDesc %>">
+  <meta name="author" content="Matt Wright">
   <link rel="canonical" href="<%= baseUrl %><%= currentPath %>" />
   <meta property="og:url" content="<%= baseUrl %><%= currentPath %>" />
-  <meta property="og:title" content="Matt Wright Portfolio" />
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:description" content="<%= pageDesc %>" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Matt Wright Portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= pageTitle %>" />
+  <meta name="twitter:description" content="<%= pageDesc %>" />
+  <meta name="theme-color" content="#030304" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="page-<%= page || 'default' %>">

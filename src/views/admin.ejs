@@ -1,58 +1,81 @@
 <%- include('layout-start') %>
-<% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other']; %>
+<% const categoryOptions = ['Logo Design', 'Branding Package', 'FiveM Graphics', 'FiveM Development', 'FiveM UI / Script Design', 'Discord Graphics', 'Website Design', 'Social Media', 'Other'];
+const publishedCount = projects.filter(p => p.published !== false).length;
+const draftCount = projects.filter(p => p.published === false).length;
+const featuredCount = projects.filter(p => p.featured).length;
+%>
 <section class="admin-shell">
   <aside class="admin-rail">
     <div>
       <p class="eyebrow">Admin</p>
       <h1>Website Studio</h1>
-      <p>Manage page text, portfolio projects, image galleries, featured work, publishing, case studies, and image order.</p>
+      <p>Manage projects, galleries, page text, publishing, and featured work.</p>
     </div>
     <nav class="admin-nav">
       <a href="#overview">Overview</a>
-      <a href="#pages">Pages</a>
-      <a href="#new-project">New Project</a>
-      <a href="#projects">Projects</a>
+      <a href="#pages">Page Content</a>
+      <a href="#new-project">Add Project</a>
+      <a href="#projects">All Projects</a>
     </nav>
-    <form method="post" action="/admin/logout"><button class="btn ghost full" type="submit">Logout</button></form>
+    <div class="admin-rail-actions">
+      <a class="btn ghost small full" href="/" target="_blank">View Live Site ↗</a>
+      <form method="post" action="/admin/logout"><button class="btn ghost small full" type="submit">Logout</button></form>
+    </div>
   </aside>
 
   <div class="admin-workspace">
-    <% if (saved) { %><div class="notice success sticky-notice">Saved successfully.</div><% } %>
+    <% if (saved) { %><div class="notice success">Saved successfully.</div><% } %>
 
-    <section id="overview" class="admin-panel admin-overview">
-      <div>
-        <p class="eyebrow">Dashboard</p>
-        <h2>Portfolio control panel</h2>
-        <p>Keep descriptions sharp, choose a main image, reorder galleries, publish/draft projects, and turn stronger work into simple case studies.</p>
-      </div>
-      <div class="admin-stats">
-        <article><span><%= projects.length %></span><p>Total Projects</p></article>
-        <article><span><%= projects.filter(project => project.featured).length %></span><p>Featured</p></article>
-        <article><span><%= projects.reduce((total, project) => total + ((project.images || []).length || 1), 0) %></span><p>Images</p></article>
+    <!-- Overview -->
+    <section id="overview" class="admin-panel">
+      <div class="admin-overview">
+        <div>
+          <p class="eyebrow">Dashboard</p>
+          <h2>Portfolio overview</h2>
+          <p>Keep descriptions sharp, manage images, publish/draft projects, and mark featured work.</p>
+          <div class="admin-quick-actions">
+            <a class="btn small primary" href="#new-project">+ Add Project</a>
+            <a class="btn small ghost" href="/portfolio" target="_blank">View Portfolio ↗</a>
+          </div>
+        </div>
+        <div class="admin-stats">
+          <article><span><%= projects.length %></span><p>Total</p></article>
+          <article><span><%= publishedCount %></span><p>Published</p></article>
+          <article><span><%= draftCount %></span><p>Draft</p></article>
+          <article><span><%= featuredCount %></span><p>Featured</p></article>
+        </div>
       </div>
     </section>
 
+    <!-- Page Content -->
     <section id="pages" class="admin-panel">
-      <div class="admin-panel-head"><div><p class="eyebrow">Page Content</p><h2>Edit website text</h2></div><span>01</span></div>
+      <div class="admin-panel-head">
+        <div><p class="eyebrow">Page Content</p><h2>Edit website text</h2></div>
+        <span>01</span>
+      </div>
       <form method="post" action="/admin/content" class="admin-editor-form">
         <div class="editor-grid">
-          <details open><summary>Homepage</summary>
+          <details open>
+            <summary>Homepage</summary>
             <label>Small Label<input name="hero_eyebrow" value="<%= content.hero_eyebrow %>"></label>
             <label>Main Headline<input name="hero_title" value="<%= content.hero_title %>"></label>
             <label>Hero Description<textarea name="hero_lead" rows="4"><%= content.hero_lead %></textarea></label>
             <label>Showcase Title<input name="hero_card_title" value="<%= content.hero_card_title %>"></label>
             <label>Showcase Text<textarea name="hero_card_body" rows="4"><%= content.hero_card_body %></textarea></label>
           </details>
-          <details><summary>Services</summary>
+          <details>
+            <summary>Services</summary>
             <label>Section Title<input name="services_title" value="<%= content.services_title %>"></label>
             <label>Services List <small>One service per line</small><textarea name="services_list" rows="10"><%= content.services_list %></textarea></label>
           </details>
-          <details><summary>About Page</summary>
+          <details>
+            <summary>About Page</summary>
             <label>About Title<input name="about_title" value="<%= content.about_title %>"></label>
             <label>About Main Text<textarea name="about_body" rows="7"><%= content.about_body %></textarea></label>
             <label>About Extra Text<textarea name="about_extra" rows="5"><%= content.about_extra %></textarea></label>
           </details>
-          <details><summary>Contact Page</summary>
+          <details>
+            <summary>Contact Page</summary>
             <label>Contact Title<input name="contact_title" value="<%= content.contact_title %>"></label>
             <label>Contact Intro<textarea name="contact_intro" rows="5"><%= content.contact_intro %></textarea></label>
           </details>
@@ -61,71 +84,131 @@
       </form>
     </section>
 
+    <!-- Add New Project -->
     <section id="new-project" class="admin-panel">
-      <div class="admin-panel-head"><div><p class="eyebrow">Portfolio</p><h2>Add new project</h2></div><span>02</span></div>
+      <div class="admin-panel-head">
+        <div><p class="eyebrow">Portfolio</p><h2>Add new project</h2></div>
+        <span>02</span>
+      </div>
       <form method="post" action="/admin/projects" enctype="multipart/form-data" class="project-form-pro">
         <div class="field-grid">
           <label>Project Title<input name="title" placeholder="Example: Server Rebrand Package" required></label>
-          <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %></select></label>
-          <label>Project Link<input name="project_url" placeholder="Optional link"></label>
+          <label>Category
+            <select name="category" required>
+              <% categoryOptions.forEach(option => { %><option value="<%= option %>"><%= option %></option><% }) %>
+            </select>
+          </label>
+          <label>Project Link<input name="project_url" placeholder="Optional external link"></label>
           <label>Sort Order<input name="sort_order" type="number" value="0" placeholder="0"></label>
-          <label class="span-2">Short Description<textarea name="description" rows="4" placeholder="Short card description shown on portfolio grids." required></textarea></label>
-          <label class="span-2">Tools Used <small>Example: Photoshop, Figma, Lua, QBCore</small><input name="tools" placeholder="Photoshop, Figma, Lua, QBCore"></label>
+          <label class="span-2">Short Description<textarea name="description" rows="4" placeholder="Short description shown on portfolio and case study pages." required></textarea></label>
+          <label class="span-2">Tools Used <small>e.g. Photoshop, Figma, Lua, QBCore</small><input name="tools" placeholder="Photoshop, Figma, Lua, QBCore"></label>
           <label class="span-2">Project Goal<textarea name="goal" rows="3" placeholder="What was the goal of this project?"></textarea></label>
           <label class="span-2">Final Result<textarea name="result" rows="3" placeholder="What was delivered or improved?"></textarea></label>
           <div class="span-2 admin-upload-group">
-            <div class="upload-group-head"><div><strong>Project Images</strong><small>Click “Add another image” to choose another file picker.</small></div><button class="mini add-image-input" type="button">+ Add another image</button></div>
-            <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
+            <div class="upload-group-head">
+              <div><strong>Project Images</strong><small>Add image files below. Click "+ Add another image" for additional uploads.</small></div>
+              <button class="mini add-image-input" type="button">+ Add another image</button>
+            </div>
+            <div class="upload-stack" data-upload-stack>
+              <label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label>
+            </div>
           </div>
-          <label class="span-2">Image URLs <small>Optional. One URL per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
-          <div class="check-row span-2"><label class="check"><input type="checkbox" name="featured"> Featured on home page</label><label class="check"><input type="checkbox" name="published" checked> Published</label></div>
+          <label class="span-2">Image URLs <small>Optional. One URL per line.</small><textarea name="image_urls" rows="3" placeholder="https://..."></textarea></label>
+          <div class="check-row span-2">
+            <label class="check"><input type="checkbox" name="featured"> Featured on homepage</label>
+            <label class="check"><input type="checkbox" name="published" checked> Published</label>
+          </div>
         </div>
         <button class="btn primary" type="submit">Add Project</button>
       </form>
     </section>
 
+    <!-- Manage Projects -->
     <section id="projects" class="admin-panel">
-      <div class="admin-panel-head"><div><p class="eyebrow">Manage Work</p><h2>Edit projects and galleries</h2></div><span>03</span></div>
+      <div class="admin-panel-head">
+        <div><p class="eyebrow">Manage Work</p><h2>Edit projects and galleries</h2></div>
+        <span>03</span>
+      </div>
       <div class="project-admin-list-pro">
-        <% if (!projects.length) { %><p class="empty-state">No projects yet.</p><% } %>
+        <% if (!projects.length) { %><p class="empty-state">No projects yet. Add one above.</p><% } %>
         <% projects.forEach(project => { %>
           <article class="project-editor-card">
             <div class="project-editor-preview">
               <img src="<%= project.image_url %>" alt="<%= project.title %>">
-              <div><strong><%= project.title %></strong><span><%= project.category %> · <%= (project.images || []).length || 1 %> image(s)</span></div>
+              <div class="preview-info">
+                <strong><%= project.title %></strong>
+                <span class="preview-meta"><%= project.category %> &middot; <%= (project.images || []).length || 1 %> image(s)</span>
+                <div class="preview-badges">
+                  <span class="project-status-badge <%= project.published === false ? 'badge-draft' : 'badge-published' %>">
+                    <%= project.published === false ? 'Draft' : 'Published' %>
+                  </span>
+                  <% if (project.featured) { %>
+                    <span class="project-status-badge badge-featured">Featured</span>
+                  <% } %>
+                </div>
+              </div>
             </div>
+
             <form method="post" action="/admin/projects/<%= project.id %>/update" enctype="multipart/form-data" class="project-form-pro compact">
               <div class="field-grid">
                 <label>Title<input name="title" value="<%= project.title %>" required></label>
-                <label>Category<select name="category" required><% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %></select></label>
+                <label>Category
+                  <select name="category" required>
+                    <% categoryOptions.forEach(option => { %><option value="<%= option %>" <%= project.category === option ? 'selected' : '' %>><%= option %></option><% }) %>
+                  </select>
+                </label>
                 <label>Project Link<input name="project_url" value="<%= project.project_url || '' %>"></label>
                 <label>Sort Order<input name="sort_order" type="number" value="<%= project.sort_order || 0 %>"></label>
                 <label class="span-2">Short Description<textarea name="description" rows="4" required><%= project.description %></textarea></label>
                 <label class="span-2">Tools Used<input name="tools" value="<%= project.tools || '' %>" placeholder="Photoshop, Figma, Lua, QBCore"></label>
                 <label class="span-2">Project Goal<textarea name="goal" rows="3"><%= project.goal || '' %></textarea></label>
                 <label class="span-2">Final Result<textarea name="result" rows="3"><%= project.result || '' %></textarea></label>
+
                 <div class="span-2 existing-images">
-                  <div class="upload-group-head"><div><strong>Current Gallery</strong><small>Click remove on any image you do not want, then save project.</small></div></div>
+                  <div class="upload-group-head">
+                    <div><strong>Current Gallery</strong><small>Set main image, reorder with arrows, or remove images — then save.</small></div>
+                  </div>
                   <div class="existing-image-grid">
                     <% (project.images || [project.image_url]).forEach((image, index) => { %>
-                      <div class="existing-image-item">
+                      <div class="existing-image-item <%= index === 0 ? 'main-image' : '' %>">
                         <input type="checkbox" name="keep_images" value="<%= image %>" checked hidden>
-                        <img src="<%= image %>" alt="Project image <%= index + 1 %>">
-                        <div><span>Image <%= index + 1 %></span><button class="mini set-main-image" type="button">Main</button><button class="mini move-image-up" type="button">↑</button><button class="mini move-image-down" type="button">↓</button><button class="mini danger remove-existing-image" type="button">Remove</button><button class="mini undo-existing-image" type="button">Undo</button></div>
+                        <img src="<%= image %>" alt="Image <%= index + 1 %>">
+                        <div>
+                          <span><%= index === 0 ? 'Main image' : 'Image ' + (index + 1) %></span>
+                          <button class="mini set-main-image" type="button">Main</button>
+                          <button class="mini move-image-up" type="button">↑</button>
+                          <button class="mini move-image-down" type="button">↓</button>
+                          <button class="mini danger remove-existing-image" type="button">Remove</button>
+                          <button class="mini undo-existing-image" type="button">Undo</button>
+                        </div>
                       </div>
                     <% }) %>
                   </div>
                 </div>
+
                 <div class="span-2 admin-upload-group compact-upload-group">
-                  <div class="upload-group-head"><div><strong>Add More Images</strong><small>New uploads are added to this project gallery.</small></div><button class="mini add-image-input" type="button">+ Add another image</button></div>
-                  <div class="upload-stack" data-upload-stack><label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label></div>
+                  <div class="upload-group-head">
+                    <div><strong>Add More Images</strong><small>New uploads are added to this project gallery.</small></div>
+                    <button class="mini add-image-input" type="button">+ Add another image</button>
+                  </div>
+                  <div class="upload-stack" data-upload-stack>
+                    <label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label>
+                  </div>
                 </div>
-                <label class="span-2">Add Image URLs <small>Optional. New URLs only, one per line.</small><textarea name="image_urls" rows="4" placeholder="https://..."></textarea></label>
-                <div class="check-row span-2"><label class="check"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on home page</label><label class="check"><input type="checkbox" name="published" <%= project.published === false ? '' : 'checked' %>> Published</label></div>
+
+                <label class="span-2">Add Image URLs <small>Optional. New URLs only, one per line.</small><textarea name="image_urls" rows="3" placeholder="https://..."></textarea></label>
+
+                <div class="check-row span-2">
+                  <label class="check"><input type="checkbox" name="featured" <%= project.featured ? 'checked' : '' %>> Featured on homepage</label>
+                  <label class="check"><input type="checkbox" name="published" <%= project.published === false ? '' : 'checked' %>> Published</label>
+                </div>
               </div>
               <div class="admin-actions"><button class="btn small primary" type="submit">Save Project</button></div>
             </form>
-            <form method="post" action="/admin/projects/<%= project.id %>/delete" onsubmit="return confirm('Delete this project?')" class="delete-form"><button class="mini danger" type="submit">Delete Project</button></form>
+
+            <form method="post" action="/admin/projects/<%= project.id %>/delete" onsubmit="return confirm('Delete this project? This cannot be undone.')" class="delete-form">
+              <button class="mini danger" type="submit">Delete Project</button>
+            </form>
           </article>
         <% }) %>
       </div>

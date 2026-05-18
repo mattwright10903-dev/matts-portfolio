@@ -2,13 +2,14 @@
 <% const serviceDescriptions = {
   'Logo Design': 'Sharp logo systems for businesses, creators, servers, and digital brands.',
   'Branding Packages': 'Full visual direction — colors, type, icons, banners, and social assets.',
+  'FiveM Graphics': 'Custom loading screens, HUD overlays, NUI backgrounds, and server visual assets.',
   'Discord Graphics': 'Icons, banners, role graphics, bot branding, and community identity assets.',
   'Website Visuals': 'Landing page visuals, web graphics, and creative direction for online brands.',
   'Social Media Designs': 'Promo posts, profile assets, ad graphics, and reusable marketing visuals.',
   'FiveM Server Development': 'QBCore/QBox setup, script config, UI improvements, bug fixing, and server features.',
   'FiveM UI & Script Design': 'Modern NUI menus, management panels, and cleaner player-facing experiences.'
 };
-const designServices = ['Logo Design', 'Branding Packages', 'Discord Graphics', 'Website Visuals', 'Social Media Designs'];
+const designServices = ['Logo Design', 'Branding Packages', 'FiveM Graphics', 'Discord Graphics', 'Website Visuals', 'Social Media Designs'];
 const developmentServices = ['FiveM Server Development', 'FiveM UI & Script Design'];
 const featured = projects.slice(0, 4);
 %>
@@ -17,8 +18,8 @@ const featured = projects.slice(0, 4);
 <section class="hero hero-panel">
   <div class="hero-copy reveal-up">
     <p class="eyebrow">Matt Wright</p>
-    <h1 class="hero-title">Graphic Designer &amp; FiveM Developer</h1>
-    <p class="hero-lead">Clean branding, FiveM graphics, Discord visuals, website assets, and custom FiveM development for communities, creators, and businesses.</p>
+    <h1 class="hero-title">Graphic Designer &amp; FiveM Server Developer</h1>
+    <p class="hero-lead">I create clean branding, FiveM graphics, Discord visuals, website assets, and custom FiveM development for communities, creators, and businesses.</p>
     <div class="hero-actions">
       <a class="btn primary" href="/portfolio">View Portfolio</a>
       <a class="btn ghost" href="/contact">Contact Me</a>
@@ -118,26 +119,10 @@ const featured = projects.slice(0, 4);
           </article>
         <% }) %>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- FiveM Development Spotlight -->
-<section class="section-block fivem-spotlight">
-  <div class="spotlight-panel reveal-up">
-    <p class="eyebrow">FiveM Development</p>
-    <h2>Custom server setup, UI polish, and ongoing development support for roleplay communities.</h2>
-    <p class="section-copy">QBCore/QBox setup, script configuration, bug fixing, server optimization, NUI panels, and database support — everything a serious FiveM community needs to run smoothly.</p>
-    <a class="btn ghost" href="/contact">Start a FiveM Project</a>
-    <div class="fivem-tags">
-      <span>QBCore</span>
-      <span>QBox</span>
-      <span>Lua</span>
-      <span>NUI</span>
-      <span>UI Polish</span>
-      <span>Server Fixes</span>
-      <span>Database Setup</span>
-      <span>Optimization</span>
+      <div class="fivem-mini-panel">
+        <p class="eyebrow">FiveM Focus</p>
+        <p>QBCore &middot; QBox &middot; Lua &middot; NUI &middot; Server Fixes &middot; Database Setup &middot; Optimization</p>
+      </div>
     </div>
   </div>
 </section>
@@ -148,7 +133,7 @@ const featured = projects.slice(0, 4);
     <p class="eyebrow">About</p>
     <h2>Freelance designer and developer focused on clean visuals and practical FiveM systems.</h2>
     <p class="section-copy">My work blends graphic design with server development so communities can look better and run smoother.</p>
-    <a class="btn ghost" href="/about">Learn more</a>
+    <a class="btn ghost" href="/about">About Me</a>
   </div>
 </section>
 
