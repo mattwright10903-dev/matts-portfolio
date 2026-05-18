@@ -19,7 +19,7 @@
 
 <!-- Featured Work -->
 <section class="section-block">
-  <div class="section-heading">
+  <div class="section-heading scroll-reveal">
     <div>
       <p class="eyebrow">Featured Work</p>
       <h2>Selected projects</h2>
@@ -37,7 +37,7 @@
       </article>
     <% } %>
     <% featured.forEach((project, index) => { %>
-      <article class="bento-card <%= index === 0 ? 'bento-large' : index === 3 ? 'bento-wide' : '' %>">
+      <article class="bento-card stagger-item <%= index === 0 ? 'bento-large' : index === 3 ? 'bento-wide' : '' %>">
         <a href="/portfolio/<%= project.id %>" class="bento-image">
           <img src="<%= project.image_url %>" alt="<%= project.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>">
           <span class="project-overlay">View Case Study</span>
@@ -55,8 +55,8 @@
 </section>
 
 <!-- Services -->
-<section class="section-block reveal" id="services">
-  <div class="section-heading">
+<section class="section-block" id="services">
+  <div class="section-heading scroll-reveal">
     <div>
       <p class="eyebrow">Services</p>
       <h2>Design and development</h2>
@@ -69,42 +69,42 @@
     <div class="service-group">
       <p class="eyebrow">Design</p>
       <div class="service-list">
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>01</span>
           <div>
             <h3>Logo Design</h3>
             <p>Clean, professional logos for brands, creators, communities, and servers.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>02</span>
           <div>
             <h3>Branding Packages</h3>
             <p>Full visual systems — colors, banners, icons, and complete style direction.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>03</span>
           <div>
             <h3>FiveM Graphics</h3>
             <p>Loading screens, HUD overlays, NUI backgrounds, and server visual assets.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>04</span>
           <div>
             <h3>Discord Graphics</h3>
             <p>Icons, banners, role visuals, announcement graphics, and community assets.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>05</span>
           <div>
             <h3>Website Visuals</h3>
             <p>Landing page visuals, web graphics, and creative direction for online brands.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>06</span>
           <div>
             <h3>Social Media Designs</h3>
@@ -118,14 +118,14 @@
     <div class="service-group">
       <p class="eyebrow">Development</p>
       <div class="service-list">
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>01</span>
           <div>
             <h3>FiveM Server Development</h3>
             <p>QBCore/QBox setup, script configuration, bug fixing, server polish, and optimization.</p>
           </div>
         </article>
-        <article class="service-card">
+        <article class="service-card stagger-item">
           <span>02</span>
           <div>
             <h3>FiveM UI &amp; Script Design</h3>
@@ -142,21 +142,21 @@
 </section>
 
 <!-- About + Contact -->
-<section class="about-contact-section reveal">
-  <div class="section-heading">
+<section class="about-contact-section">
+  <div class="section-heading scroll-reveal">
     <div>
       <p class="eyebrow">About &amp; Contact</p>
       <h2>Let's work together</h2>
     </div>
   </div>
   <div class="about-contact-grid">
-    <div class="split-panel about-panel">
+    <div class="split-panel about-panel stagger-item">
       <p class="eyebrow">About</p>
       <h2>Freelance designer and developer focused on clean visuals and practical FiveM systems.</h2>
       <p>I'm a freelance designer and developer focused on clean visuals, bold branding, and practical FiveM systems. My work blends graphic design with server development so communities can look better and run smoother.</p>
       <div><a class="btn ghost" href="/about">About Me</a></div>
     </div>
-    <div class="split-panel contact-panel">
+    <div class="split-panel contact-panel stagger-item">
       <p class="eyebrow">Have work you want to show better?</p>
       <h2>Let's build something clean, sharp, and professional.</h2>
       <div class="split-panel-actions">
