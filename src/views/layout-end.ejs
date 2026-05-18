@@ -22,216 +22,334 @@
 
   <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js"></script>
   <script>
-    const $ = (s, scope = document) => scope.querySelector(s);
-    const $$ = (s, scope = document) => Array.from(scope.querySelectorAll(s));
-    const anime = window.anime || null;
-    const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  (function () {
+    'use strict';
 
-    // Site loader — dismiss via DOMContentLoaded (fast) + hard backup timer
-    function dismissLoader() {
-      const loader = $('[data-site-loader]');
+    var $ = function (s, scope) { return (scope || document).querySelector(s); };
+    var $$ = function (s, scope) { return Array.from((scope || document).querySelectorAll(s)); };
+    var animeJS = window.anime || null;
+    var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ─────────────────────────────────────────────────────────────
+       LOADER — sessionStorage-gated, homepage-only intro
+    ─────────────────────────────────────────────────────────────── */
+    var INTRO_KEY = 'mw_intro';
+    var isHomePage = document.body.classList.contains('page-home');
+
+    function dismissLoader(instant) {
+      var loader = $('[data-site-loader]');
       if (!loader) return;
+      if (instant) {
+        loader.remove();
+        return;
+      }
       loader.classList.add('is-hidden');
-      setTimeout(() => loader.remove(), 600);
+      setTimeout(function () { if (loader.parentNode) loader.remove(); }, 500);
     }
-    // Primary: fire as soon as DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => setTimeout(dismissLoader, 600));
-    } else {
-      setTimeout(dismissLoader, 600);
-    }
-    // Backup: force removal at 1400ms no matter what
-    setTimeout(dismissLoader, 1400);
 
-    // Scroll progress + nav state
-    const progress = $('.scroll-progress');
-    const nav = $('[data-nav]');
+    // html.intro-skip means CSS already hid it — just remove the DOM node cleanly
+    if (document.documentElement.classList.contains('intro-skip')) {
+      dismissLoader(true);
+    } else {
+      // Homepage first visit: show intro, then dismiss after ~1050ms
+      var introDuration = 1050;
+
+      // Primary dismissal on DOMContentLoaded
+      function scheduleDismissal() {
+        setTimeout(function () {
+          try { sessionStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
+          dismissLoader(false);
+        }, introDuration);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scheduleDismissal);
+      } else {
+        scheduleDismissal();
+      }
+
+      // Hard backup — fires regardless, 600ms after introDuration
+      setTimeout(function () {
+        try { sessionStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
+        dismissLoader(false);
+      }, introDuration + 600);
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       PAGE TRANSITION — dark overlay on departure only
+    ─────────────────────────────────────────────────────────────── */
+    var transitionOverlay = $('.page-transition-overlay');
+
+    function isInternalLink(el) {
+      var href = el.getAttribute('href');
+      if (!href) return false;
+      // Skip: external URLs, mailto, tel, discord, hash-only, new tab
+      if (/^(https?:|mailto:|tel:|discord:)/i.test(href)) return false;
+      if (href.startsWith('#')) return false;
+      if (el.target === '_blank') return false;
+      // Skip: admin action forms, delete buttons, file inputs
+      if (el.closest('form[method="post"]')) return false;
+      if (el.classList.contains('no-transition')) return false;
+      return true;
+    }
+
+    if (transitionOverlay && !noMotion) {
+      document.addEventListener('click', function (e) {
+        var link = e.target.closest('a[href]');
+        if (!link || !isInternalLink(link)) return;
+        // Already navigating away — skip
+        if (transitionOverlay.classList.contains('is-active')) return;
+        e.preventDefault();
+        var dest = link.href;
+        transitionOverlay.classList.add('is-active');
+        setTimeout(function () {
+          window.location.href = dest;
+        }, 310);
+      }, true);
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       SCROLL PROGRESS + NAV SCROLL STATE
+    ─────────────────────────────────────────────────────────────── */
+    var progress = $('.scroll-progress');
+    var nav = $('[data-nav]');
+
     function onScroll() {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      if (progress) progress.style.transform = `scaleX(${Math.min(1, window.scrollY / max)})`;
+      var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      if (progress) progress.style.transform = 'scaleX(' + Math.min(1, window.scrollY / max) + ')';
       if (nav) nav.classList.toggle('scrolled', window.scrollY > 22);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
-    // Cursor glow
-    const cursorGlow = $('.cursor-glow');
+    /* ─────────────────────────────────────────────────────────────
+       CURSOR GLOW
+    ─────────────────────────────────────────────────────────────── */
+    var cursorGlow = $('.cursor-glow');
     if (cursorGlow && !noMotion) {
-      window.addEventListener('pointermove', (e) => {
-        cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      window.addEventListener('pointermove', function (e) {
+        cursorGlow.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
       }, { passive: true });
     }
 
-    // Hero title char animation
+    /* ─────────────────────────────────────────────────────────────
+       HERO TITLE CHARACTER ANIMATION
+    ─────────────────────────────────────────────────────────────── */
     if (!noMotion) {
-      $$('.hero-title').forEach((el) => {
+      $$('.hero-title').forEach(function (el) {
         if (el.dataset.split) return;
         el.dataset.split = '1';
-        const text = el.textContent.trim();
-        el.innerHTML = text.split(' ').map((w) =>
-          `<span style="display:inline-block;white-space:nowrap">${
-            w.split('').map((c) => `<span style="display:inline-block">${c}</span>`).join('')
-          }</span>`
-        ).join(' ');
-        const chars = $$('span > span', el);
-        if (anime && typeof anime === 'function') {
-          anime({ targets: chars, opacity: [0,1], translateY: [20,0], delay: (_,i) => 14*i, duration: 800, easing: 'easeOutExpo' });
+        var text = el.textContent.trim();
+        el.innerHTML = text.split(' ').map(function (w) {
+          return '<span style="display:inline-block;white-space:nowrap">' +
+            w.split('').map(function (c) {
+              return '<span style="display:inline-block">' + c + '</span>';
+            }).join('') + '</span>';
+        }).join(' ');
+        var chars = $$('span > span', el);
+        if (animeJS && typeof animeJS === 'function') {
+          animeJS({ targets: chars, opacity: [0, 1], translateY: [18, 0], delay: function (_, i) { return 12 * i; }, duration: 750, easing: 'easeOutExpo' });
         }
       });
     }
 
-    // JS-enhanced scroll reveal
-    if (!noMotion) {
-      document.body.classList.add('js-loaded');
-      const ro = new IntersectionObserver((entries) => {
-        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); ro.unobserve(e.target); } });
-      }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
-      $$('.scroll-reveal').forEach((el) => ro.observe(el));
+    /* ─────────────────────────────────────────────────────────────
+       SCROLL REVEAL — IntersectionObserver
+       Safe: js-ready body class enables hiding, so no JS = always visible
+    ─────────────────────────────────────────────────────────────── */
+    if (!noMotion && 'IntersectionObserver' in window) {
+      document.body.classList.add('js-ready');
+      var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          revealObs.unobserve(entry.target);
+        });
+      }, { threshold: 0.07, rootMargin: '0px 0px -20px 0px' });
+
+      $$('.reveal, .scroll-reveal').forEach(function (el) { revealObs.observe(el); });
     }
 
-    // Gallery thumbnail switching
-    $$('[data-gallery]').forEach((gallery) => {
-      const main = $('.gallery-main', gallery);
-      $$('.gallery-thumb', gallery).forEach((thumb) => {
-        thumb.addEventListener('click', () => {
-          const src = thumb.getAttribute('data-image');
+    /* ─────────────────────────────────────────────────────────────
+       GALLERY THUMBNAIL SWITCHING
+    ─────────────────────────────────────────────────────────────── */
+    $$('[data-gallery]').forEach(function (gallery) {
+      var main = $('.gallery-main', gallery);
+      $$('.gallery-thumb', gallery).forEach(function (thumb) {
+        thumb.addEventListener('click', function () {
+          var src = thumb.getAttribute('data-image');
           if (!src || !main || main.src === src) return;
-          if (anime && typeof anime === 'function') {
-            anime({ targets: main, opacity: [1,0], duration: 140, easing: 'easeOutQuad',
-              complete: () => { main.src = src; anime({ targets: main, opacity: [0,1], duration: 320, easing: 'easeOutCubic' }); }
+          if (animeJS && typeof animeJS === 'function') {
+            animeJS({ targets: main, opacity: [1, 0], duration: 130, easing: 'easeOutQuad',
+              complete: function () {
+                main.src = src;
+                animeJS({ targets: main, opacity: [0, 1], duration: 300, easing: 'easeOutCubic' });
+              }
             });
-          } else { main.src = src; }
-          $$('.gallery-thumb', gallery).forEach((b) => b.classList.remove('active'));
+          } else {
+            main.src = src;
+          }
+          $$('.gallery-thumb', gallery).forEach(function (b) { b.classList.remove('active'); });
           thumb.classList.add('active');
         });
       });
     });
 
-    // Portfolio filter
-    $$('[data-filter-bar]').forEach((bar) => {
-      const grid = $('[data-project-grid]');
+    /* ─────────────────────────────────────────────────────────────
+       PORTFOLIO CATEGORY FILTER
+    ─────────────────────────────────────────────────────────────── */
+    $$('[data-filter-bar]').forEach(function (bar) {
+      var grid = $('[data-project-grid]');
       if (!grid) return;
-      $$('[data-filter]', bar).forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const f = btn.getAttribute('data-filter');
-          $$('[data-filter]', bar).forEach((b) => b.classList.remove('active'));
+      $$('[data-filter]', bar).forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var f = btn.getAttribute('data-filter');
+          $$('[data-filter]', bar).forEach(function (b) { b.classList.remove('active'); });
           btn.classList.add('active');
-          $$('[data-category]', grid).forEach((card) => {
-            const match = f === 'all' || card.getAttribute('data-category') === f;
+          $$('[data-category]', grid).forEach(function (card) {
+            var match = f === 'all' || card.getAttribute('data-category') === f;
             card.classList.toggle('hidden', !match);
           });
         });
       });
     });
 
-    // Admin: image upload preview
+    /* ─────────────────────────────────────────────────────────────
+       ADMIN — IMAGE UPLOAD PREVIEW
+    ─────────────────────────────────────────────────────────────── */
     function attachPreview(input) {
-      input.addEventListener('change', () => {
-        const file = input.files && input.files[0];
-        const slot = input.closest('.upload-slot');
+      input.addEventListener('change', function () {
+        var file = input.files && input.files[0];
+        var slot = input.closest('.upload-slot');
         if (!file || !slot) return;
-        let preview = $('.upload-preview', slot);
-        if (!preview) { preview = document.createElement('img'); preview.className = 'upload-preview'; slot.appendChild(preview); }
+        var preview = $('.upload-preview', slot);
+        if (!preview) {
+          preview = document.createElement('img');
+          preview.className = 'upload-preview';
+          slot.appendChild(preview);
+        }
         preview.src = URL.createObjectURL(file);
       });
     }
     $$('input[type="file"][name="image_files"]').forEach(attachPreview);
 
-    $$('.add-image-input').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const group = btn.closest('.admin-upload-group');
-        const stack = group ? $('[data-upload-stack]', group) : null;
+    $$('.add-image-input').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var group = btn.closest('.admin-upload-group');
+        var stack = group ? $('[data-upload-stack]', group) : null;
         if (!stack) return;
-        const n = $$('.upload-slot', stack).length + 1;
-        const label = document.createElement('label');
+        var n = $$('.upload-slot', stack).length + 1;
+        var label = document.createElement('label');
         label.className = 'upload-slot';
-        label.innerHTML = `<span>Image ${n}</span><input type="file" name="image_files" accept="image/*"><button class="remove-upload mini" type="button">Remove</button>`;
+        label.innerHTML = '<span>Image ' + n + '</span><input type="file" name="image_files" accept="image/*"><button class="remove-upload mini" type="button">Remove</button>';
         stack.appendChild(label);
-        const inp = $('input', label);
+        var inp = $('input', label);
         if (inp) { attachPreview(inp); inp.click(); }
       });
     });
 
-    // Admin: image management (remove, undo, set main, reorder)
-    document.addEventListener('click', (e) => {
-      const ru = e.target.closest('.remove-upload');
-      if (ru) { e.preventDefault(); ru.closest('.upload-slot')?.remove(); }
+    /* ─────────────────────────────────────────────────────────────
+       ADMIN — IMAGE MANAGEMENT (remove, undo, set main, reorder)
+    ─────────────────────────────────────────────────────────────── */
+    document.addEventListener('click', function (e) {
+      var ru = e.target.closest('.remove-upload');
+      if (ru) { e.preventDefault(); ru.closest('.upload-slot') && ru.closest('.upload-slot').remove(); }
 
-      const re = e.target.closest('.remove-existing-image');
+      var re = e.target.closest('.remove-existing-image');
       if (re) {
         e.preventDefault();
-        const item = re.closest('.existing-image-item');
-        const cb = item && $('input[type="checkbox"]', item);
+        var item = re.closest('.existing-image-item');
+        var cb = item && $('input[type="checkbox"]', item);
         if (cb) cb.checked = false;
-        item?.classList.add('image-removed');
+        if (item) item.classList.add('image-removed');
       }
 
-      const ue = e.target.closest('.undo-existing-image');
+      var ue = e.target.closest('.undo-existing-image');
       if (ue) {
         e.preventDefault();
-        const item = ue.closest('.existing-image-item');
-        const cb = item && $('input[type="checkbox"]', item);
-        if (cb) cb.checked = true;
-        item?.classList.remove('image-removed');
+        var item2 = ue.closest('.existing-image-item');
+        var cb2 = item2 && $('input[type="checkbox"]', item2);
+        if (cb2) cb2.checked = true;
+        if (item2) item2.classList.remove('image-removed');
       }
 
-      const sm = e.target.closest('.set-main-image');
+      var sm = e.target.closest('.set-main-image');
       if (sm) {
         e.preventDefault();
-        const item = sm.closest('.existing-image-item');
-        const grid = item?.parentElement;
-        if (item && grid) {
-          grid.prepend(item);
-          $$('.existing-image-item', grid).forEach((row, i) => {
-            const lbl = $('span', row);
-            if (lbl) lbl.textContent = i === 0 ? 'Main image' : `Image ${i + 1}`;
+        var item3 = sm.closest('.existing-image-item');
+        var grid = item3 && item3.parentElement;
+        if (item3 && grid) {
+          grid.prepend(item3);
+          $$('.existing-image-item', grid).forEach(function (row, i) {
+            var lbl = $('span', row);
+            if (lbl) lbl.textContent = i === 0 ? 'Main image' : 'Image ' + (i + 1);
             row.classList.toggle('main-image', i === 0);
           });
         }
       }
 
-      const mu = e.target.closest('.move-image-up');
-      if (mu) { e.preventDefault(); const item = mu.closest('.existing-image-item'); if (item?.previousElementSibling) item.parentElement.insertBefore(item, item.previousElementSibling); }
+      var mu = e.target.closest('.move-image-up');
+      if (mu) {
+        e.preventDefault();
+        var item4 = mu.closest('.existing-image-item');
+        if (item4 && item4.previousElementSibling) item4.parentElement.insertBefore(item4, item4.previousElementSibling);
+      }
 
-      const md = e.target.closest('.move-image-down');
-      if (md) { e.preventDefault(); const item = md.closest('.existing-image-item'); if (item?.nextElementSibling) item.parentElement.insertBefore(item.nextElementSibling, item); }
+      var md = e.target.closest('.move-image-down');
+      if (md) {
+        e.preventDefault();
+        var item5 = md.closest('.existing-image-item');
+        if (item5 && item5.nextElementSibling) item5.parentElement.insertBefore(item5.nextElementSibling, item5);
+      }
     });
 
-    // Spotlight mouse position on cards
-    $$('.portfolio-card-pro, .bento-card, .contact-channel-card, .split-panel').forEach((card) => {
-      card.addEventListener('pointermove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-        card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+    /* ─────────────────────────────────────────────────────────────
+       CARD SPOTLIGHT HOVER (--mx / --my CSS vars)
+    ─────────────────────────────────────────────────────────────── */
+    $$('.portfolio-card-pro, .bento-card, .contact-channel-card, .split-panel').forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+        card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
       });
     });
 
-    // Subtle star field
+    /* ─────────────────────────────────────────────────────────────
+       SUBTLE STAR FIELD
+    ─────────────────────────────────────────────────────────────── */
     if (!noMotion) {
-      const canvas = document.createElement('canvas');
-      canvas.id = 'star-canvas';
-      document.body.prepend(canvas);
-      const ctx = canvas.getContext('2d');
-      let W = window.innerWidth, H = window.innerHeight;
-      canvas.width = W; canvas.height = H;
-      window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }, { passive: true });
-      const stars = Array.from({ length: 50 }, () => ({
-        x: Math.random(), y: Math.random(),
-        r: Math.random() * 1.1 + 0.2,
-        o: Math.random() * 0.18 + 0.04,
-        d: (Math.random() - 0.5) * 0.004
-      }));
-      const draw = () => {
-        ctx.clearRect(0, 0, W, H);
-        for (const s of stars) {
-          s.o += s.d; if (s.o < 0.04 || s.o > 0.24) s.d *= -1;
-          ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${s.o.toFixed(3)})`; ctx.fill();
-        }
-        requestAnimationFrame(draw);
-      };
-      draw();
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.id = 'star-canvas';
+        document.body.prepend(canvas);
+        var ctx = canvas.getContext('2d');
+        var W = window.innerWidth, H = window.innerHeight;
+        canvas.width = W; canvas.height = H;
+        window.addEventListener('resize', function () {
+          W = canvas.width = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+        }, { passive: true });
+        var stars = Array.from({ length: 48 }, function () {
+          return { x: Math.random(), y: Math.random(), r: Math.random() * 1.1 + 0.2, o: Math.random() * 0.18 + 0.04, d: (Math.random() - 0.5) * 0.004 };
+        });
+        var drawStars = function () {
+          ctx.clearRect(0, 0, W, H);
+          for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            s.o += s.d;
+            if (s.o < 0.04 || s.o > 0.24) s.d *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,' + s.o.toFixed(3) + ')';
+            ctx.fill();
+          }
+          requestAnimationFrame(drawStars);
+        };
+        drawStars();
+      } catch (e) { /* canvas not supported */ }
     }
+
+  })();
   </script>
 </body>
 </html>

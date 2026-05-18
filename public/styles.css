@@ -48,23 +48,87 @@ input, textarea, select, button { font-family: inherit; }
 main { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
 
 /* ── Site loader ── */
-/* CSS hard timeout: loader auto-fades at 1.8s and is gone by 2.4s even if JS fails */
-@keyframes loaderFade {
-  0%, 70% { opacity: 1; visibility: visible; pointer-events: auto; }
-  100%     { opacity: 0; visibility: hidden; pointer-events: none; }
-}
+@keyframes loaderIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes loaderBarGrow { from { width: 0; } to { width: 100%; } }
+/* CSS fallback: if JS never runs, loader auto-hides after 2.6s */
+@keyframes loaderDismiss { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+
 .site-loader {
   position: fixed; inset: 0; z-index: 9999;
-  display: grid; place-items: center;
+  display: grid; place-items: center; overflow: hidden;
   background: #050505;
-  animation: loaderFade 2.4s ease forwards;
-  transition: opacity .5s ease, visibility .5s ease;
+  transition: opacity .42s ease, visibility .42s ease;
+  animation: loaderDismiss .4s ease 2.6s forwards;
+}
+.site-loader::before {
+  content: ""; position: absolute;
+  width: 480px; height: 480px; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,36,69,.14), transparent 65%);
+  filter: blur(48px); pointer-events: none;
 }
 .site-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; animation: none; }
-.site-loader div { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
-.site-loader strong { font-size: clamp(2rem,6vw,4.5rem); letter-spacing: -.06em; color: #fff; }
-.site-loader strong::after { content: ''; display: inline-block; width: .12em; height: .12em; border-radius: 50%; background: var(--red); margin-left: .06em; }
-.site-loader span { color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .24em; font-size: .7rem; font-weight: 800; }
+
+/* Instant hide when intro should be skipped (class set by inline <head> script) */
+html.intro-skip .site-loader { display: none !important; animation: none !important; }
+
+.loader-inner {
+  display: flex; flex-direction: column; align-items: center; gap: .7rem;
+  position: relative; z-index: 1;
+}
+.loader-wordmark {
+  font-size: clamp(2.2rem,6vw,4.8rem); letter-spacing: -.065em;
+  font-weight: 900; color: #fff;
+  animation: loaderIn .55s cubic-bezier(.16,1,.3,1) both;
+}
+.loader-wordmark .loader-dot { color: var(--red); }
+.loader-sub {
+  color: rgba(255,255,255,.46); text-transform: uppercase;
+  letter-spacing: .28em; font-size: .68rem; font-weight: 800;
+  animation: loaderIn .55s .1s cubic-bezier(.16,1,.3,1) both;
+}
+.loader-bar {
+  width: 100px; height: 2px;
+  background: rgba(255,255,255,.1); border-radius: 999px;
+  margin-top: .3rem; overflow: hidden;
+  animation: loaderIn .55s .18s cubic-bezier(.16,1,.3,1) both;
+}
+.loader-bar-fill {
+  height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--red), rgba(255,255,255,.9));
+  animation: loaderBarGrow 1s .2s cubic-bezier(.16,1,.3,1) forwards;
+  width: 0;
+}
+
+/* ── Page transition overlay (departure only — never blocks arrival) ── */
+.page-transition-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: #030304;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 300ms ease, visibility 300ms ease;
+}
+.page-transition-overlay.is-active { opacity: 1; visibility: visible; pointer-events: all; }
+
+/* ── Section scroll reveal ── */
+/* Default: always visible. JS adds js-ready to body to enable hiding before reveal. */
+.reveal { transition: opacity .58s cubic-bezier(.16,1,.3,1), transform .58s cubic-bezier(.16,1,.3,1); }
+body.js-ready .reveal { opacity: 0; transform: translateY(16px); }
+body.js-ready .reveal.is-visible { opacity: 1; transform: none; }
+body.js-ready .reveal-delay-1 { transition-delay: .08s; }
+body.js-ready .reveal-delay-2 { transition-delay: .16s; }
+body.js-ready .reveal-delay-3 { transition-delay: .24s; }
+
+/* Card entrance animation — pure CSS, no JS dependency */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .bento-grid .bento-card:nth-child(1) { animation: fadeUp .6s .06s cubic-bezier(.16,1,.3,1) both; }
+  .bento-grid .bento-card:nth-child(2) { animation: fadeUp .6s .14s cubic-bezier(.16,1,.3,1) both; }
+  .bento-grid .bento-card:nth-child(3) { animation: fadeUp .6s .22s cubic-bezier(.16,1,.3,1) both; }
+  .bento-grid .bento-card:nth-child(4) { animation: fadeUp .6s .30s cubic-bezier(.16,1,.3,1) both; }
+}
+
+/* ── Scroll progress + cursor ── */
 
 /* ── Scroll progress + cursor ── */
 .scroll-progress {
@@ -483,17 +547,11 @@ details label:last-child { margin-bottom: 14px; }
 
 /* ── Reveal animation — CSS only, no JS required ── */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+/* Legacy aliases — kept for any templates still using these class names */
 .reveal-up { animation: fadeUp .65s var(--ease) both; }
-.delay-1 { animation-delay: .1s; }
-.delay-2 { animation-delay: .2s; }
-
-/* JS-enhanced scroll reveal — safe: elements start visible, JS makes them prettier */
-.scroll-reveal { opacity: 1; transform: none; transition: opacity .55s var(--ease), transform .55s var(--ease); }
+.scroll-reveal { transition: opacity .55s var(--ease), transform .55s var(--ease); }
 .js-loaded .scroll-reveal { opacity: 0; transform: translateY(16px); }
 .js-loaded .scroll-reveal.is-visible { opacity: 1; transform: none; }
-.js-loaded .scroll-reveal:nth-child(2) { transition-delay: .08s; }
-.js-loaded .scroll-reveal:nth-child(3) { transition-delay: .16s; }
-.js-loaded .scroll-reveal:nth-child(4) { transition-delay: .24s; }
 
 /* ── Media queries ── */
 @media (max-width: 980px) {

@@ -29,12 +29,37 @@
   <meta property="og:description" content="<%= pageDesc %>" />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#030304" />
+
+  <%# Inline script runs BEFORE CSS loads — determines loader state synchronously to prevent flash %>
+  <script>
+    (function () {
+      try {
+        var isHome = '<%= page %>' === 'home';
+        var played = sessionStorage.getItem('mw_intro') === '1';
+        if (!isHome || played) document.documentElement.classList.add('intro-skip');
+      } catch (e) {
+        // sessionStorage blocked (private mode edge case) — skip intro to be safe
+        document.documentElement.classList.add('intro-skip');
+      }
+    })();
+  </script>
+
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="page-<%= page || 'default' %>">
-  <div class="site-loader" data-site-loader>
-    <div><strong>Matt Wright</strong><span>Design + FiveM Development</span></div>
+
+  <%# Loader: only homepage first-visit (CSS hides it instantly otherwise via html.intro-skip) %>
+  <div class="site-loader" data-site-loader aria-hidden="true">
+    <div class="loader-inner">
+      <div class="loader-wordmark">Matt Wright<span class="loader-dot">.</span></div>
+      <div class="loader-sub">Design + FiveM Development</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
   </div>
+
+  <%# Page departure overlay — fades dark when navigating away, never blocks arrival %>
+  <div class="page-transition-overlay" aria-hidden="true"></div>
+
   <div class="scroll-progress" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
 
