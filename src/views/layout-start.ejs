@@ -65,7 +65,7 @@
 
   <nav class="nav" data-nav>
     <a class="brand" href="/">Matt Wright</a>
-    <div class="nav-links">
+    <div class="nav-links" data-nav-links>
       <a href="/" class="<%= page === 'home' ? 'active' : '' %>">Home</a>
       <a href="/portfolio" class="<%= page === 'portfolio' ? 'active' : '' %>">Portfolio</a>
       <a href="/about" class="<%= page === 'about' ? 'active' : '' %>">About</a>
@@ -79,6 +79,9 @@
         <button type="submit">Logout</button>
       </form>
     <% } %>
+    <button class="nav-hamburger" data-hamburger type="button" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <main>
