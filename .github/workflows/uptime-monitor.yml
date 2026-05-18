@@ -1,0 +1,74 @@
+# External uptime monitor for mattwright.online
+#
+# Runs every 5 minutes and pings /health.
+# If the site is unreachable or returns a non-200 status, sends a Discord alert.
+#
+# Required GitHub secret (Settings → Secrets → Actions):
+#   STATUS_LOG_WEBHOOK_URL — your Discord webhook URL
+#
+# Note: this workflow can only alert when the site is DOWN.
+# It cannot send a "back online" embed from inside the app because the app itself is offline.
+# Use this as the external monitor that fills that gap.
+
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes
+  workflow_dispatch:          # also allow manual trigger from GitHub Actions UI
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Ping health endpoint
+        id: ping
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+            "https://mattwright.online/health" 2>/dev/null || echo "000")
+          echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
+          echo "Health check returned HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send offline alert to Discord
+        if: steps.ping.outputs.healthy != 'true'
+        env:
+          WEBHOOK_URL: ${{ secrets.STATUS_LOG_WEBHOOK_URL }}
+          HTTP_CODE:   ${{ steps.ping.outputs.http_code }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "STATUS_LOG_WEBHOOK_URL secret not set — skipping Discord alert"
+            exit 0
+          fi
+
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          CHECKED_AT=$(date -u)
+          STATUS_DISPLAY="${HTTP_CODE:-timeout / no response}"
+
+          PAYLOAD=$(printf '{
+            "embeds": [{
+              "title": "⚠️ Website Offline",
+              "color": 15158332,
+              "description": "The health check endpoint did not return HTTP 200.",
+              "fields": [
+                {"name": "Site",        "value": "Matt Wright Portfolio",        "inline": true},
+                {"name": "URL",         "value": "https://mattwright.online",    "inline": true},
+                {"name": "HTTP Status", "value": "%s",                           "inline": true},
+                {"name": "Checked At",  "value": "%s",                           "inline": false}
+              ],
+              "footer": {"text": "Matt Wright Portfolio Monitor — GitHub Actions"},
+              "timestamp": "%s"
+            }]
+          }' "$STATUS_DISPLAY" "$CHECKED_AT" "$TIMESTAMP")
+
+          curl -s -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
+
+          echo "Offline alert sent for HTTP $HTTP_CODE"

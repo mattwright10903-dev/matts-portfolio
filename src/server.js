@@ -11,6 +11,7 @@ import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
 import { logAdmin, logSite } from './lib/logger.js';
 import { adminGuard } from './lib/adminGuard.js';
+import { logStartup, logError, logHealthPing, getStatus, incrementRequestCount } from './lib/statusLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -88,9 +89,28 @@ app.use(
   })
 );
 
+// ── Request counter ──
+// Counts all non-static requests for /health and /status-ping responses.
+app.use((req, res, next) => { incrementRequestCount(); next(); });
+
+// ── Status endpoints ──
+// Fast JSON — no DB query, no template rendering.
+
+app.get('/health', (_req, res) => {
+  res.json(getStatus());
+});
+
+app.get('/status-ping', (req, res) => {
+  const status = getStatus();
+  if (req.query.log === 'true') {
+    logHealthPing(req).catch(() => {});
+  }
+  res.json(status);
+});
+
 // ── Admin access guard ──
 // Applied to ALL /admin routes before route handlers run.
-// Blocks requests not from an allowed IP or without a valid trusted device cookie.
+// Blocks requests not from an allowed IP.
 // If ADMIN_ALLOWED_IPS env var is not set, guard is inactive (not configured).
 app.use('/admin', adminGuard);
 
@@ -385,8 +405,23 @@ app.post('/admin/messages/:id/close', requireAdmin, async (req, res) => {
 
 app.use((req, res) => res.status(404).render('error', locals(req, { message: 'Page not found.' })));
 
+// ── Express error handler ──
+// Catches errors passed via next(err) or thrown synchronously in route handlers.
+// Logs to STATUS_LOG_WEBHOOK_URL and returns a safe 500 page.
+// Must be defined after all routes and have exactly 4 arguments.
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  console.error('Server error:', err);
+  logError(err, req).catch(() => {});
+  res.status(500).render('error', locals(req, { message: 'Something went wrong. Please try again.' }));
+});
+
 initDb()
-  .then(() => app.listen(PORT, () => console.log(`Matt Wright Portfolio running on port ${PORT}`)))
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Matt Wright Portfolio running on port ${PORT}`);
+      logStartup().catch(() => {});
+    });
+  })
   .catch((error) => {
     console.error('Failed to start app:', error);
     process.exit(1);
