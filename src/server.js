@@ -75,6 +75,34 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// ── Status endpoints ──
+// Registered BEFORE session middleware so they can never be blocked by DB session issues.
+// Self-contained — no DB, no session, no external dependencies.
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    status:      'online',
+    site:        'Matt Wright Portfolio',
+    timestamp:   new Date().toISOString(),
+    uptime:      process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+app.get('/status-ping', (req, res) => {
+  const payload = {
+    status:      'online',
+    site:        'Matt Wright Portfolio',
+    timestamp:   new Date().toISOString(),
+    uptime:      process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+  };
+  if (req.query.log === 'true') {
+    try { logHealthPing(req).catch(() => {}); } catch { /* never block the response */ }
+  }
+  res.status(200).json(payload);
+});
+
 app.use(
   session({
     store: new PgSession({ pool, createTableIfMissing: true }),
@@ -89,25 +117,6 @@ app.use(
     },
   })
 );
-
-// ── Request counter ──
-// Counts all non-static requests for /health and /status-ping responses.
-app.use((req, res, next) => { incrementRequestCount(); next(); });
-
-// ── Status endpoints ──
-// Fast JSON — no DB query, no template rendering.
-
-app.get('/health', (_req, res) => {
-  res.json(getStatus());
-});
-
-app.get('/status-ping', (req, res) => {
-  const status = getStatus();
-  if (req.query.log === 'true') {
-    logHealthPing(req).catch(() => {});
-  }
-  res.json(status);
-});
 
 // ── Admin access guard ──
 // Applied to ALL /admin routes before route handlers run.
