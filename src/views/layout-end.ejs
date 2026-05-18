@@ -27,14 +27,21 @@
     const anime = window.anime || null;
     const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Site loader
-    const loader = $('[data-site-loader]');
-    if (loader) {
-      window.addEventListener('load', () => {
-        setTimeout(() => loader.classList.add('is-hidden'), 400);
-        setTimeout(() => loader.remove(), 950);
-      });
+    // Site loader — dismiss via DOMContentLoaded (fast) + hard backup timer
+    function dismissLoader() {
+      const loader = $('[data-site-loader]');
+      if (!loader) return;
+      loader.classList.add('is-hidden');
+      setTimeout(() => loader.remove(), 600);
     }
+    // Primary: fire as soon as DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => setTimeout(dismissLoader, 600));
+    } else {
+      setTimeout(dismissLoader, 600);
+    }
+    // Backup: force removal at 1400ms no matter what
+    setTimeout(dismissLoader, 1400);
 
     // Scroll progress + nav state
     const progress = $('.scroll-progress');
