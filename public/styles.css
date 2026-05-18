@@ -1430,3 +1430,70 @@ body::before {
   .admin-stats { grid-template-columns: repeat(2, 1fr); }
   .case-layout { grid-template-columns: 1fr; }
 }
+
+/* ===========================
+   Round 4 — Comprehensive Polish
+   =========================== */
+
+/* Typography — stronger hero, cleaner hierarchy */
+.hero-copy h1 { font-size: clamp(44px, 6.2vw, 84px); line-height: .93; letter-spacing: -.08em; }
+.hero-lead { font-size: 15.5px; color: rgba(255,255,255,.68); }
+.section-heading h2 { font-size: clamp(28px, 3.4vw, 48px); letter-spacing: -.06em; }
+
+/* Section spacing — tighter, consistent rhythm */
+.section-block { padding: clamp(62px, 7.5vw, 100px) 0; }
+.section-heading { margin-bottom: 30px; }
+
+/* Hero — more breathing room */
+.hero.hero-clean { padding: clamp(70px, 10vw, 126px) 0 clamp(44px, 6vw, 68px); }
+.hero-actions { margin-top: 26px; }
+.stat-strip { margin-top: 22px; }
+
+/* Bento — brighter images, interactive hover */
+.bento-image img { opacity: .88; }
+.bento-card:hover .bento-image img { opacity: 1; transform: scale(1.05); }
+.bento-large { min-height: 520px; }
+.bento-card:hover { transform: translateY(-4px) scale(1.003) !important; border-color: rgba(255,255,255,.18); box-shadow: 0 26px 70px rgba(0,0,0,.30); }
+
+/* Buttons — subtle hover lift */
+.btn:hover { transform: translateY(-2px); }
+.btn.primary:hover { box-shadow: 0 22px 52px rgba(255,36,69,.32); }
+
+/* Services — compact and clean */
+.service-card { padding: 15px 18px; gap: 12px; border-radius: 20px; }
+.service-card span { width: 38px; height: 38px; border-radius: 13px; flex-shrink: 0; }
+.service-list { gap: 10px; }
+.services-group-grid { gap: 30px; margin-top: 34px; }
+
+/* About preview — slightly wider */
+.about-preview-panel { max-width: 840px; padding: 36px; }
+
+/* Portfolio — landscape ratio, image zoom, card lift */
+.portfolio-gallery-pro { aspect-ratio: 16 / 10; }
+.gallery-main { transition: transform 500ms var(--ease); }
+.project-open-link:hover .gallery-main { transform: scale(1.04); }
+.portfolio-card-pro:hover { transform: translateY(-4px) !important; border-color: rgba(255,255,255,.16); box-shadow: 0 26px 70px rgba(0,0,0,.30); }
+.portfolio-card-content h2 { font-size: 18px; }
+
+/* Footer — less top space, cleaner */
+.footer-pro { margin: 5rem auto 2.5rem; padding: 1.75rem 2rem; }
+.footer-brand p { font-size: 13px; line-height: 1.68; }
+.footer-links a, .footer-contact span { font-size: 13px; }
+
+/* Admin — slightly more breathing room */
+.admin-panel, .form-card { padding: 28px; }
+
+/* Mobile polish */
+@media (max-width: 980px) {
+  .footer-pro { margin-top: 3.5rem; padding: 1.5rem; gap: 1.5rem; }
+  .bento-grid { gap: 14px; }
+  .services-group-grid { gap: 24px; margin-top: 24px; }
+}
+@media (max-width: 620px) {
+  .hero-copy h1 { font-size: 38px; }
+  .hero-lead { font-size: 14.5px; }
+  .section-block { padding: clamp(46px, 6.5vw, 68px) 0; }
+  .portfolio-gallery-pro { aspect-ratio: 4 / 3; }
+  .footer-pro { margin-top: 3rem; padding: 1.25rem; gap: 1.25rem; }
+  .services-group-grid { gap: 20px; }
+}
