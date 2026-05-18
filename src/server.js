@@ -10,7 +10,7 @@ import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
 import { logAdmin, logSite } from './lib/logger.js';
 import { adminGuard } from './lib/adminGuard.js';
-import { logStartup, logError, logHealthPing, getStatus, incrementRequestCount } from './lib/statusLogger.js';
+import { logStartup, logError } from './lib/statusLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -87,18 +87,14 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.get('/status-ping', (req, res) => {
-  const payload = {
+app.get('/status-ping', (_req, res) => {
+  res.status(200).json({
     status:      'online',
     site:        'Matt Wright Portfolio',
     timestamp:   new Date().toISOString(),
     uptime:      process.uptime(),
     environment: process.env.NODE_ENV || 'development',
-  };
-  if (req.query.log === 'true') {
-    try { logHealthPing(req).catch(() => {}); } catch { /* never block the response */ }
-  }
-  res.status(200).json(payload);
+  });
 });
 
 app.use(
