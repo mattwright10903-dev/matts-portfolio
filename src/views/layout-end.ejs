@@ -10,6 +10,7 @@
       <a href="/portfolio">Portfolio</a>
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
+      <a href="/privacy">Privacy</a>
       <% if (isAdmin) { %><a href="/admin">Admin</a><% } %>
     </div>
     <div class="footer-contact">
@@ -303,6 +304,22 @@
         if (item5 && item5.nextElementSibling) item5.parentElement.insertBefore(item5.nextElementSibling, item5);
       }
     });
+
+    /* ─────────────────────────────────────────────────────────────
+       CONTACT CTA CLICK TRACKING
+       sendBeacon is fire-and-forget — never blocks navigation.
+    ─────────────────────────────────────────────────────────────── */
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href]');
+      if (!link) return;
+      var href = link.getAttribute('href') || '';
+      var endpoint = null;
+      if (/discord\.com/i.test(href) || /^discord:/i.test(href)) endpoint = '/track/contact-discord';
+      else if (/^mailto:/i.test(href))                             endpoint = '/track/contact-email';
+      else if (/fiverr\.com/i.test(href))                          endpoint = '/track/contact-fiverr';
+      if (!endpoint) return;
+      try { navigator.sendBeacon(endpoint, ''); } catch (e) {}
+    }, { passive: true });
 
     /* ─────────────────────────────────────────────────────────────
        CARD SPOTLIGHT HOVER (--mx / --my CSS vars)

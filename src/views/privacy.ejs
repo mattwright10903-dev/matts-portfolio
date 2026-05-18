@@ -1,0 +1,61 @@
+<%- include('layout-start') %>
+
+<div class="page-head">
+  <p class="eyebrow">Legal</p>
+  <h1>Privacy Notice</h1>
+  <p>How this site handles data and why.</p>
+</div>
+
+<div class="section-block" style="border-bottom:none;padding-top:0">
+  <div style="max-width:720px;display:flex;flex-direction:column;gap:32px">
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">What this site collects</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0 0 10px">When you visit this site, the following data may be collected automatically:</p>
+      <ul style="color:rgba(255,255,255,.68);font-size:14px;line-height:2;margin:0;padding-left:20px">
+        <li>Your IP address</li>
+        <li>Browser and device user-agent string</li>
+        <li>Pages visited and timestamps</li>
+        <li>Referrer (the link or site you came from)</li>
+        <li>Country code, if provided by the hosting infrastructure</li>
+        <li>Contact button interactions (Discord, Email, Fiverr)</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">Why this data is collected</h2>
+      <ul style="color:rgba(255,255,255,.68);font-size:14px;line-height:2;margin:0;padding-left:20px">
+        <li>Site security and admin access protection</li>
+        <li>Basic website analytics to understand how the site is used</li>
+        <li>Detecting and blocking abusive or automated requests</li>
+        <li>Logging important contact interactions</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">Where logs are sent</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0">Activity logs, including page visit events and admin access attempts, may be sent to private Discord channels via secure server-side webhooks. These webhooks are stored only in server environment variables and are never exposed to your browser. Passwords are never logged.</p>
+    </div>
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">Cookies</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0 0 10px">This site uses a session cookie for admin authentication. If you log in to the admin area from a trusted device, a separate signed cookie (<code style="font-size:12px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:5px">mw_admin_device</code>) may be set to allow future access without re-entering credentials. This cookie is HTTP-only, secure, and expires after 30 days.</p>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0">No third-party tracking cookies, analytics scripts, or advertising are used on this site.</p>
+    </div>
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">Third-party services</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0">This site is hosted on <strong>Render</strong> and uses <strong>PostgreSQL</strong> for data storage. These services have their own privacy policies. No personal data is sold or shared with advertisers.</p>
+    </div>
+
+    <div>
+      <h2 style="font-size:18px;letter-spacing:-.04em;margin-bottom:12px">Contact</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.8;margin:0">If you have any questions about how your data is handled, contact Matt Wright on Discord (<strong>mjww0</strong>) or by email at <a href="mailto:mattwright10903@gmail.com" style="color:var(--red)">mattwright10903@gmail.com</a>.</p>
+    </div>
+
+    <p style="color:rgba(255,255,255,.34);font-size:12px;margin:0">Last updated: May 2026</p>
+
+  </div>
+</div>
+
+<%- include('layout-end') %>

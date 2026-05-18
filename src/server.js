@@ -9,18 +9,20 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { getContent, initDb, pool, query } from './lib/db.js';
 import { sendMessageEmail } from './lib/mailer.js';
+import { logAdmin, logSite } from './lib/logger.js';
+import { adminGuard } from './lib/adminGuard.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 const app = express();
 app.set('trust proxy', 1);
-const PgSession = connectPgSimple(session);
 
-const PORT = process.env.PORT || 3000;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
+const PgSession     = connectPgSimple(session);
+const PORT          = process.env.PORT || 3000;
+const ADMIN_EMAIL   = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const BASE_URL = (process.env.BASE_URL || 'https://mattwright.online').replace(/\/$/, '');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024, files: 10 } });
+const BASE_URL      = (process.env.BASE_URL || 'https://mattwright.online').replace(/\/$/, '');
+const upload        = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024, files: 10 } });
 
 function splitImageUrls(value) {
   return String(value || '')
@@ -86,6 +88,12 @@ app.use(
   })
 );
 
+// ── Admin access guard ──
+// Applied to ALL /admin routes before route handlers run.
+// Blocks requests not from an allowed IP or without a valid trusted device cookie.
+// If ADMIN_ALLOWED_IPS env var is not set, guard is inactive (not configured).
+app.use('/admin', adminGuard);
+
 function locals(req, extra = {}) {
   return {
     user: null,
@@ -105,54 +113,87 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// ── Public routes ──
+
 app.get('/', async (req, res) => {
   const projects = await query('SELECT * FROM projects WHERE featured = true AND published = true ORDER BY sort_order ASC, created_at DESC LIMIT 6');
-  const content = await getContent();
+  const content  = await getContent();
+  logSite('Homepage Visit', req).catch(() => {});
   res.render('home', locals(req, { page: 'home', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/portfolio', async (req, res) => {
   const projects = await query('SELECT * FROM projects WHERE published = true ORDER BY sort_order ASC, created_at DESC');
-  const content = await getContent();
+  const content  = await getContent();
+  logSite('Portfolio Page Visit', req).catch(() => {});
   res.render('portfolio', locals(req, { page: 'portfolio', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/portfolio/:id', async (req, res) => {
   const project = await query('SELECT * FROM projects WHERE id = $1 AND published = true', [req.params.id]);
   if (!project.rows.length) return res.status(404).render('error', locals(req, { message: 'Project not found.' }));
-  const more = await query('SELECT * FROM projects WHERE published = true AND id <> $1 ORDER BY featured DESC, sort_order ASC, created_at DESC LIMIT 3', [req.params.id]);
+  const more    = await query('SELECT * FROM projects WHERE published = true AND id <> $1 ORDER BY featured DESC, sort_order ASC, created_at DESC LIMIT 3', [req.params.id]);
   const content = await getContent();
+  logSite('Case Study Opened', req, { Project: project.rows[0].title }).catch(() => {});
   res.render('project-detail', locals(req, { page: 'portfolio', project: normalizeProject(project.rows[0]), moreProjects: normalizeProjects(more.rows), content }));
 });
 
 app.get('/about', async (req, res) => {
   const content = await getContent();
+  logSite('About Page Visit', req).catch(() => {});
   res.render('about', locals(req, { page: 'about', content }));
 });
 
 app.get('/contact', async (req, res) => {
   const content = await getContent();
+  logSite('Contact Page Visit', req).catch(() => {});
   res.render('contact', locals(req, { page: 'contact', sent: false, content }));
 });
 
+app.get('/privacy', (_req, res) => {
+  res.render('privacy', {
+    user: null, isAdmin: false, adminEmail: ADMIN_EMAIL,
+    baseUrl: BASE_URL, currentPath: '/privacy', page: '', content: {},
+  });
+});
+
+// ── Contact CTA tracking endpoints ──
+// Called via navigator.sendBeacon from frontend JS.
+// Respond immediately — never block the user's outbound navigation.
+
+app.post('/track/contact-discord', (req, res) => {
+  logSite('Contact CTA Clicked — Discord', req).catch(() => {});
+  res.sendStatus(200);
+});
+
+app.post('/track/contact-email', (req, res) => {
+  logSite('Contact CTA Clicked — Email', req).catch(() => {});
+  res.sendStatus(200);
+});
+
+app.post('/track/contact-fiverr', (req, res) => {
+  logSite('Contact CTA Clicked — Fiverr', req).catch(() => {});
+  res.sendStatus(200);
+});
+
+// ── Contact form ──
+
 app.post('/contact', async (req, res) => {
-  const name = req.body.name || 'Website Visitor';
-  const email = req.body.email || '';
+  const name    = req.body.name || 'Website Visitor';
+  const email   = req.body.email || '';
   const subject = req.body.subject || 'Website chat';
-  const body = req.body.body || '';
+  const body    = req.body.body || '';
   if (!email || !body) {
     const content = await getContent();
     return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.', content }));
   }
 
-  const token = crypto.randomBytes(24).toString('hex');
+  const token  = crypto.randomBytes(24).toString('hex');
   const thread = await query(
     'INSERT INTO chat_threads (token, name, email, subject) VALUES ($1, $2, $3, $4) RETURNING *',
     [token, name, email, subject]
   );
   await query('INSERT INTO chat_messages (thread_id, sender, body) VALUES ($1, $2, $3)', [thread.rows[0].id, 'visitor', body]);
-
-  // Keep a simple inbox record too, so old dashboard/message history still works.
   await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [null, name, email, subject, body]);
 
   const content = await getContent();
@@ -181,18 +222,23 @@ app.post('/chat/:token/messages', async (req, res) => {
 app.get('/login', (_req, res) => res.redirect('/admin'));
 app.get('/account', (_req, res) => res.redirect('/contact'));
 
+// ── Admin routes ──
+// All routes below /admin already passed adminGuard above.
+
 app.get('/admin', async (req, res) => {
   if (!req.session?.isAdmin) {
+    logAdmin('Admin Login Page Visited', req).catch(() => {});
     return res.render('admin-login', locals(req, { page: 'admin', error: null }));
   }
 
+  logAdmin('Admin Dashboard Accessed', req).catch(() => {});
   const projects = await query('SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC');
-  const content = await getContent();
+  const content  = await getContent();
   res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), content, saved: req.query.saved || null }));
 });
 
 app.post('/admin/login', async (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase();
+  const email    = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '');
 
   if (!ADMIN_PASSWORD) {
@@ -203,24 +249,26 @@ app.post('/admin/login', async (req, res) => {
   }
 
   if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
-    req.session.isAdmin = true;
+    req.session.isAdmin    = true;
     req.session.adminEmail = ADMIN_EMAIL;
+    logAdmin('Admin Login Success', req, { Email: email }, { bypassCooldown: true }).catch(() => {});
     return req.session.save(() => res.redirect('/admin'));
   }
 
+  logAdmin('Admin Login Failed', req, { 'Attempted Email': email }, { bypassCooldown: true }).catch(() => {});
   return res.status(401).render('admin-login', locals(req, { page: 'admin', error: 'Invalid admin email or password.' }));
 });
 
 app.post('/admin/logout', (req, res) => {
+  logAdmin('Admin Logout', req, {}, { bypassCooldown: true }).catch(() => {});
   req.session.destroy(() => res.redirect('/admin'));
 });
-
 
 app.post('/admin/content', requireAdmin, async (req, res) => {
   const allowedKeys = [
     'hero_eyebrow', 'hero_title', 'hero_lead', 'hero_card_title', 'hero_card_body',
     'services_title', 'services_list', 'about_title', 'about_body', 'about_extra',
-    'contact_title', 'contact_intro'
+    'contact_title', 'contact_intro',
   ];
 
   for (const key of allowedKeys) {
@@ -233,55 +281,65 @@ app.post('/admin/content', requireAdmin, async (req, res) => {
     );
   }
 
+  logAdmin('Admin Content Updated', req, {}, { bypassCooldown: true }).catch(() => {});
   res.redirect('/admin?saved=content');
 });
 
 app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files', 10), async (req, res) => {
   const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
-  const existing = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
+  const existing      = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
   const fallbackImages = normalizeProject(existing.rows[0] || {}).images;
-  const images = getProjectImages(req, fallbackImages, { useKeepImages: true });
-  const image_url = images[0] || '/assets/project-1.svg';
+  const images        = getProjectImages(req, fallbackImages, { useKeepImages: true });
+  const image_url     = images[0] || '/assets/project-1.svg';
+
   await query(
     `UPDATE projects
-     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5, project_url = $6, featured = $7, tools = $8, goal = $9, result = $10, published = $11, sort_order = $12
+     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5,
+         project_url = $6, featured = $7, tools = $8, goal = $9, result = $10, published = $11, sort_order = $12
      WHERE id = $13`,
-    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on', tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0), req.params.id]
+    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on',
+     tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0), req.params.id]
   );
+
+  // Build a specific log message based on what was changed
+  const uploadedCount = (req.files || []).length;
+  const keptCount     = images.length;
+  const prevCount     = fallbackImages.length;
+  const extraFields   = { Project: title || req.params.id };
+  if (uploadedCount > 0) extraFields['Images Uploaded'] = uploadedCount;
+  if (keptCount < prevCount) extraFields['Images Removed'] = prevCount - keptCount;
+  if (keptCount !== prevCount && uploadedCount === 0) extraFields['Images Reordered'] = 'Yes';
+
+  logAdmin('Admin Project Edited', req, extraFields, { bypassCooldown: true }).catch(() => {});
   res.redirect('/admin?saved=project');
 });
 
 app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async (req, res) => {
   const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
-  const images = getProjectImages(req, ['/assets/project-1.svg']);
+  const images    = getProjectImages(req, ['/assets/project-1.svg']);
   const image_url = images[0] || '/assets/project-1.svg';
-  await query('INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured, tools, goal, result, published, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [
-    title,
-    category || 'Design',
-    description,
-    image_url,
-    images,
-    project_url || '',
-    featured === 'on',
-    tools || '',
-    goal || '',
-    result || '',
-    published !== 'off',
-    Number(sort_order || 0),
-  ]);
+
+  await query(
+    'INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured, tools, goal, result, published, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+    [title, category || 'Design', description, image_url, images, project_url || '',
+     featured === 'on', tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0)]
+  );
+
+  logAdmin('Admin Project Created', req, { Project: title, Category: category || 'Design' }, { bypassCooldown: true }).catch(() => {});
   res.redirect('/admin?saved=project');
 });
 
 app.post('/admin/projects/:id/delete', requireAdmin, async (req, res) => {
+  const existing = await query('SELECT title FROM projects WHERE id = $1', [req.params.id]);
+  const title    = existing.rows[0]?.title || req.params.id;
   await query('DELETE FROM projects WHERE id = $1', [req.params.id]);
+  logAdmin('Admin Project Deleted', req, { Project: title }, { bypassCooldown: true }).catch(() => {});
   res.redirect('/admin');
 });
 
-
-
 app.get('/admin/chats/live', requireAdmin, async (_req, res) => {
   const chats = await query(`
-    SELECT t.*, 
+    SELECT t.*,
       (SELECT body FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message,
       (SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY created_at DESC LIMIT 1) AS last_message_at,
       (SELECT COUNT(*)::int FROM chat_messages WHERE thread_id = t.id AND sender = 'visitor' AND (t.last_seen_admin IS NULL OR created_at > t.last_seen_admin)) AS unread_count
