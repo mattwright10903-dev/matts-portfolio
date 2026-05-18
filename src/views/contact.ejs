@@ -1,59 +1,83 @@
 <%- include('layout-start') %>
-<section class="contact-page-shell">
-  <div class="contact-hero-simple">
+
+<div class="contact-page">
+
+  <!-- Hero -->
+  <div class="contact-hero">
     <p class="eyebrow">Contact</p>
     <h1>Let's work together.</h1>
-    <p>Reach out through Discord or email — I'll get back to you directly for design, branding, or FiveM server projects.</p>
+    <p>Reach out through Discord, email, or Fiverr for design, branding, FiveM development, and digital project work.</p>
   </div>
 
-  <section class="contact-methods-polished" aria-label="Contact options">
-    <a class="contact-channel-card discord-card" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">
-      <span class="channel-icon discord-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" role="img" focusable="false">
-          <path d="M19.5 5.4A16.2 16.2 0 0 0 15.6 4l-.2.4c1.4.4 2.1.9 2.1.9a13.8 13.8 0 0 0-6.5-.8 13.8 13.8 0 0 0-4.5.8s.7-.5 2.2-.9L8.4 4a16.2 16.2 0 0 0-3.9 1.4C2 9.1 1.3 12.7 1.6 16.3A16 16 0 0 0 6.4 18.7l.6-.9c-1-.4-1.9-1-2.7-1.8l.6.4c2.9 1.4 6 1.8 9.1 1.2a12.7 12.7 0 0 0 5-2.1c-.8.9-1.7 1.5-2.8 1.9l.6.9a16 16 0 0 0 4.8-2.4c.4-4.1-.7-7.6-2.1-10.5ZM8.4 14.5c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8Zm7.2 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8Z" />
+  <!-- Contact cards -->
+  <div class="contact-grid" aria-label="Contact options">
+
+    <!-- Discord -->
+    <a class="contact-card contact-card--discord" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer" aria-label="Contact Matt Wright on Discord">
+      <div class="contact-card-icon contact-card-icon--discord" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26">
+          <path fill="rgba(255,255,255,.92)" d="M19.5 5.4A16.2 16.2 0 0 0 15.6 4l-.2.4c1.4.4 2.1.9 2.1.9a13.8 13.8 0 0 0-6.5-.8 13.8 13.8 0 0 0-4.5.8s.7-.5 2.2-.9L8.4 4a16.2 16.2 0 0 0-3.9 1.4C2 9.1 1.3 12.7 1.6 16.3A16 16 0 0 0 6.4 18.7l.6-.9c-1-.4-1.9-1-2.7-1.8l.6.4c2.9 1.4 6 1.8 9.1 1.2a12.7 12.7 0 0 0 5-2.1c-.8.9-1.7 1.5-2.8 1.9l.6.9a16 16 0 0 0 4.8-2.4c.4-4.1-.7-7.6-2.1-10.5ZM8.4 14.5c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8Zm7.2 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8Z"/>
         </svg>
-      </span>
-      <div class="channel-copy">
-        <small>Discord</small>
-        <strong>mjww0</strong>
-        <p>Add me directly for quick questions, FiveM work, and design requests.</p>
       </div>
-      <span class="channel-button">Open Discord</span>
+      <div class="contact-card-body">
+        <span class="contact-card-label">Discord</span>
+        <strong class="contact-card-title">mjww0</strong>
+        <p class="contact-card-desc">Add me directly for quick questions, FiveM work, and design requests.</p>
+      </div>
+      <span class="contact-card-btn contact-card-btn--discord">Open Discord</span>
     </a>
 
-    <a class="contact-channel-card email-card" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry&body=Hi%20Matt,%0A%0AI%20want%20to%20start%20a%20project.%0A%0AProject%20type:%0ABudget:%0ADeadline:%0ADiscord:%0ADetails:%0A">
-      <span class="channel-icon email-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" role="img" focusable="false">
-          <path class="g-blue" d="M4 7.5 12 13l8-5.5v8.8c0 1-.8 1.7-1.8 1.7H5.8c-1 0-1.8-.8-1.8-1.7V7.5Z" />
-          <path class="g-red" d="M4 7.5 12 13l8-5.5v-.8c0-1-.8-1.7-1.8-1.7H5.8C4.8 5 4 5.8 4 6.7v.8Z" />
-          <path class="g-yellow" d="M4 7.5v8.8c0 .4.1.7.3 1l5.2-5.8L4 7.5Z" />
-          <path class="g-green" d="M20 7.5v8.8c0 .4-.1.7-.3 1l-5.2-5.8L20 7.5Z" />
+    <!-- Email -->
+    <a class="contact-card contact-card--email" href="mailto:mattwright10903@gmail.com?subject=Portfolio%20Project%20Inquiry&body=Hi%20Matt,%0A%0AI%20want%20to%20start%20a%20project.%0A%0AProject%20type:%0ABudget:%0ADeadline:%0ADiscord:%0ADetails:%0A" aria-label="Email Matt Wright">
+      <div class="contact-card-icon contact-card-icon--email" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26">
+          <path fill="#4285f4" d="M4 7.5 12 13l8-5.5v8.8c0 1-.8 1.7-1.8 1.7H5.8c-1 0-1.8-.8-1.8-1.7V7.5Z"/>
+          <path fill="#ea4335" d="M4 7.5 12 13l8-5.5v-.8c0-1-.8-1.7-1.8-1.7H5.8C4.8 5 4 5.8 4 6.7v.8Z"/>
+          <path fill="#fbbc05" d="M4 7.5v8.8c0 .4.1.7.3 1l5.2-5.8L4 7.5Z"/>
+          <path fill="#34a853" d="M20 7.5v8.8c0 .4-.1.7-.3 1l-5.2-5.8L20 7.5Z"/>
         </svg>
-      </span>
-      <div class="channel-copy">
-        <small>Email</small>
-        <strong>mattwright10903@gmail.com</strong>
-        <p>Send project details, references, budget, deadline, and anything you want me to look at.</p>
       </div>
-      <span class="channel-button">Email Me</span>
+      <div class="contact-card-body">
+        <span class="contact-card-label">Email</span>
+        <strong class="contact-card-title">mattwright10903<wbr>@gmail.com</strong>
+        <p class="contact-card-desc">Send project details, references, budget, deadline, and anything you want me to look at.</p>
+      </div>
+      <span class="contact-card-btn contact-card-btn--email">Email Me</span>
     </a>
 
-    <a class="contact-channel-card fiverr-card fiverr-span" href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer" aria-label="View Matt Wright on Fiverr">
-      <span class="channel-icon fiverr-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false">
-          <rect x="7" y="4" width="3" height="16" rx="1" fill="rgba(29,191,115,.9)"/>
-          <rect x="7" y="4" width="9" height="3" rx="1" fill="rgba(29,191,115,.9)"/>
-          <rect x="7" y="10" width="6.5" height="2.5" rx="1" fill="rgba(29,191,115,.9)"/>
-          <circle cx="18.5" cy="5" r="1.8" fill="rgba(29,191,115,.9)"/>
+    <!-- Fiverr -->
+    <a class="contact-card contact-card--fiverr" href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer" aria-label="View Matt Wright on Fiverr">
+      <div class="contact-card-icon contact-card-icon--fiverr" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" width="26" height="26">
+          <rect x="7" y="4" width="3" height="16" rx="1" fill="rgba(29,191,115,.92)"/>
+          <rect x="7" y="4" width="9" height="3" rx="1" fill="rgba(29,191,115,.92)"/>
+          <rect x="7" y="10" width="6.5" height="2.5" rx="1" fill="rgba(29,191,115,.92)"/>
+          <circle cx="18.5" cy="5" r="1.8" fill="rgba(29,191,115,.92)"/>
         </svg>
-      </span>
-      <div class="channel-copy">
-        <small>Fiverr Marketplace</small>
-        <strong>Order on Fiverr</strong>
-        <p>Prefer ordering through Fiverr? View my freelance services and place an order directly.</p>
       </div>
-      <span class="channel-button">View on Fiverr</span>
+      <div class="contact-card-body">
+        <span class="contact-card-label">Fiverr Marketplace</span>
+        <strong class="contact-card-title">Order on Fiverr</strong>
+        <p class="contact-card-desc">Prefer ordering through Fiverr? View my freelance services and place an order directly.</p>
+      </div>
+      <span class="contact-card-btn contact-card-btn--fiverr">View on Fiverr</span>
     </a>
-  </section>
-</section>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="contact-cta">
+    <div class="contact-cta-text">
+      <h2>Ready to start something?</h2>
+      <p>Send me what you need — preferred style, deadline, budget, and any references. I'll get back to you directly.</p>
+    </div>
+    <div class="contact-cta-actions">
+      <a class="btn email small" href="mailto:mattwright10903@gmail.com">Email Me</a>
+      <a class="btn discord small" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">Message on Discord</a>
+      <a class="btn fiverr small" href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer" aria-label="View Matt Wright on Fiverr">Order on Fiverr</a>
+    </div>
+  </div>
+
+</div>
+
 <%- include('layout-end') %>

@@ -430,31 +430,72 @@ body.js-enabled .reveal.is-visible { opacity: 1; transform: none; }
 .related-card strong { color: #fff; font-size: .92rem; }
 
 /* ── Contact page ── */
-.contact-page-shell { padding: clamp(56px,9vw,100px) 0 80px; }
-.contact-hero-simple { margin-bottom: 32px; max-width: 740px; }
-.contact-hero-simple h1 { font-size: clamp(42px,6.5vw,76px); line-height: .92; letter-spacing: -.072em; }
-.contact-hero-simple > p { font-size: 15px; color: var(--soft); line-height: 1.72; margin-top: 16px; }
-.contact-methods-polished { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
-.contact-channel-card { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 24px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.032); transition: border-color 240ms ease, background 240ms ease, transform 240ms ease; }
-.contact-channel-card:hover { border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.056); transform: translateY(-3px); }
-.discord-card { border-color: rgba(88,101,242,.22); background: rgba(88,101,242,.06); }
-.discord-card:hover { border-color: rgba(88,101,242,.4); background: rgba(88,101,242,.1); }
-.email-card { border-color: rgba(66,133,244,.2); background: rgba(66,133,244,.05); }
-.email-card:hover { border-color: rgba(66,133,244,.38); background: rgba(66,133,244,.09); }
-.fiverr-card { border-color: rgba(29,191,115,.2); background: rgba(29,191,115,.05); }
-.fiverr-card:hover { border-color: rgba(29,191,115,.38); background: rgba(29,191,115,.09); }
-.fiverr-span { grid-column: 1 / -1; }
-.channel-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; }
-.discord-icon { background: rgba(88,101,242,.18); }
-.email-icon { background: rgba(66,133,244,.14); }
-.fiverr-icon { background: rgba(29,191,115,.16); }
-.channel-icon svg { width: 22px; height: 22px; fill: #fff; }
-.g-blue { fill: #4285f4; } .g-red { fill: #ea4335; } .g-yellow { fill: #fbbc05; } .g-green { fill: #34a853; }
-.channel-copy small { color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; }
-.channel-copy strong { display: block; margin: 4px 0 6px; font-size: 1rem; letter-spacing: -.02em; }
-.channel-copy p { color: var(--soft); font-size: 13px; line-height: 1.65; margin: 0; }
-.channel-button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.06); color: #fff; font-size: 13px; font-weight: 800; white-space: nowrap; transition: background 180ms ease, border-color 180ms ease; }
-.channel-button:hover { background: rgba(255,255,255,.12); border-color: var(--line2); }
+.contact-page { padding: clamp(64px,9vw,110px) 0 clamp(60px,8vw,90px); }
+.contact-hero { max-width: 660px; margin-bottom: 48px; }
+.contact-hero h1 { font-size: clamp(38px,5.5vw,64px); line-height: .94; letter-spacing: -.07em; margin: .35rem 0 .85rem; }
+.contact-hero > p { font-size: 15px; color: var(--soft); line-height: 1.75; }
+
+.contact-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+.contact-card {
+  display: flex; flex-direction: column;
+  padding: 26px 24px 22px; border: 1px solid var(--line); border-radius: var(--radius);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  position: relative; overflow: hidden; text-decoration: none; color: inherit;
+  transition: transform 260ms var(--ease), border-color 260ms ease, box-shadow 260ms ease;
+}
+.contact-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,0%), var(--card-glow,rgba(255,255,255,.05)), transparent 55%);
+  opacity: 0; transition: opacity 320ms ease;
+}
+.contact-card:hover { transform: translateY(-5px); }
+.contact-card:hover::before { opacity: 1; }
+
+.contact-card--discord { --card-glow: rgba(88,101,242,.22); border-color: rgba(88,101,242,.22); background: linear-gradient(145deg, rgba(88,101,242,.055), rgba(88,101,242,.02)); }
+.contact-card--discord:hover { border-color: rgba(88,101,242,.46); box-shadow: 0 18px 52px rgba(88,101,242,.14); }
+.contact-card--email { --card-glow: rgba(66,133,244,.2); border-color: rgba(66,133,244,.18); background: linear-gradient(145deg, rgba(66,133,244,.045), rgba(66,133,244,.01)); }
+.contact-card--email:hover { border-color: rgba(66,133,244,.44); box-shadow: 0 18px 52px rgba(66,133,244,.12); }
+.contact-card--fiverr { --card-glow: rgba(29,191,115,.18); border-color: rgba(29,191,115,.18); background: linear-gradient(145deg, rgba(29,191,115,.042), rgba(29,191,115,.01)); }
+.contact-card--fiverr:hover { border-color: rgba(29,191,115,.42); box-shadow: 0 18px 52px rgba(29,191,115,.10); }
+
+.contact-card-icon { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; flex-shrink: 0; }
+.contact-card-icon--discord { background: rgba(88,101,242,.18); }
+.contact-card-icon--email { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+.contact-card-icon--fiverr { background: rgba(29,191,115,.14); }
+
+.contact-card-body { flex: 1; display: flex; flex-direction: column; }
+.contact-card-label { display: block; font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .22em; margin-bottom: 6px; }
+.contact-card--discord .contact-card-label { color: rgba(148,157,255,.88); }
+.contact-card--email .contact-card-label { color: rgba(100,160,255,.88); }
+.contact-card--fiverr .contact-card-label { color: rgba(29,191,115,.88); }
+.contact-card-title { display: block; font-size: 16px; font-weight: 900; letter-spacing: -.04em; line-height: 1.25; margin-bottom: 8px; color: #fff; word-break: break-word; overflow-wrap: break-word; }
+.contact-card-desc { font-size: 13px; color: rgba(255,255,255,.52); line-height: 1.68; flex: 1; }
+
+.contact-card-btn {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 42px; margin-top: 20px; width: 100%;
+  border: 1px solid; border-radius: 999px;
+  font-size: 13px; font-weight: 800;
+  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+.contact-card-btn--discord { border-color: rgba(88,101,242,.36); background: rgba(88,101,242,.14); color: rgba(168,176,255,.95); }
+.contact-card--discord:hover .contact-card-btn--discord { background: rgba(88,101,242,.26); border-color: rgba(88,101,242,.58); box-shadow: 0 4px 20px rgba(88,101,242,.2); }
+.contact-card-btn--email { border-color: rgba(66,133,244,.3); background: rgba(66,133,244,.1); color: rgba(130,180,255,.95); }
+.contact-card--email:hover .contact-card-btn--email { background: rgba(66,133,244,.22); border-color: rgba(66,133,244,.52); box-shadow: 0 4px 20px rgba(66,133,244,.16); }
+.contact-card-btn--fiverr { border-color: rgba(29,191,115,.28); background: rgba(29,191,115,.1); color: rgba(29,191,115,.9); }
+.contact-card--fiverr:hover .contact-card-btn--fiverr { background: rgba(29,191,115,.2); border-color: rgba(29,191,115,.5); box-shadow: 0 4px 20px rgba(29,191,115,.15); }
+
+.contact-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  margin-top: 14px; padding: clamp(22px,3vw,30px) clamp(22px,3vw,34px);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: rgba(255,255,255,.022);
+}
+.contact-cta-text { flex: 1; min-width: 0; }
+.contact-cta-text h2 { font-size: clamp(17px,1.8vw,22px); letter-spacing: -.05em; line-height: 1.2; margin-bottom: 4px; }
+.contact-cta-text p { color: rgba(255,255,255,.52); font-size: 13px; line-height: 1.65; max-width: 480px; }
+.contact-cta-actions { display: flex; gap: 9px; flex-wrap: wrap; flex-shrink: 0; }
 
 /* ── About page ── */
 .about-pro-page { display: grid; grid-template-columns: 1fr .9fr; gap: 60px; padding: clamp(60px,10vw,110px) 0; border-bottom: 1px solid var(--line); }
@@ -586,7 +627,8 @@ details label:last-child { margin-bottom: 14px; }
   .case-study-card { position: static; }
   .related-grid { grid-template-columns: repeat(2,1fr); }
   .footer-pro { grid-template-columns: 1fr; gap: 1.25rem; margin: 3.5rem auto 1.5rem; }
-  .contact-methods-polished { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-cta { flex-direction: column; align-items: flex-start; }
   .portfolio-grid-pro { grid-template-columns: 1fr; }
   .case-cta-section { flex-direction: column; align-items: flex-start; }
   .editor-grid { grid-template-columns: 1fr; }
@@ -599,8 +641,6 @@ details label:last-child { margin-bottom: 14px; }
   .bento-count-2 { grid-template-columns: 1fr; }
   .split-panel { padding: 24px; }
   .split-panel h2 { font-size: 20px; }
-  .contact-channel-card { grid-template-columns: auto 1fr; }
-  .channel-button { display: none; }
   .related-grid { grid-template-columns: 1fr; }
   .about-cards { gap: 10px; }
   .footer-pro { margin-top: 3rem; padding: 1.25rem; }
