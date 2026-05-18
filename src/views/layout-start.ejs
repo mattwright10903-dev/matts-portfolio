@@ -45,6 +45,9 @@
   </script>
 
   <link rel="stylesheet" href="/styles.css" />
+  <% if (page === 'portfolio') { %>
+  <link rel="stylesheet" href="/portfolio-gallery.css" />
+  <% } %>
 </head>
 <body class="page-<%= page || 'default' %>">
 

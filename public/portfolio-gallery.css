@@ -1,0 +1,277 @@
+/* ══════════════════════════════════════════════════════════════════
+   Portfolio Dome Gallery — portfolio-gallery.css
+   Loaded only on /portfolio via layout-start.ejs conditional link
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Gallery section ── */
+.pgal-section {
+  padding: clamp(28px, 4vw, 48px) 0 clamp(36px, 5vw, 56px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden; /* clip cards that drift past section edges */
+  position: relative;
+}
+
+.pgal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Prev / Next buttons */
+.pgal-controls { display: flex; gap: 8px; }
+.pgal-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border: 1px solid var(--line); border-radius: 50%;
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.75); font-size: 15px;
+  cursor: pointer; padding: 0;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms var(--ease);
+}
+.pgal-btn:hover { background: rgba(255,255,255,.12); border-color: var(--line2); color: #fff; transform: scale(1.06); }
+.pgal-btn:active { transform: scale(.95); transition-duration: 60ms; }
+
+/* ── Stage (the 3D canvas, desktop) ── */
+.pgal-stage {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  perspective: 960px;
+  perspective-origin: 50% 38%;
+  /* Cards are absolutely centered inside — overflow is clipped by .pgal-section */
+}
+.pgal-stage.is-dragging { cursor: grabbing; }
+
+/* ── Individual card ── */
+.pgal-card {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 256px; height: 336px;
+  margin-top: -168px;
+  margin-left: -128px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: filter 320ms ease, border-color 320ms ease, box-shadow 320ms ease;
+  filter: grayscale(.72) brightness(.7);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Center card — full color, elevated */
+.pgal-card.is-center {
+  filter: grayscale(0) brightness(1);
+  border-color: rgba(255, 255, 255, .18);
+  box-shadow: 0 28px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07), 0 0 48px rgba(255,36,69,.08);
+}
+
+/* Hover — any adjacent card */
+.pgal-card:hover {
+  filter: grayscale(0) brightness(1);
+  border-color: rgba(255, 36, 69, .28);
+}
+.pgal-card:focus-visible {
+  filter: grayscale(0) brightness(1);
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+
+/* ── Card image layer ── */
+.pgal-card-img {
+  position: absolute;
+  inset: 0;
+}
+.pgal-card-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Placeholder for missing image */
+.pgal-card-placeholder {
+  width: 100%; height: 100%;
+  background: linear-gradient(145deg, rgba(255,36,69,.04), rgba(255,255,255,.015));
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Gradient overlay so text reads on any image */
+.pgal-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top,
+    rgba(0,0,0,.92) 0%,
+    rgba(0,0,0,.38) 42%,
+    rgba(0,0,0,.0) 72%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ── Card info overlay ── */
+.pgal-card-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 18px 16px 18px;
+  z-index: 2;
+  transform: translateY(8px);
+  opacity: 0;
+  transition: opacity 260ms ease, transform 260ms var(--ease);
+}
+.pgal-card.is-center .pgal-card-info,
+.pgal-card:hover .pgal-card-info,
+.pgal-card:focus-visible .pgal-card-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pgal-card-cat {
+  display: block;
+  font-size: 9px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .24em;
+  color: rgba(255, 36, 69, .88);
+  margin-bottom: 5px;
+}
+.pgal-card-title {
+  display: block;
+  font-size: 15px; font-weight: 900;
+  letter-spacing: -.03em; line-height: 1.2;
+  color: #fff;
+}
+.pgal-image-count {
+  display: inline-block;
+  font-size: 10px; font-weight: 800;
+  color: rgba(255,255,255,.45);
+  margin-top: 5px;
+}
+.pgal-card-cta {
+  display: block;
+  margin-top: 9px;
+  font-size: 10px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: rgba(255,36,69,.82);
+  transition: color 180ms ease;
+}
+.pgal-card:hover .pgal-card-cta { color: var(--red); }
+
+/* ── Dots ── */
+.pgal-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+}
+.pgal-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.22);
+  background: transparent;
+  cursor: pointer; padding: 0;
+  transition: background 220ms ease, border-color 220ms ease, width 260ms var(--ease), border-radius 260ms var(--ease), box-shadow 220ms ease;
+}
+.pgal-dot.is-active {
+  width: 22px;
+  border-radius: 3px;
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 10px rgba(255,36,69,.36);
+}
+.pgal-dot:hover:not(.is-active) { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4); }
+
+/* ── Hint text ── */
+.pgal-hint {
+  text-align: center;
+  margin-top: 13px;
+  color: rgba(255,255,255,.28);
+  font-size: 10.5px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+
+/* ── Browse section ── */
+.portfolio-browse-section {
+  padding: clamp(44px, 6vw, 76px) 0 80px;
+}
+
+/* ── Empty gallery state ── */
+.pgal-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  height: 240px;
+  border: 1px dashed rgba(255,255,255,.1);
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: 14px; font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Mobile — CSS-only horizontal scroll carousel (≤ 640px)
+   JS does NOT run below this breakpoint
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .pgal-stage {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    height: auto;
+    gap: 14px;
+    /* Centre the first card visually */
+    padding: 16px calc(50% - 110px) 24px;
+    perspective: none;
+    perspective-origin: initial;
+    cursor: default;
+  }
+  .pgal-stage::-webkit-scrollbar { display: none; }
+  .pgal-stage.is-dragging { cursor: default; }
+
+  .pgal-card {
+    position: relative;
+    top: auto; left: auto;
+    margin: 0; flex-shrink: 0;
+    width: 220px; height: 288px;
+    scroll-snap-align: center;
+    /* Override JS inline transforms / opacity */
+    transform: none !important;
+    opacity: 1 !important;
+    filter: grayscale(0) brightness(1) !important;
+    border-color: var(--line);
+    box-shadow: none;
+    pointer-events: auto !important;
+  }
+  .pgal-card.is-center { border-color: var(--line); box-shadow: none; }
+  .pgal-card-info { opacity: 1 !important; transform: none !important; }
+  .pgal-controls { display: none; }
+  .pgal-hint { display: none; }
+  .pgal-dots { margin-top: 12px; }
+}
+
+/* Tablet: slightly smaller cards */
+@media (min-width: 641px) and (max-width: 900px) {
+  .pgal-stage { height: 420px; }
+  .pgal-card { width: 220px; height: 290px; margin-top: -145px; margin-left: -110px; }
+}
+
+/* Respect prefers-reduced-motion — transitions only, no transform animation */
+@media (prefers-reduced-motion: reduce) {
+  .pgal-card { transition: filter 0ms, border-color 0ms, box-shadow 0ms; }
+  .pgal-card-info { transition: none; }
+  .pgal-dot { transition: none; }
+}

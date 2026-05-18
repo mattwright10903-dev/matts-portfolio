@@ -22,6 +22,9 @@
     <p class="footer-copy">© <%= new Date().getFullYear() %> Matt Wright. All rights reserved.</p>
   </footer>
 
+  <% if (page === 'portfolio') { %>
+  <script src="/portfolio-gallery.js" defer></script>
+  <% } %>
   <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js"></script>
   <script>
   (function () {
