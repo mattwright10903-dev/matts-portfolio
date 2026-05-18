@@ -108,8 +108,8 @@ main { width: min(var(--max), calc(100% - 42px)); margin: 0 auto; }
 
 .timewarp-section { opacity: .72; transform: translateY(var(--warp-y, 0)) scale(calc(0.985 + (1 - var(--warp, 0)) * .015)); filter: blur(calc(var(--warp, 0) * 1.2px)); transition: opacity 460ms var(--ease), transform 460ms var(--ease), filter 460ms var(--ease); perspective: 1200px; }
 .timewarp-section.is-visible, .timewarp-section:hover { opacity: 1; }
-.reveal-up, .section-block, .portfolio-card-pro, .service-pro-card, .bento-card { opacity: 0; transform: translateY(30px); transition: opacity 700ms var(--ease), transform 700ms var(--ease); }
-.reveal-up.is-visible, .section-block.is-visible, .portfolio-card-pro.is-visible, .service-pro-card.is-visible, .bento-card.is-visible { opacity: 1; transform: translateY(0); }
+.reveal-up, .section-block, .portfolio-card-pro, .service-pro-card, .bento-card { transition: opacity 600ms var(--ease), transform 600ms var(--ease); }
+.reveal-up.is-visible, .section-block.is-visible, .portfolio-card-pro.is-visible, .service-pro-card.is-visible, .bento-card.is-visible { opacity: 1; transform: none; }
 .delay-1 { transition-delay: .12s; }
 
 .ticker-band { overflow: hidden; padding: 12px 0 62px; border-bottom: 1px solid var(--line); }
@@ -328,20 +328,6 @@ input:focus, textarea:focus, select:focus { border-color: rgba(255,36,69,.42); b
   transform: none !important;
   filter: none !important;
   perspective: none !important;
-}
-
-.reveal-up,
-.section-block,
-.portfolio-card-pro,
-.service-pro-card,
-.bento-card,
-.reveal-up.is-visible,
-.section-block.is-visible,
-.portfolio-card-pro.is-visible,
-.service-pro-card.is-visible,
-.bento-card.is-visible {
-  opacity: 1 !important;
-  transform: none !important;
 }
 
 main, section, .section-block, .hero, .page-head {
@@ -1496,4 +1482,102 @@ body::before {
   .portfolio-gallery-pro { aspect-ratio: 4 / 3; }
   .footer-pro { margin-top: 3rem; padding: 1.25rem; gap: 1.25rem; }
   .services-group-grid { gap: 20px; }
+}
+
+/* ===========================
+   About + Contact — Combined 2-column Section
+   =========================== */
+.about-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+.split-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 28px;
+  background: rgba(255,255,255,.032);
+  overflow: hidden;
+}
+.split-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,36,69,.13), transparent 40%);
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+.split-panel:hover::before { opacity: 1; }
+.split-panel h2 {
+  margin: 0;
+  font-size: clamp(20px, 2.4vw, 32px);
+  letter-spacing: -.054em;
+  line-height: 1.12;
+}
+.split-panel > p:not(.eyebrow) {
+  margin: 0;
+  color: rgba(255,255,255,.62);
+  font-size: 14px;
+  line-height: 1.76;
+  flex-grow: 1;
+}
+.contact-panel {
+  background: radial-gradient(circle at 10% 100%, rgba(255,36,69,.09), transparent 50%), rgba(255,255,255,.024);
+  border-color: rgba(255,36,69,.14);
+}
+.split-panel-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* ===========================
+   Progressive Animation — js-anim body class added by JS
+   =========================== */
+
+/* Reveal elements — start hidden, transition to visible */
+.js-anim .reveal-up { opacity: 0; transform: translateY(20px); }
+.js-anim .reveal-up.is-visible { opacity: 1; transform: none; }
+
+/* Portfolio cards */
+.js-anim .portfolio-card-pro { opacity: 0; transform: translateY(16px); }
+.js-anim .portfolio-card-pro.is-visible { opacity: 1; transform: none; }
+
+/* Bento cards — observed individually, staggered via nth-child delay */
+.js-anim .bento-card { opacity: 0; transform: translateY(20px); }
+.js-anim .bento-card.is-visible { opacity: 1; transform: none; }
+.js-anim .bento-grid .bento-card:nth-child(1) { transition-delay: 0ms; }
+.js-anim .bento-grid .bento-card:nth-child(2) { transition-delay: 85ms; }
+.js-anim .bento-grid .bento-card:nth-child(3) { transition-delay: 170ms; }
+.js-anim .bento-grid .bento-card:nth-child(4) { transition-delay: 255ms; }
+
+/* Split panels — observed individually */
+.js-anim .split-panel { opacity: 0; transform: translateY(18px); }
+.js-anim .split-panel.is-visible { opacity: 1; transform: none; }
+.js-anim .about-contact-grid .split-panel:nth-child(2) { transition-delay: 110ms; }
+
+/* Star canvas */
+#star-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* About / contact split — mobile */
+@media (max-width: 768px) {
+  .about-contact-grid { grid-template-columns: 1fr; gap: 12px; }
+  .split-panel { padding: 26px; gap: 16px; }
+  .js-anim .about-contact-grid .split-panel:nth-child(2) { transition-delay: 0ms; }
+}
+@media (max-width: 620px) {
+  .split-panel { padding: 22px; }
+  .split-panel h2 { font-size: 20px; }
 }
