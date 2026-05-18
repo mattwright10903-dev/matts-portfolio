@@ -12,10 +12,10 @@
       admin: 'Admin — Matt Wright'
     };
     const pageDescriptions = {
-      home: 'Matt Wright — Freelance graphic designer and FiveM server developer. Clean branding, Discord graphics, FiveM UI, and custom server development for communities and creators.',
-      portfolio: 'Portfolio of design and FiveM development work by Matt Wright — branding, Discord graphics, website visuals, FiveM graphics, and roleplay server projects.',
-      about: 'About Matt Wright — freelance graphic designer and FiveM developer with 5+ years of experience in branding, graphics, and server development.',
-      contact: 'Contact Matt Wright for design, branding, FiveM development, Discord graphics, and website visual projects. Reach out via Discord or email.'
+      home: 'Matt Wright — Freelance graphic designer and FiveM server developer. Clean branding, Discord graphics, FiveM UI, and custom server development.',
+      portfolio: 'Portfolio of design and FiveM development work by Matt Wright — branding, Discord graphics, website visuals, FiveM graphics, and server projects.',
+      about: 'About Matt Wright — freelance graphic designer and FiveM developer with 5+ years experience in branding, graphics, and server development.',
+      contact: 'Contact Matt Wright for design, branding, FiveM development, Discord graphics, and website visual projects.'
     };
     const pageTitle = pageTitles[page] || 'Matt Wright — Design & FiveM Development';
     const pageDesc = pageDescriptions[page] || 'Matt Wright — Graphic Designer & FiveM Server Developer.';
@@ -28,34 +28,32 @@
   <meta property="og:title" content="<%= pageTitle %>" />
   <meta property="og:description" content="<%= pageDesc %>" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Matt Wright Portfolio" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="<%= pageTitle %>" />
-  <meta name="twitter:description" content="<%= pageDesc %>" />
   <meta name="theme-color" content="#030304" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="page-<%= page || 'default' %>">
-  <div class="site-loader" data-site-loader><div><strong>Matt Wright.</strong><span>Design + FiveM Development</span></div></div>
+  <div class="site-loader" data-site-loader>
+    <div><strong>Matt Wright</strong><span>Design + FiveM Development</span></div>
+  </div>
   <div class="scroll-progress" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
-  <nav class="nav gooey-shell" data-nav data-active-page="<%= page || 'home' %>">
-    <a class="brand" href="/" aria-label="Matt Wright home">Matt Wright</a>
-    <div class="gooey-nav-container" data-gooey-nav>
-      <div class="gooey-track">
-        <a data-gooey-item data-page="home" class="<%= page === 'home' ? 'active' : '' %>" href="/">Home</a>
-        <a data-gooey-item data-page="portfolio" class="<%= page === 'portfolio' ? 'active' : '' %>" href="/portfolio">Portfolio</a>
-        <a data-gooey-item data-page="about" class="<%= page === 'about' ? 'active' : '' %>" href="/about">About Me</a>
-        <a data-gooey-item data-page="contact" class="<%= page === 'contact' ? 'active' : '' %>" href="/contact">Contact</a>
-        <% if (isAdmin) { %>
-          <a data-gooey-item data-page="admin" class="admin-nav-link <%= page === 'admin' ? 'active' : '' %>" href="/admin">Admin</a>
-        <% } %>
-      </div>
-      <span class="gooey-effect gooey-filter" aria-hidden="true"></span>
-      <span class="gooey-effect gooey-text" aria-hidden="true"></span>
+
+  <nav class="nav" data-nav>
+    <a class="brand" href="/">Matt Wright</a>
+    <div class="nav-links">
+      <a href="/" class="<%= page === 'home' ? 'active' : '' %>">Home</a>
+      <a href="/portfolio" class="<%= page === 'portfolio' ? 'active' : '' %>">Portfolio</a>
+      <a href="/about" class="<%= page === 'about' ? 'active' : '' %>">About</a>
+      <a href="/contact" class="<%= page === 'contact' ? 'active' : '' %>">Contact</a>
+      <% if (isAdmin) { %>
+        <a href="/admin" class="<%= page === 'admin' ? 'active' : '' %>">Admin</a>
+      <% } %>
     </div>
     <% if (isAdmin) { %>
-      <form method="post" action="/admin/logout" class="nav-form nav-logout"><button type="submit">Logout</button></form>
+      <form method="post" action="/admin/logout" class="nav-form">
+        <button type="submit">Logout</button>
+      </form>
     <% } %>
   </nav>
+
   <main>

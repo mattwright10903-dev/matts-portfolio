@@ -9,8 +9,8 @@
 
 <div class="filter-bar" data-filter-bar>
   <button class="filter-pill active" type="button" data-filter="all">All Work</button>
-  <% categories.forEach(category => { %>
-    <button class="filter-pill" type="button" data-filter="<%= category %>"><%= category %></button>
+  <% categories.forEach(cat => { %>
+    <button class="filter-pill" type="button" data-filter="<%= cat %>"><%= cat %></button>
   <% }) %>
 </div>
 
@@ -23,20 +23,20 @@
     const desc = project.description || '';
     const shortDesc = desc.length > 120 ? desc.slice(0, 120).trim() + '…' : desc;
   %>
-    <article class="portfolio-card-pro" data-category="<%= project.category %>">
+    <article class="portfolio-card-pro scroll-reveal" data-category="<%= project.category %>">
       <div class="portfolio-gallery-pro" data-gallery>
         <a href="/portfolio/<%= project.id %>" class="project-open-link" aria-label="Open <%= project.title %> case study">
-          <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>">
-          <span class="project-hover-layer">
+          <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>" loading="lazy">
+          <div class="project-hover-layer">
             <b>View Case Study</b>
             <small><%= project.category %></small>
-          </span>
+          </div>
         </a>
         <% if (images.length > 1) { %>
           <div class="gallery-thumbs floating-thumbs">
-            <% images.forEach((image, index) => { %>
-              <button type="button" class="gallery-thumb <%= index === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= index + 1 %> for <%= project.title %>">
-                <img src="<%= image %>" alt="">
+            <% images.forEach((image, i) => { %>
+              <button type="button" class="gallery-thumb <%= i === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= i + 1 %>">
+                <img src="<%= image %>" alt="" loading="lazy">
               </button>
             <% }) %>
           </div>
