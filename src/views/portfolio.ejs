@@ -56,14 +56,24 @@
        aria-label="Interactive project showcase. Use arrow keys or drag to browse.">
 
     <% galleryProjects.forEach(function(project, i) {
-       const isCtr   = (i === initCenter);
-       const isEager = (i >= initCenter - 1 && i <= initCenter + 1);
+       const isCtr      = (i === initCenter);
+       const isEager    = (i >= initCenter - 1 && i <= initCenter + 1);
+       const cardImgs   = (Array.isArray(project.images) && project.images.length) ? project.images : (project.image_url ? [project.image_url] : []);
+       const cardImgsJson = JSON.stringify(cardImgs);
     %>
-      <%# href kept for JS-off fallback; JS intercepts center-card clicks to open popup %>
+      <%# href kept for JS-off fallback; JS intercepts card clicks to open popup %>
       <a href="/portfolio/<%= project.id %>"
          class="pgal-card<%= isCtr ? ' is-center' : '' %>"
          data-pgal-card
          data-index="<%= i %>"
+         data-project-id="<%= project.id %>"
+         data-title="<%= project.title %>"
+         data-category="<%= project.category %>"
+         data-description="<%= (project.description || '').slice(0, 300) %>"
+         data-tools="<%= project.tools || '' %>"
+         data-goal="<%= (project.goal || '').slice(0, 200) %>"
+         data-result="<%= (project.result || '').slice(0, 200) %>"
+         data-images="<%= cardImgsJson %>"
          draggable="false"
          aria-label="<%= project.title %> — <%= project.category %>.">
 

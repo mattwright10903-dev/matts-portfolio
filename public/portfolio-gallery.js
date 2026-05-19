@@ -1,12 +1,11 @@
 /* ══════════════════════════════════════════════════════════════════
    Portfolio Dome Gallery + Project Viewer — portfolio-gallery.js
    Loaded only on /portfolio (deferred, via layout-end conditional).
-   Mobile ≤ 640px: CSS scroll-snap handles gallery, JS skips dome.
+   Mobile ≤ 640px: CSS scroll-snap handles gallery navigation.
    ══════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
-  /* ── Utilities ── */
   var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function escHtml(s) {
@@ -17,97 +16,150 @@
       .replace(/"/g, '&quot;');
   }
 
-  /* ── Load project data ── */
+  /* ── Load project data from safe JSON embed ── */
   var pviewData = [];
   try {
     var dataEl = document.getElementById('pgal-data');
     if (dataEl) pviewData = JSON.parse(dataEl.textContent || '[]');
-  } catch (e) { /* data unavailable — modal won't open */ }
+  } catch (e) { /* silently fall back to card data-attributes */ }
+
+  /* ── Gallery stage + cards (used on both mobile and desktop) ── */
+  var stage = document.querySelector('[data-pgal-stage]');
+  var cards = stage ? Array.from(stage.querySelectorAll('[data-pgal-card]')) : [];
+  var count = cards.length;
+
+  /* dragDelta is declared here so the click handler can read it on both paths */
+  var dragDelta = 0;
 
   /* ════════════════════════════════════════════════════════════════
      PROJECT VIEWER MODAL
      ════════════════════════════════════════════════════════════════ */
-  var pview           = document.getElementById('pview');
-  var pviewImgEl      = pview && pview.querySelector('[data-pview-img]');
-  var pviewCatEl      = pview && pview.querySelector('[data-pview-cat]');
-  var pviewTitleEl    = pview && pview.querySelector('[data-pview-title]');
-  var pviewDescEl     = pview && pview.querySelector('[data-pview-desc]');
-  var pviewMetaEl     = pview && pview.querySelector('[data-pview-meta]');
-  var pviewThumbsEl   = pview && pview.querySelector('[data-pview-thumbs]');
-  var pviewCtaEl      = pview && pview.querySelector('[data-pview-cta]');
-  var pviewPrevBtn    = pview && pview.querySelector('[data-pview-prev]');
-  var pviewNextBtn    = pview && pview.querySelector('[data-pview-next]');
+  var pview         = document.getElementById('pview');
+  var pviewImgEl    = pview && pview.querySelector('[data-pview-img]');
+  var pviewCatEl    = pview && pview.querySelector('[data-pview-cat]');
+  var pviewTitleEl  = pview && pview.querySelector('[data-pview-title]');
+  var pviewDescEl   = pview && pview.querySelector('[data-pview-desc]');
+  var pviewMetaEl   = pview && pview.querySelector('[data-pview-meta]');
+  var pviewThumbsEl = pview && pview.querySelector('[data-pview-thumbs]');
+  var pviewCtaEl    = pview && pview.querySelector('[data-pview-cta]');
+  var pviewPrevBtn  = pview && pview.querySelector('[data-pview-prev]');
+  var pviewNextBtn  = pview && pview.querySelector('[data-pview-next]');
 
-  var pviewCurrentIdx = -1; // index into pviewData
+  var pviewCurrentIdx = -1;
   var prevFocusEl     = null;
 
-  function openPview(idx) {
-    if (!pview || !pviewData[idx]) return;
-    pviewCurrentIdx = idx;
-    var p = pviewData[idx];
+  /* Core populate + show function — used by both openPview and openPviewFromCard */
+  function showModal(p, idx) {
+    if (!pview || !p) return;
+    pviewCurrentIdx = (typeof idx === 'number' && idx >= 0) ? idx : -1;
 
-    /* Image */
-    pviewImgEl.src = p.image_url || '';
-    pviewImgEl.alt = p.title;
+    var imgs    = (p.images && p.images.length) ? p.images : (p.image_url ? [p.image_url] : []);
+    var mainSrc = imgs[0] || '';
 
-    /* Text */
-    pviewCatEl.textContent   = p.category;
-    pviewTitleEl.textContent = p.title;
-    pviewDescEl.textContent  = p.description;
-
-    /* CTA link */
-    pviewCtaEl.href = '/portfolio/' + p.id;
+    if (pviewImgEl) {
+      pviewImgEl.style.opacity = '1';
+      pviewImgEl.src = mainSrc;
+      pviewImgEl.alt = p.title || '';
+    }
+    if (pviewCatEl)   pviewCatEl.textContent  = p.category    || '';
+    if (pviewTitleEl) pviewTitleEl.textContent = p.title       || '';
+    if (pviewDescEl)  pviewDescEl.textContent  = p.description || '';
+    if (pviewCtaEl)   pviewCtaEl.href = '/portfolio/' + encodeURIComponent(String(p.id || ''));
 
     /* Meta rows */
-    pviewMetaEl.innerHTML = '';
-    [
-      { label: 'Tools',  val: p.tools  },
-      { label: 'Goal',   val: p.goal   },
-      { label: 'Result', val: p.result }
-    ].forEach(function (row) {
-      if (!row.val) return;
-      var el = document.createElement('div');
-      el.className = 'pview-meta-row';
-      el.innerHTML =
-        '<span class="pview-meta-label">' + escHtml(row.label) + '</span>' +
-        '<span class="pview-meta-val">'   + escHtml(row.val)   + '</span>';
-      pviewMetaEl.appendChild(el);
-    });
-
-    /* Thumbnails */
-    pviewThumbsEl.innerHTML = '';
-    var imgs = p.images && p.images.length ? p.images : (p.image_url ? [p.image_url] : []);
-    if (imgs.length > 1) {
-      imgs.forEach(function (src, ti) {
-        var btn = document.createElement('button');
-        btn.type      = 'button';
-        btn.className = 'pview-thumb' + (ti === 0 ? ' is-active' : '');
-        btn.setAttribute('aria-label', 'Image ' + (ti + 1));
-        var img       = document.createElement('img');
-        img.src       = src;
-        img.alt       = '';
-        img.loading   = 'lazy';
-        btn.appendChild(img);
-        btn.addEventListener('click', function () { switchPviewImg(src, btn); });
-        pviewThumbsEl.appendChild(btn);
+    if (pviewMetaEl) {
+      pviewMetaEl.innerHTML = '';
+      [
+        { label: 'Tools',  val: p.tools  },
+        { label: 'Goal',   val: p.goal   },
+        { label: 'Result', val: p.result }
+      ].forEach(function (row) {
+        if (!row.val) return;
+        var el = document.createElement('div');
+        el.className = 'pview-meta-row';
+        el.innerHTML =
+          '<span class="pview-meta-label">' + escHtml(row.label) + '</span>' +
+          '<span class="pview-meta-val">'   + escHtml(row.val)   + '</span>';
+        pviewMetaEl.appendChild(el);
       });
     }
 
-    /* Prev/Next button state */
-    if (pviewPrevBtn) pviewPrevBtn.disabled = (idx <= 0);
-    if (pviewNextBtn) pviewNextBtn.disabled = (idx >= pviewData.length - 1);
+    /* Thumbnails */
+    if (pviewThumbsEl) {
+      pviewThumbsEl.innerHTML = '';
+      if (imgs.length > 1) {
+        imgs.forEach(function (src, ti) {
+          var btn = document.createElement('button');
+          btn.type      = 'button';
+          btn.className = 'pview-thumb' + (ti === 0 ? ' is-active' : '');
+          btn.setAttribute('aria-label', 'Image ' + (ti + 1));
+          var img       = document.createElement('img');
+          img.src       = src; img.alt = ''; img.loading = 'lazy';
+          btn.appendChild(img);
+          btn.addEventListener('click', function () { switchPviewImg(src, btn); });
+          pviewThumbsEl.appendChild(btn);
+        });
+      }
+    }
 
-    /* Show overlay */
+    /* Prev / Next button state */
+    if (pviewPrevBtn) pviewPrevBtn.disabled = (pviewCurrentIdx <= 0);
+    if (pviewNextBtn) pviewNextBtn.disabled = (pviewCurrentIdx < 0 || pviewCurrentIdx >= pviewData.length - 1);
+
+    /* Show */
     prevFocusEl = document.activeElement;
     pview.setAttribute('aria-hidden', 'false');
     pview.classList.add('is-open');
     document.body.style.overflow = 'hidden';
 
-    /* Focus the close button for keyboard users */
     setTimeout(function () {
       var closeBtn = pview.querySelector('[data-pview-close]');
       if (closeBtn) closeBtn.focus();
     }, 60);
+  }
+
+  /* Called by modal prev/next nav — index-based */
+  function openPview(idx) {
+    if (pviewData[idx]) showModal(pviewData[idx], idx);
+  }
+
+  /* Called by card click — reads pviewData first, falls back to data-attributes */
+  function openPviewFromCard(card) {
+    if (!card) return;
+
+    var idx = parseInt(card.getAttribute('data-index'), 10);
+
+    /* Primary: use pviewData (server-rendered, complete) */
+    if (!isNaN(idx) && pviewData[idx]) {
+      showModal(pviewData[idx], idx);
+      return;
+    }
+
+    /* Fallback: read directly from the card's data-attributes */
+    var images;
+    try { images = JSON.parse(card.getAttribute('data-images') || '[]'); }
+    catch (e) { images = []; }
+
+    var p = {
+      id:          card.getAttribute('data-project-id') || '',
+      title:       card.getAttribute('data-title')       || '',
+      category:    card.getAttribute('data-category')    || '',
+      description: card.getAttribute('data-description') || '',
+      tools:       card.getAttribute('data-tools')       || '',
+      goal:        card.getAttribute('data-goal')        || '',
+      result:      card.getAttribute('data-result')      || '',
+      image_url:   images[0] || '',
+      images:      images
+    };
+
+    /* If we have no usable data at all, let the href navigate */
+    if (!p.title && !p.id) {
+      var href = card.getAttribute('href');
+      if (href) window.location.href = href;
+      return;
+    }
+
+    showModal(p, -1); /* idx = -1 → prev/next disabled */
   }
 
   function closePview() {
@@ -124,69 +176,98 @@
     setTimeout(function () {
       pviewImgEl.src = src;
       pviewImgEl.style.opacity = '1';
-    }, 170);
-    pviewThumbsEl && Array.from(pviewThumbsEl.querySelectorAll('.pview-thumb')).forEach(function (t) {
-      t.classList.toggle('is-active', t === thumbBtn);
-    });
+    }, 160);
+    if (pviewThumbsEl) {
+      Array.from(pviewThumbsEl.querySelectorAll('.pview-thumb')).forEach(function (t) {
+        t.classList.toggle('is-active', t === thumbBtn);
+      });
+    }
   }
 
-  /* Wire up pview controls */
+  /* ── Wire up pview controls ── */
   if (pview) {
-    /* Close buttons (including backdrop) */
-    pview.addEventListener('click', function (e) {
-      if (e.target.closest('[data-pview-close]') || e.target === pview.querySelector('[data-pview-backdrop]')) {
-        closePview();
-      }
-    });
-
-    /* Prev/Next */
-    if (pviewPrevBtn) pviewPrevBtn.addEventListener('click', function () { openPview(pviewCurrentIdx - 1); });
-    if (pviewNextBtn) pviewNextBtn.addEventListener('click', function () { openPview(pviewCurrentIdx + 1); });
-
-    /* Keyboard */
-    document.addEventListener('keydown', function (e) {
-      if (!pview.classList.contains('is-open')) return;
-      if (e.key === 'Escape')      { e.preventDefault(); closePview(); }
-      if (e.key === 'ArrowLeft')   { e.preventDefault(); if (pviewCurrentIdx > 0) openPview(pviewCurrentIdx - 1); }
-      if (e.key === 'ArrowRight')  { e.preventDefault(); if (pviewCurrentIdx < pviewData.length - 1) openPview(pviewCurrentIdx + 1); }
-    });
-
-    /* Prevent click propagation inside dialog */
-    var dialog = pview.querySelector('.pview-dialog');
-    if (dialog) dialog.addEventListener('click', function (e) { e.stopPropagation(); });
-
     /* Backdrop click */
     var backdrop = pview.querySelector('[data-pview-backdrop]');
     if (backdrop) backdrop.addEventListener('click', closePview);
+
+    /* Close button — direct listener (no bubbling dependency) */
+    var closeBtnEl = pview.querySelector('[data-pview-close]');
+    if (closeBtnEl) closeBtnEl.addEventListener('click', closePview);
+
+    /* Prev / Next */
+    if (pviewPrevBtn) {
+      pviewPrevBtn.addEventListener('click', function () {
+        if (pviewCurrentIdx > 0) openPview(pviewCurrentIdx - 1);
+      });
+    }
+    if (pviewNextBtn) {
+      pviewNextBtn.addEventListener('click', function () {
+        if (pviewCurrentIdx >= 0 && pviewCurrentIdx < pviewData.length - 1) {
+          openPview(pviewCurrentIdx + 1);
+        }
+      });
+    }
+
+    /* Keyboard: ESC close, ← → prev/next */
+    document.addEventListener('keydown', function (e) {
+      if (!pview.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault(); closePview();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (pviewCurrentIdx > 0) openPview(pviewCurrentIdx - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (pviewCurrentIdx >= 0 && pviewCurrentIdx < pviewData.length - 1) {
+          openPview(pviewCurrentIdx + 1);
+        }
+      }
+    });
+
+    /* Prevent click propagation inside dialog from closing modal */
+    var dialogEl = pview.querySelector('.pview-dialog');
+    if (dialogEl) {
+      dialogEl.addEventListener('click', function (e) {
+        /* Only stop propagation if NOT clicking the close button */
+        if (!e.target.closest('[data-pview-close]') && !e.target.closest('[data-pview-backdrop]')) {
+          e.stopPropagation();
+        }
+      });
+    }
   }
 
   /* ════════════════════════════════════════════════════════════════
-     DOME GALLERY
-     Skip on mobile — CSS scroll-snap handles scroll there.
+     CARD CLICK — event delegation
+     Mobile (≤640px): any card click → open modal immediately.
+     Desktop: handled again after dome init with center-card logic.
+     ════════════════════════════════════════════════════════════════ */
+  if (stage && window.innerWidth <= 640) {
+    stage.addEventListener('click', function (e) {
+      var card = e.target.closest('[data-pgal-card]');
+      if (!card) return;
+      e.preventDefault();
+      openPviewFromCard(card);
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     DOME GALLERY (desktop only — mobile handled above + CSS snap)
      ════════════════════════════════════════════════════════════════ */
   if (window.innerWidth <= 640) return;
+  if (!stage || !count) return;
 
-  var stage = document.querySelector('[data-pgal-stage]');
-  if (!stage) return;
-
-  var cards = Array.from(stage.querySelectorAll('[data-pgal-card]'));
-  if (!cards.length) return;
-
-  var count      = cards.length;
-  var offset     = Math.floor(count / 2);
-  var rafId      = null;
+  var offset  = Math.floor(count / 2);
+  var rafId   = null;
 
   /* Drag state */
   var isDragging   = false;
   var dragStartX   = 0;
   var dragStartOff = 0;
-  var dragDelta    = 0;
   var lastX        = 0;
   var lastT        = 0;
   var velTracker   = 0;
   var inertiaVel   = 0;
 
-  /* ── Responsive spacing ── */
   function getSpacing() {
     var w = window.innerWidth;
     if (w >= 1200) return 320;
@@ -195,7 +276,6 @@
     return 228;
   }
 
-  /* ── Apply dome transforms ── */
   function applyTransforms(off) {
     off = (off !== undefined) ? off : offset;
     var sp      = getSpacing();
@@ -218,13 +298,13 @@
         ' translateY(' + ty.toFixed(1) + 'px)' +
         ' scale(' + sc.toFixed(3) + ')' +
         ' rotateY(' + ry.toFixed(1) + 'deg)';
-
-      card.style.opacity = op.toFixed(3);
-      card.style.zIndex  = zi;
+      card.style.opacity       = op.toFixed(3);
+      card.style.zIndex        = zi;
+      /* Allow clicks for cards within 2 positions of center; block far cards */
+      card.style.pointerEvents = (ad <= 2) ? 'auto' : 'none';
 
       var isCenter = (i === centerI);
       card.classList.toggle('is-center', isCenter);
-      card.style.pointerEvents = (ad < 1.5) ? 'auto' : 'none';
     });
 
     Array.from(dots).forEach(function (dot, i) {
@@ -234,33 +314,30 @@
     });
   }
 
-  /* ── Animate to integer index (lerp) ── */
   function animateTo(target) {
     cancelAnimationFrame(rafId);
     target = Math.max(0, Math.min(count - 1, target));
     if (noMotion) { offset = target; applyTransforms(); return; }
-    function tick() {
+    (function tick() {
       offset += (target - offset) * 0.14;
       if (Math.abs(target - offset) < 0.002) { offset = target; applyTransforms(); return; }
       applyTransforms();
       rafId = requestAnimationFrame(tick);
-    }
-    tick();
+    })();
   }
 
-  /* ── Inertia + snap ── */
   function inertiaSnap() {
     cancelAnimationFrame(rafId);
-    if (noMotion || Math.abs(inertiaVel) < 0.004) { animateTo(Math.round(Math.max(0, Math.min(count - 1, offset)))); return; }
-    function tick() {
-      if (Math.abs(inertiaVel) < 0.005) { animateTo(Math.round(Math.max(0, Math.min(count - 1, offset)))); return; }
+    var snap = function () { animateTo(Math.round(Math.max(0, Math.min(count - 1, offset)))); };
+    if (noMotion || Math.abs(inertiaVel) < 0.004) { snap(); return; }
+    (function tick() {
+      if (Math.abs(inertiaVel) < 0.005) { snap(); return; }
       offset    += inertiaVel;
       offset     = Math.max(-0.45, Math.min(count - 0.55, offset));
       inertiaVel *= 0.88;
       applyTransforms();
       rafId = requestAnimationFrame(tick);
-    }
-    tick();
+    })();
   }
 
   /* ── Pointer drag ── */
@@ -303,27 +380,26 @@
   stage.addEventListener('pointerup',     onRelease);
   stage.addEventListener('pointercancel', onRelease);
 
-  /* Prevent link if dragged */
+  /* ── Desktop click delegation — navigate gallery or open modal ──
+     Uses is-center class (not float offset) for reliable detection.
+     dragDelta > 5 = drag gesture → block navigation, reset after 40ms. */
   stage.addEventListener('click', function (e) {
-    if (Math.abs(dragDelta) > 5) { e.preventDefault(); e.stopPropagation(); }
-  }, true);
+    if (Math.abs(dragDelta) > 5) { e.preventDefault(); return; }
 
-  /* Card click: non-center → navigate gallery; center → open viewer */
-  cards.forEach(function (card, i) {
-    card.addEventListener('click', function (e) {
-      if (Math.abs(dragDelta) > 5) return;
-      var centerI = Math.round(offset);
-      if (centerI !== i) {
-        /* Not center — navigate gallery to this card */
-        e.preventDefault();
-        animateTo(i);
-      } else if (pviewData.length > i) {
-        /* Center card — open popup viewer */
-        e.preventDefault();
-        openPview(i);
-      }
-      /* Fallback: if no pviewData, let href work normally */
-    });
+    var card = e.target.closest('[data-pgal-card]');
+    if (!card) return;
+
+    var idx = parseInt(card.getAttribute('data-index'), 10);
+
+    if (!card.classList.contains('is-center') && !isNaN(idx)) {
+      /* Non-center card: navigate dome gallery to it */
+      e.preventDefault();
+      animateTo(idx);
+    } else {
+      /* Center card (or fallback): open project viewer modal */
+      e.preventDefault();
+      openPviewFromCard(card);
+    }
   });
 
   /* ── Trackpad / wheel horizontal swipe ── */
@@ -343,14 +419,13 @@
   stage.setAttribute('tabindex', '0');
   stage.addEventListener('keydown', function (e) {
     var moved = false;
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { animateTo(Math.round(offset) - 1); moved = true; }
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { animateTo(Math.round(offset) + 1); moved = true; }
-    if (e.key === 'Home')  { animateTo(0); moved = true; }
-    if (e.key === 'End')   { animateTo(count - 1); moved = true; }
-    if ((e.key === 'Enter' || e.key === ' ') && pviewData.length > Math.round(offset)) {
-      e.preventDefault();
-      openPview(Math.round(offset));
-      moved = true;
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  { animateTo(Math.round(offset) - 1); moved = true; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { animateTo(Math.round(offset) + 1); moved = true; }
+    if (e.key === 'Home') { animateTo(0); moved = true; }
+    if (e.key === 'End')  { animateTo(count - 1); moved = true; }
+    if (e.key === 'Enter' || e.key === ' ') {
+      var centerCard = cards[Math.round(offset)];
+      if (centerCard) { e.preventDefault(); openPviewFromCard(centerCard); moved = true; }
     }
     if (moved) e.preventDefault();
   });
@@ -360,7 +435,7 @@
     dot.addEventListener('click', function () { animateTo(i); });
   });
 
-  /* ── Prev / Next gallery buttons ── */
+  /* ── Gallery prev / next buttons ── */
   var prevBtn = document.querySelector('[data-pgal-prev]');
   var nextBtn = document.querySelector('[data-pgal-next]');
   if (prevBtn) prevBtn.addEventListener('click', function () { animateTo(Math.round(offset) - 1); });
