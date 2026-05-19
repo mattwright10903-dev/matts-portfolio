@@ -63,7 +63,7 @@
     %>
       <%# href kept for JS-off fallback; JS intercepts card clicks to open popup %>
       <a href="/portfolio/<%= project.id %>"
-         class="pgal-card<%= isCtr ? ' is-center' : '' %>"
+         class="pgal-card js-project-preview<%= isCtr ? ' is-center' : '' %>"
          data-pgal-card
          data-index="<%= i %>"
          data-project-id="<%= project.id %>"

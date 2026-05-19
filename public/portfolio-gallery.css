@@ -47,6 +47,17 @@
 }
 .pgal-stage.is-dragging { cursor: grabbing; }
 
+/* ── Clickable showcase cards ── */
+.js-project-preview {
+  cursor: pointer;
+  /* pointer-events managed by JS (applyTransforms) on desktop;
+     on mobile the CSS scroll-snap section overrides to auto !important */
+}
+.js-project-preview img,
+.js-project-preview video {
+  pointer-events: none; /* prevent img from swallowing the click */
+}
+
 /* ── Individual card ── */
 .pgal-card {
   position: absolute;
