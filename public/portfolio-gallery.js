@@ -245,8 +245,9 @@
     /* If user was dragging the carousel, suppress the resulting click */
     if (Math.abs(dragDelta) > 8) return;
 
-    /* On desktop with dome active: non-centre card → navigate carousel */
-    if (domeOffset !== null && !card.classList.contains('is-center')) {
+    /* On desktop with dome active: non-centre carousel card → navigate carousel
+       (data-pgal-card distinguishes carousel cards from grid cards) */
+    if (domeOffset !== null && card.hasAttribute('data-pgal-card') && !card.classList.contains('is-center')) {
       var navIdx = parseInt(card.getAttribute('data-index'), 10);
       if (!isNaN(navIdx)) {
         e.preventDefault();

@@ -13,7 +13,8 @@
       .replace(/&/g, '\\u0026');
   }
 
-  const galleryData = galleryProjects.map(function(p) {
+  /* All projects for the modal (carousel uses first galleryMax, grid uses all) */
+  const allProjectData = projects.map(function(p) {
     const imgs = (Array.isArray(p.images) && p.images.length) ? p.images : (p.image_url ? [p.image_url] : []);
     return {
       id:          p.id,
@@ -29,8 +30,8 @@
   });
 %>
 
-<%# Project data for popup viewer (read by portfolio-gallery.js) %>
-<script id="pgal-data" type="application/json"><%- safeJson(galleryData) %></script>
+<%# All project data for the JS modal (covers carousel + grid) %>
+<script id="pgal-data" type="application/json"><%- safeJson(allProjectData) %></script>
 
 <!-- ── Portfolio Hero ── -->
 <section class="page-head portfolio-head">
@@ -40,10 +41,13 @@
 </section>
 
 <% if (galleryProjects.length > 0) { %>
-<!-- ── Interactive Dome Gallery ── -->
+<!-- ── Featured Interactive Showcase ── -->
 <section class="pgal-section scroll-reveal">
   <div class="pgal-header">
-    <p class="eyebrow">Showcase</p>
+    <div>
+      <p class="eyebrow">Showcase</p>
+      <h2 class="pgal-heading">Featured Projects</h2>
+    </div>
     <div class="pgal-controls">
       <button class="pgal-btn" type="button" data-pgal-prev aria-label="Previous project">&#8592;</button>
       <button class="pgal-btn" type="button" data-pgal-next aria-label="Next project">&#8594;</button>
@@ -151,6 +155,7 @@
         <div class="pview-meta" data-pview-meta></div>
         <div class="pview-actions">
           <a class="btn primary pview-cta" data-pview-cta href="#" target="_self">View Full Case Study</a>
+          <a class="btn pview-contact" href="/contact">Contact Me</a>
         </div>
       </div>
     </div>
@@ -184,14 +189,26 @@
       <p class="empty-state">No projects have been added yet.</p>
     <% } %>
 
-    <% projects.forEach(function(project) {
+    <% projects.forEach(function(project, i) {
          const images    = (Array.isArray(project.images) && project.images.length) ? project.images : (project.image_url ? [project.image_url] : []);
          const desc      = project.description || '';
          const shortDesc = desc.length > 120 ? desc.slice(0, 120).trim() + '…' : desc;
     %>
       <article class="portfolio-card-pro scroll-reveal" data-category="<%= project.category %>">
         <div class="portfolio-gallery-pro" data-gallery>
-          <a href="/portfolio/<%= project.id %>" class="project-open-link" aria-label="Open <%= project.title %> case study">
+          <%# js-project-preview enables click-to-modal; href fallback navigates to case study %>
+          <a href="/portfolio/<%= project.id %>"
+             class="project-open-link js-project-preview"
+             data-index="<%= i %>"
+             data-project-id="<%= project.id %>"
+             data-title="<%= project.title %>"
+             data-category="<%= project.category %>"
+             data-description="<%= (project.description || '').slice(0, 300) %>"
+             data-tools="<%= project.tools || '' %>"
+             data-goal="<%= (project.goal || '').slice(0, 200) %>"
+             data-result="<%= (project.result || '').slice(0, 200) %>"
+             data-images="<%= JSON.stringify(images) %>"
+             aria-label="Open <%= project.title %> case study">
             <% if (project.image_url) { %>
               <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>" loading="lazy">
             <% } else { %>
@@ -204,14 +221,14 @@
               </div>
             <% } %>
             <div class="project-hover-layer">
-              <b>View Case Study</b>
+              <b>Quick Preview</b>
               <small><%= project.category %></small>
             </div>
           </a>
           <% if (images.length > 1) { %>
             <div class="gallery-thumbs floating-thumbs">
-              <% images.forEach(function(image, i) { %>
-                <button type="button" class="gallery-thumb <%= i === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= i + 1 %>">
+              <% images.forEach(function(image, idx) { %>
+                <button type="button" class="gallery-thumb <%= idx === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= idx + 1 %>">
                   <img src="<%= image %>" alt="" loading="lazy">
                 </button>
               <% }); %>
@@ -236,6 +253,19 @@
       </article>
     <% }); %>
   </section>
+</section>
+
+<!-- ── Contact CTA ── -->
+<section class="port-cta-section scroll-reveal">
+  <div class="port-cta-inner">
+    <p class="eyebrow">Work Together</p>
+    <h2>Like what you see?</h2>
+    <p class="port-cta-body">Let's build something great. Whether it's branding, FiveM development, or Discord graphics — I'd love to hear about your project.</p>
+    <div class="port-cta-btns">
+      <a class="btn primary" href="/contact">Contact Me</a>
+      <a class="btn" href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer">Order on Fiverr ↗</a>
+    </div>
+  </div>
 </section>
 
 <%- include('layout-end') %>
