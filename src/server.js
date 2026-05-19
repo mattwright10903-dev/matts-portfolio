@@ -1,3 +1,4 @@
+import compression from 'compression';
 import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
@@ -75,6 +76,7 @@ function normalizeProjects(rows) {
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(compression());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.static(path.join(__dirname, '../public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
@@ -150,14 +152,14 @@ function requireAdmin(req, res, next) {
 // ── Public routes ──
 
 app.get('/', async (req, res) => {
-  const projects = await query('SELECT * FROM projects WHERE featured = true AND published = true ORDER BY sort_order ASC, created_at DESC LIMIT 6');
+  const projects = await query('SELECT id, title, category, image_url, project_images FROM projects WHERE featured = true AND published = true ORDER BY sort_order ASC, created_at DESC LIMIT 6');
   const content  = await getContent();
   logSite('Homepage Visit', req).catch(() => {});
   res.render('home', locals(req, { page: 'home', projects: normalizeProjects(projects.rows), content }));
 });
 
 app.get('/portfolio', async (req, res) => {
-  const projects = await query('SELECT * FROM projects WHERE published = true ORDER BY sort_order ASC, created_at DESC');
+  const projects = await query('SELECT id, title, category, description, image_url, project_images, featured, tools, goal, result, project_url FROM projects WHERE published = true ORDER BY sort_order ASC, created_at DESC');
   const content  = await getContent();
   logSite('Portfolio Page Visit', req).catch(() => {});
   res.render('portfolio', locals(req, { page: 'portfolio', projects: normalizeProjects(projects.rows), content }));

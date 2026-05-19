@@ -68,6 +68,9 @@ export async function initDb() {
   await query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;`);
   await query(`UPDATE projects SET project_images = ARRAY[image_url] WHERE (project_images IS NULL OR cardinality(project_images) = 0) AND image_url IS NOT NULL AND image_url <> '';`);
   await query(`UPDATE projects SET published = true WHERE published IS NULL;`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_projects_published ON projects (published);`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_projects_featured ON projects (featured);`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_projects_sort ON projects (sort_order ASC, created_at DESC);`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS messages (

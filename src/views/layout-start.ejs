@@ -47,6 +47,23 @@
     })();
   </script>
 
+  <%# Prefetch adjacent public pages so navigation feels instant %>
+  <% if (page === 'home') { %>
+  <link rel="prefetch" href="/portfolio" as="document">
+  <link rel="prefetch" href="/about"     as="document">
+  <link rel="prefetch" href="/contact"   as="document">
+  <% } else if (page === 'portfolio') { %>
+  <link rel="prefetch" href="/"        as="document">
+  <link rel="prefetch" href="/about"   as="document">
+  <link rel="prefetch" href="/contact" as="document">
+  <% } else if (page === 'about') { %>
+  <link rel="prefetch" href="/portfolio" as="document">
+  <link rel="prefetch" href="/contact"   as="document">
+  <% } else if (page === 'contact') { %>
+  <link rel="prefetch" href="/portfolio" as="document">
+  <link rel="prefetch" href="/about"     as="document">
+  <% } %>
+
   <link rel="stylesheet" href="/styles.css" />
   <% if (page === 'portfolio') { %>
   <link rel="stylesheet" href="/portfolio-gallery.css" />
