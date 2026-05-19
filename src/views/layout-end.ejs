@@ -102,15 +102,19 @@
       document.addEventListener('click', function (e) {
         var link = e.target.closest('a[href]');
         if (!link || !isInternalLink(link)) return;
-        // Already navigating away — skip
         if (transitionOverlay.classList.contains('is-active')) return;
         e.preventDefault();
         var dest = link.href;
         transitionOverlay.classList.add('is-active');
         setTimeout(function () {
           window.location.href = dest;
-        }, 310);
+        }, 200);
       }, true);
+
+      // Remove overlay if page is restored from bfcache (back/forward navigation)
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) transitionOverlay.classList.remove('is-active');
+      });
     }
 
     /* ─────────────────────────────────────────────────────────────

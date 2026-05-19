@@ -76,7 +76,10 @@ function normalizeProjects(rows) {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
+  etag: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
