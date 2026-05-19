@@ -706,6 +706,13 @@ details label:last-child { margin-bottom: 14px; }
 .check-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
 .delete-form { padding: 0 22px 18px; }
 .admin-editor-form button[type="submit"] { margin-top: 16px; }
+/* Save button loading state */
+.btn.is-loading, .btn[disabled] { opacity: .55; cursor: not-allowed; pointer-events: none; }
+
+/* Project card "just saved" highlight */
+@keyframes savedPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); } 30% { box-shadow: 0 0 0 4px rgba(52,199,89,.35); } }
+.project-editor-card.just-saved { animation: savedPulse 2.4s var(--ease) both; border-color: rgba(52,199,89,.4); }
+
 /* Admin search bar */
 .admin-search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .admin-search-bar input[type="search"] { flex: 1; min-width: 180px; }

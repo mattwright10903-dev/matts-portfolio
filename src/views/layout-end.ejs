@@ -248,6 +248,20 @@
     });
 
     /* ─────────────────────────────────────────────────────────────
+       ADMIN — FORM SAVE LOADING STATE
+    ─────────────────────────────────────────────────────────────── */
+    $$('.project-form-pro').forEach(function (form) {
+      form.addEventListener('submit', function () {
+        var btn = form.querySelector('button[type="submit"]');
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        btn.dataset.orig = btn.textContent;
+        btn.textContent  = 'Saving…';
+        btn.classList.add('is-loading');
+      });
+    });
+
+    /* ─────────────────────────────────────────────────────────────
        ADMIN — IMAGE UPLOAD PREVIEW
     ─────────────────────────────────────────────────────────────── */
     function attachPreview(input) {

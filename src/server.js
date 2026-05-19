@@ -22,7 +22,14 @@ const PORT          = process.env.PORT || 3000;
 const ADMIN_EMAIL   = process.env.ADMIN_EMAIL || 'mattwright10903@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const BASE_URL      = (process.env.BASE_URL || 'https://mattwright.online').replace(/\/$/, '');
-const upload        = multer({ storage: multer.memoryStorage(), limits: { fileSize: 6 * 1024 * 1024, files: 10 } });
+const upload        = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fieldSize: 25 * 1024 * 1024,  // 25 MB per field — required for base64 keep_images values
+    fileSize:   6 * 1024 * 1024,  // 6 MB per uploaded file
+    files: 10,
+  },
+});
 
 function splitImageUrls(value) {
   return String(value || '')
@@ -249,16 +256,28 @@ app.get('/account', (_req, res) => res.redirect('/contact'));
 // ── Admin routes ──
 // All routes below /admin already passed adminGuard above.
 
-app.get('/admin', async (req, res) => {
-  if (!req.session?.isAdmin) {
-    logAdmin('Admin Login Page Visited', req).catch(() => {});
-    return res.render('admin-login', locals(req, { page: 'admin', error: null }));
-  }
+app.get('/admin', async (req, res, next) => {
+  try {
+    if (!req.session?.isAdmin) {
+      logAdmin('Admin Login Page Visited', req).catch(() => {});
+      return res.render('admin-login', locals(req, { page: 'admin', error: null }));
+    }
 
-  logAdmin('Admin Dashboard Accessed', req).catch(() => {});
-  const projects = await query('SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC');
-  const content  = await getContent();
-  res.render('admin', locals(req, { page: 'admin', projects: normalizeProjects(projects.rows), content, saved: req.query.saved || null }));
+    logAdmin('Admin Dashboard Accessed', req).catch(() => {});
+    const projects = await query('SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC');
+    const content  = await getContent();
+    res.render('admin', locals(req, {
+      page:       'admin',
+      projects:   normalizeProjects(projects.rows),
+      content,
+      saved:      req.query.saved      || null,
+      savedPid:   req.query.pid        || null,
+      adminError: req.query.error      || null,
+    }));
+  } catch (err) {
+    console.error('[Admin] Dashboard load error:', err);
+    next(err);
+  }
 });
 
 app.post('/admin/login', async (req, res) => {
@@ -309,56 +328,113 @@ app.post('/admin/content', requireAdmin, async (req, res) => {
   res.redirect('/admin?saved=content');
 });
 
-app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files', 10), async (req, res) => {
-  const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
-  const existing      = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
-  const fallbackImages = normalizeProject(existing.rows[0] || {}).images;
-  const images        = getProjectImages(req, fallbackImages, { useKeepImages: true });
-  const image_url     = images[0] || '/assets/project-1.svg';
+app.post('/admin/projects/:id/update', requireAdmin, upload.array('image_files', 10), async (req, res, next) => {
+  try {
+    const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
 
-  await query(
-    `UPDATE projects
-     SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5,
-         project_url = $6, featured = $7, tools = $8, goal = $9, result = $10, published = $11, sort_order = $12
-     WHERE id = $13`,
-    [title, category || 'Design', description, image_url, images, project_url || '', featured === 'on',
-     tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0), req.params.id]
-  );
+    if (!title || !description) {
+      return res.redirect(`/admin?error=missing_fields&pid=${req.params.id}`);
+    }
 
-  // Build a specific log message based on what was changed
-  const uploadedCount = (req.files || []).length;
-  const keptCount     = images.length;
-  const prevCount     = fallbackImages.length;
-  const extraFields   = { Project: title || req.params.id };
-  if (uploadedCount > 0) extraFields['Images Uploaded'] = uploadedCount;
-  if (keptCount < prevCount) extraFields['Images Removed'] = prevCount - keptCount;
-  if (keptCount !== prevCount && uploadedCount === 0) extraFields['Images Reordered'] = 'Yes';
+    const existing = await query('SELECT image_url, project_images FROM projects WHERE id = $1', [req.params.id]);
+    if (!existing.rows.length) {
+      return res.redirect('/admin?error=not_found');
+    }
 
-  logAdmin('Admin Project Edited', req, extraFields, { bypassCooldown: true }).catch(() => {});
-  res.redirect('/admin?saved=project');
+    const fallbackImages = normalizeProject(existing.rows[0]).images;
+    const images         = getProjectImages(req, fallbackImages, { useKeepImages: true });
+    const image_url      = images[0] || '/assets/project-1.svg';
+
+    await query(
+      `UPDATE projects
+       SET title = $1, category = $2, description = $3, image_url = $4, project_images = $5,
+           project_url = $6, featured = $7, tools = $8, goal = $9, result = $10, published = $11, sort_order = $12
+       WHERE id = $13`,
+      [
+        title,
+        category || 'Design',
+        description,
+        image_url,
+        images,
+        project_url || '',
+        featured === 'on',
+        tools    || '',
+        goal     || '',
+        result   || '',
+        published === 'on',          // fixed: was `!== 'off'` which always evaluated to true
+        Number(sort_order || 0),
+        req.params.id,
+      ]
+    );
+
+    const uploadedCount = (req.files || []).length;
+    const keptCount     = images.length;
+    const prevCount     = fallbackImages.length;
+    const extraFields   = { Project: title || req.params.id };
+    if (uploadedCount > 0)               extraFields['Images Uploaded'] = uploadedCount;
+    if (keptCount < prevCount)           extraFields['Images Removed']  = prevCount - keptCount;
+    if (keptCount !== prevCount && uploadedCount === 0) extraFields['Images Reordered'] = 'Yes';
+
+    logAdmin('Admin Project Edited', req, extraFields, { bypassCooldown: true }).catch(() => {});
+    res.redirect(`/admin?saved=project&pid=${req.params.id}`);
+  } catch (err) {
+    console.error('[Admin] Update project error:', err);
+    next(err);
+  }
 });
 
-app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async (req, res) => {
-  const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
-  const images    = getProjectImages(req, ['/assets/project-1.svg']);
-  const image_url = images[0] || '/assets/project-1.svg';
+app.post('/admin/projects', requireAdmin, upload.array('image_files', 10), async (req, res, next) => {
+  try {
+    const { title, category, description, project_url, featured, tools, goal, result, published, sort_order } = req.body;
 
-  await query(
-    'INSERT INTO projects (title, category, description, image_url, project_images, project_url, featured, tools, goal, result, published, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-    [title, category || 'Design', description, image_url, images, project_url || '',
-     featured === 'on', tools || '', goal || '', result || '', published !== 'off', Number(sort_order || 0)]
-  );
+    if (!title || !description) {
+      return res.redirect('/admin?error=missing_fields#new-project');
+    }
 
-  logAdmin('Admin Project Created', req, { Project: title, Category: category || 'Design' }, { bypassCooldown: true }).catch(() => {});
-  res.redirect('/admin?saved=project');
+    const images    = getProjectImages(req, ['/assets/project-1.svg']);
+    const image_url = images[0] || '/assets/project-1.svg';
+
+    const inserted = await query(
+      `INSERT INTO projects
+         (title, category, description, image_url, project_images, project_url, featured, tools, goal, result, published, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       RETURNING id`,
+      [
+        title,
+        category || 'Design',
+        description,
+        image_url,
+        images,
+        project_url || '',
+        featured === 'on',
+        tools    || '',
+        goal     || '',
+        result   || '',
+        published === 'on',          // fixed: was `!== 'off'` which always evaluated to true
+        Number(sort_order || 0),
+      ]
+    );
+
+    const newId = inserted.rows[0].id;
+    logAdmin('Admin Project Created', req, { Project: title, Category: category || 'Design' }, { bypassCooldown: true }).catch(() => {});
+    res.redirect(`/admin?saved=project&pid=${newId}`);
+  } catch (err) {
+    console.error('[Admin] Create project error:', err);
+    next(err);
+  }
 });
 
-app.post('/admin/projects/:id/delete', requireAdmin, async (req, res) => {
-  const existing = await query('SELECT title FROM projects WHERE id = $1', [req.params.id]);
-  const title    = existing.rows[0]?.title || req.params.id;
-  await query('DELETE FROM projects WHERE id = $1', [req.params.id]);
-  logAdmin('Admin Project Deleted', req, { Project: title }, { bypassCooldown: true }).catch(() => {});
-  res.redirect('/admin');
+app.post('/admin/projects/:id/delete', requireAdmin, async (req, res, next) => {
+  try {
+    const existing = await query('SELECT title FROM projects WHERE id = $1', [req.params.id]);
+    const title    = existing.rows[0]?.title || req.params.id;
+    await query('DELETE FROM projects WHERE id = $1', [req.params.id]);
+    logAdmin('Admin Project Deleted', req, { Project: title }, { bypassCooldown: true }).catch(() => {});
+    res.redirect('/admin?saved=deleted');
+  } catch (err) {
+    console.error('[Admin] Delete project error:', err);
+    next(err);
+  }
 });
 
 app.get('/admin/chats/live', requireAdmin, async (_req, res) => {

@@ -38,7 +38,27 @@
   <div class="admin-workspace">
 
     <% if (saved) { %>
-      <div class="notice success admin-saved-notice">✓ Saved successfully.</div>
+      <div class="notice success admin-saved-notice" id="admin-saved-notice">
+        <% if (saved === 'deleted') { %>✓ Project deleted.<% } else if (saved === 'content') { %>✓ Page content saved.<% } else { %>✓ Project saved successfully.<% } %>
+      </div>
+    <% } %>
+    <% if (adminError) { %>
+      <div class="notice error admin-saved-notice">
+        <% if (adminError === 'missing_fields') { %>✗ Title and description are required.<% } else if (adminError === 'not_found') { %>✗ Project not found.<% } else { %>✗ Something went wrong — please try again.<% } %>
+      </div>
+    <% } %>
+    <% if (saved === 'project' && savedPid) { %>
+    <script>
+      (function () {
+        var target = document.getElementById('project-<%= savedPid %>');
+        if (!target) return;
+        setTimeout(function () {
+          target.scrollIntoView({ block: 'start' });
+          target.classList.add('just-saved');
+          setTimeout(function () { target.classList.remove('just-saved'); }, 3000);
+        }, 80);
+      })();
+    </script>
     <% } %>
 
     <!-- ══ Overview ══ -->
