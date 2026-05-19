@@ -15,12 +15,12 @@
 
 <section class="case-layout">
   <div class="case-gallery" data-gallery>
-    <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>">
+    <img class="gallery-main" src="<%= project.image_url %>" alt="<%= project.title %>" decoding="async">
     <% if (images.length > 1) { %>
       <div class="gallery-thumbs case-thumbs">
         <% images.forEach((image, index) => { %>
           <button type="button" class="gallery-thumb <%= index === 0 ? 'active' : '' %>" data-image="<%= image %>" aria-label="View image <%= index + 1 %>">
-            <img src="<%= image %>" alt="">
+            <img src="<%= image %>" alt="" loading="lazy" decoding="async">
           </button>
         <% }) %>
       </div>
@@ -66,7 +66,7 @@
   <div class="related-grid">
     <% moreProjects.forEach(item => { %>
       <a class="related-card spotlight-card" href="/portfolio/<%= item.id %>">
-        <img src="<%= item.image_url %>" alt="<%= item.title %>">
+        <img src="<%= item.image_url %>" alt="<%= item.title %>" loading="lazy" decoding="async">
         <span><%= item.category %></span>
         <strong><%= item.title %></strong>
       </a>

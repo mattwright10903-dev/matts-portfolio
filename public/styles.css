@@ -706,6 +706,17 @@ details label:last-child { margin-bottom: 14px; }
 .check-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
 .delete-form { padding: 0 22px 18px; }
 .admin-editor-form button[type="submit"] { margin-top: 16px; }
+/* Admin search bar */
+.admin-search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.admin-search-bar input[type="search"] { flex: 1; min-width: 180px; }
+.admin-search-bar select { flex-shrink: 0; width: auto; min-width: 160px; }
+
+/* Drag-and-drop image reorder */
+.existing-image-item[draggable] { cursor: grab; }
+.existing-image-item[draggable]:active { cursor: grabbing; }
+.existing-image-item.is-dragging { opacity: .4; transform: scale(.97); transition: opacity 160ms ease, transform 160ms ease; }
+.existing-image-item.drag-over { border-color: rgba(255,36,69,.6); box-shadow: 0 0 0 2px rgba(255,36,69,.22); }
+
 .project-admin-list-pro { display: flex; flex-direction: column; gap: 14px; }
 .login-shell { min-height: calc(100vh - 160px); display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items: center; }
 .login-copy h1 { font-size: clamp(42px,6vw,70px); line-height: .95; letter-spacing: -.07em; }
@@ -804,5 +815,8 @@ details label:last-child { margin-bottom: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .scroll-reveal, .stagger-item, .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; }
+  .scroll-reveal, .stagger-item, .reveal, .reveal-left, .reveal-right,
+  .port-reveal { opacity: 1 !important; transform: none !important; }
+  .pview-dialog { transition: none !important; transform: none !important; }
+  .existing-image-item.is-dragging { transition: none !important; }
 }

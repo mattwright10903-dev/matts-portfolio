@@ -39,7 +39,7 @@
     <% featured.forEach((project, index) => { %>
       <article class="bento-card stagger-item <%= index === 0 ? 'bento-large' : index === 3 ? 'bento-wide' : '' %>">
         <a href="/portfolio/<%= project.id %>" class="bento-image">
-          <img src="<%= project.image_url %>" alt="<%= project.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>">
+          <img src="<%= project.image_url %>" alt="<%= project.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async">
           <span class="project-overlay">View Case Study</span>
           <% if (project.images && project.images.length > 1) { %>
             <span class="image-count"><%= project.images.length %> images</span>

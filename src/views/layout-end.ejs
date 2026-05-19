@@ -284,6 +284,14 @@
     /* ─────────────────────────────────────────────────────────────
        ADMIN — IMAGE MANAGEMENT (remove, undo, set main, reorder)
     ─────────────────────────────────────────────────────────────── */
+    function updateImageLabels(grid) {
+      $$('.existing-image-item', grid).forEach(function (row, i) {
+        var lbl = $('span', row);
+        if (lbl) lbl.textContent = i === 0 ? '★ Main image' : 'Image ' + (i + 1);
+        row.classList.toggle('main-image', i === 0);
+      });
+    }
+
     document.addEventListener('click', function (e) {
       var ru = e.target.closest('.remove-upload');
       if (ru) { e.preventDefault(); ru.closest('.upload-slot') && ru.closest('.upload-slot').remove(); }
@@ -310,14 +318,10 @@
       if (sm) {
         e.preventDefault();
         var item3 = sm.closest('.existing-image-item');
-        var grid = item3 && item3.parentElement;
-        if (item3 && grid) {
-          grid.prepend(item3);
-          $$('.existing-image-item', grid).forEach(function (row, i) {
-            var lbl = $('span', row);
-            if (lbl) lbl.textContent = i === 0 ? 'Main image' : 'Image ' + (i + 1);
-            row.classList.toggle('main-image', i === 0);
-          });
+        var grid3 = item3 && item3.parentElement;
+        if (item3 && grid3) {
+          grid3.prepend(item3);
+          updateImageLabels(grid3);
         }
       }
 
@@ -325,16 +329,97 @@
       if (mu) {
         e.preventDefault();
         var item4 = mu.closest('.existing-image-item');
-        if (item4 && item4.previousElementSibling) item4.parentElement.insertBefore(item4, item4.previousElementSibling);
+        if (item4 && item4.previousElementSibling) {
+          item4.parentElement.insertBefore(item4, item4.previousElementSibling);
+          updateImageLabels(item4.parentElement);
+        }
       }
 
       var md = e.target.closest('.move-image-down');
       if (md) {
         e.preventDefault();
         var item5 = md.closest('.existing-image-item');
-        if (item5 && item5.nextElementSibling) item5.parentElement.insertBefore(item5.nextElementSibling, item5);
+        if (item5 && item5.nextElementSibling) {
+          item5.parentElement.insertBefore(item5.nextElementSibling, item5);
+          updateImageLabels(item5.parentElement);
+        }
       }
     });
+
+    /* ─────────────────────────────────────────────────────────────
+       ADMIN — DRAG-AND-DROP IMAGE REORDER
+    ─────────────────────────────────────────────────────────────── */
+    var draggedImageItem = null;
+
+    document.addEventListener('dragstart', function (e) {
+      var item = e.target.closest('.existing-image-item[draggable]');
+      if (!item) return;
+      draggedImageItem = item;
+      item.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    document.addEventListener('dragend', function (e) {
+      if (draggedImageItem) draggedImageItem.classList.remove('is-dragging');
+      $$('.existing-image-item.drag-over').forEach(function (el) { el.classList.remove('drag-over'); });
+      draggedImageItem = null;
+    });
+
+    document.addEventListener('dragover', function (e) {
+      var item = e.target.closest('.existing-image-item[draggable]');
+      if (!item || item === draggedImageItem) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      $$('.existing-image-item.drag-over').forEach(function (el) { el.classList.remove('drag-over'); });
+      item.classList.add('drag-over');
+    });
+
+    document.addEventListener('dragleave', function (e) {
+      var item = e.target.closest('.existing-image-item');
+      if (item && !item.contains(e.relatedTarget)) item.classList.remove('drag-over');
+    });
+
+    document.addEventListener('drop', function (e) {
+      var target = e.target.closest('.existing-image-item[draggable]');
+      if (!target || !draggedImageItem || target === draggedImageItem) return;
+      if (target.parentElement !== draggedImageItem.parentElement) return;
+      e.preventDefault();
+      target.classList.remove('drag-over');
+      var grid = draggedImageItem.parentElement;
+      var items = Array.from(grid.children);
+      var dragIdx = items.indexOf(draggedImageItem);
+      var dropIdx = items.indexOf(target);
+      if (dragIdx < dropIdx) {
+        grid.insertBefore(draggedImageItem, target.nextElementSibling);
+      } else {
+        grid.insertBefore(draggedImageItem, target);
+      }
+      updateImageLabels(grid);
+    });
+
+    /* ─────────────────────────────────────────────────────────────
+       ADMIN — PROJECT SEARCH + FILTER
+    ─────────────────────────────────────────────────────────────── */
+    var adminSearch     = document.getElementById('admin-project-search');
+    var adminCatFilter  = document.getElementById('admin-category-filter');
+    var adminCards      = $$('.project-editor-card');
+
+    function filterAdminProjects() {
+      var q   = adminSearch   ? adminSearch.value.trim().toLowerCase()   : '';
+      var cat = adminCatFilter ? adminCatFilter.value                     : '';
+      adminCards.forEach(function (card) {
+        var titleEl = card.querySelector('.preview-info strong');
+        var metaEl  = card.querySelector('.preview-meta');
+        var title   = titleEl ? titleEl.textContent.toLowerCase() : '';
+        var meta    = metaEl  ? metaEl.textContent                : '';
+        var matchQ   = !q   || title.includes(q);
+        var matchCat = !cat || meta.includes(cat);
+        card.style.display = (matchQ && matchCat) ? '' : 'none';
+      });
+    }
+
+    if (adminSearch)    adminSearch.addEventListener('input',  filterAdminProjects);
+    if (adminCatFilter) adminCatFilter.addEventListener('change', filterAdminProjects);
 
     /* ─────────────────────────────────────────────────────────────
        CONTACT CTA CLICK TRACKING

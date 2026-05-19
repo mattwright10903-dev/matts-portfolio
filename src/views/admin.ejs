@@ -81,7 +81,7 @@
           </div>
           <% projects.slice(0, 6).forEach(p => { %>
             <div class="admin-recent-row">
-              <img src="<%= p.image_url %>" alt="">
+              <img src="<%= p.image_url %>" alt="" loading="lazy" decoding="async">
               <div class="admin-recent-info">
                 <strong><%= p.title %></strong>
                 <span><%= p.category %></span>
@@ -116,6 +116,16 @@
         </div>
       </div>
 
+      <div class="admin-search-bar">
+        <input type="search" id="admin-project-search" placeholder="Search by title..." autocomplete="off" aria-label="Search projects">
+        <select id="admin-category-filter" aria-label="Filter by category">
+          <option value="">All categories</option>
+          <% categoryOptions.forEach(option => { %>
+            <option value="<%= option %>"><%= option %></option>
+          <% }) %>
+        </select>
+      </div>
+
       <div class="project-admin-list-pro">
         <% if (!projects.length) { %>
           <div class="admin-empty-state">
@@ -129,7 +139,7 @@
 
             <!-- Card header -->
             <div class="project-editor-preview">
-              <img src="<%= project.image_url %>" alt="<%= project.title %>">
+              <img src="<%= project.image_url %>" alt="<%= project.title %>" loading="lazy" decoding="async">
               <div class="preview-info">
                 <strong><%= project.title %></strong>
                 <span class="preview-meta"><%= project.category %> &middot; <%= (project.images || []).length || 1 %> image(s) &middot; Sort: <%= project.sort_order || 0 %></span>
@@ -177,9 +187,9 @@
                   <p style="font-size:12px;color:var(--muted);margin:0 0 10px">Set main, reorder with arrows, or mark to remove — then save changes.</p>
                   <div class="existing-image-grid">
                     <% imgs.forEach((image, index) => { %>
-                      <div class="existing-image-item <%= index === 0 ? 'main-image' : '' %>">
+                      <div class="existing-image-item <%= index === 0 ? 'main-image' : '' %>" draggable="true">
                         <input type="checkbox" name="keep_images" value="<%= image %>" checked hidden>
-                        <img src="<%= image %>" alt="Image <%= index + 1 %>">
+                        <img src="<%= image %>" alt="Image <%= index + 1 %>" loading="lazy" decoding="async">
                         <div>
                           <span><%= index === 0 ? '★ Main image' : 'Image ' + (index + 1) %></span>
                           <button class="mini set-main-image" type="button">Set Main</button>
@@ -203,7 +213,7 @@
                     <button class="mini add-image-input" type="button">+ Add another</button>
                   </div>
                   <div class="upload-stack" data-upload-stack>
-                    <label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*"></label>
+                    <label class="upload-slot"><span>New image 1</span><input type="file" name="image_files" accept="image/*" multiple></label>
                   </div>
                 </div>
                 <label style="margin-top:10px">Add Image URLs <small>Optional — one URL per line</small><textarea name="image_urls" rows="2" placeholder="https://..."></textarea></label>
@@ -279,7 +289,7 @@
               <button class="mini add-image-input" type="button">+ Add another image</button>
             </div>
             <div class="upload-stack" data-upload-stack>
-              <label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*"></label>
+              <label class="upload-slot"><span>Image 1</span><input type="file" name="image_files" accept="image/*" multiple></label>
             </div>
           </div>
           <label style="margin-top:10px">Image URLs <small>Optional — one URL per line</small><textarea name="image_urls" rows="2" placeholder="https://..."></textarea></label>
