@@ -826,4 +826,84 @@ details label:last-child { margin-bottom: 14px; }
   .port-reveal { opacity: 1 !important; transform: none !important; }
   .pview-dialog { transition: none !important; transform: none !important; }
   .existing-image-item.is-dragging { transition: none !important; }
+  .image-sequence-section { min-height: auto !important; padding: clamp(56px,8vw,80px) 0; }
+  .sequence-sticky { position: static !important; height: auto !important; flex-direction: column; gap: 28px; }
+  .sequence-frame-wrap { height: max(50vw,260px); flex: none; width: 100%; }
+}
+
+/* ── Image Sequence Section ── */
+.image-sequence-section {
+  position: relative;
+  min-height: 280vh;
+  border-bottom: 1px solid var(--line);
+}
+
+.sequence-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  gap: clamp(28px,4vw,56px);
+  /* Pad top to clear the sticky nav bar */
+  padding: 72px 0 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sequence-copy {
+  flex: 0 0 clamp(240px,30%,380px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sequence-heading {
+  font-size: clamp(28px,3.8vw,52px);
+  line-height: 1;
+  letter-spacing: -.06em;
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+}
+
+.sequence-body {
+  color: var(--soft);
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 0;
+}
+
+.sequence-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sequence-frame-wrap {
+  flex: 1;
+  height: min(72vh,580px);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: linear-gradient(135deg,rgba(255,36,69,.06),transparent 60%), rgba(255,255,255,.028);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255,36,69,.07), 0 0 80px rgba(255,36,69,.1), 0 40px 100px rgba(0,0,0,.55);
+  will-change: transform;
+}
+
+.sequence-frame {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .image-sequence-section { min-height: auto; padding: clamp(56px,8vw,80px) 0; }
+  .sequence-sticky { position: static; height: auto; flex-direction: column; gap: 28px; padding: 0; overflow: visible; }
+  .sequence-copy { flex: none; width: 100%; }
+  .sequence-frame-wrap { width: 100%; height: max(52vw,220px); flex: none; }
 }
