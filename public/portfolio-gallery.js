@@ -1,14 +1,170 @@
 /* ══════════════════════════════════════════════════════════════════
-   Portfolio Dome Gallery — portfolio-gallery.js
-   Curved-arc draggable carousel. Loaded only on /portfolio.
-   Mobile (≤ 640px) uses CSS scroll-snap — this script returns early.
+   Portfolio Dome Gallery + Project Viewer — portfolio-gallery.js
+   Loaded only on /portfolio (deferred, via layout-end conditional).
+   Mobile ≤ 640px: CSS scroll-snap handles gallery, JS skips dome.
    ══════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
-  /* ── Guards ── */
+  /* ── Utilities ── */
   var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (window.innerWidth <= 640) return; // mobile: CSS handles scroll
+
+  function escHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── Load project data ── */
+  var pviewData = [];
+  try {
+    var dataEl = document.getElementById('pgal-data');
+    if (dataEl) pviewData = JSON.parse(dataEl.textContent || '[]');
+  } catch (e) { /* data unavailable — modal won't open */ }
+
+  /* ════════════════════════════════════════════════════════════════
+     PROJECT VIEWER MODAL
+     ════════════════════════════════════════════════════════════════ */
+  var pview           = document.getElementById('pview');
+  var pviewImgEl      = pview && pview.querySelector('[data-pview-img]');
+  var pviewCatEl      = pview && pview.querySelector('[data-pview-cat]');
+  var pviewTitleEl    = pview && pview.querySelector('[data-pview-title]');
+  var pviewDescEl     = pview && pview.querySelector('[data-pview-desc]');
+  var pviewMetaEl     = pview && pview.querySelector('[data-pview-meta]');
+  var pviewThumbsEl   = pview && pview.querySelector('[data-pview-thumbs]');
+  var pviewCtaEl      = pview && pview.querySelector('[data-pview-cta]');
+  var pviewPrevBtn    = pview && pview.querySelector('[data-pview-prev]');
+  var pviewNextBtn    = pview && pview.querySelector('[data-pview-next]');
+
+  var pviewCurrentIdx = -1; // index into pviewData
+  var prevFocusEl     = null;
+
+  function openPview(idx) {
+    if (!pview || !pviewData[idx]) return;
+    pviewCurrentIdx = idx;
+    var p = pviewData[idx];
+
+    /* Image */
+    pviewImgEl.src = p.image_url || '';
+    pviewImgEl.alt = p.title;
+
+    /* Text */
+    pviewCatEl.textContent   = p.category;
+    pviewTitleEl.textContent = p.title;
+    pviewDescEl.textContent  = p.description;
+
+    /* CTA link */
+    pviewCtaEl.href = '/portfolio/' + p.id;
+
+    /* Meta rows */
+    pviewMetaEl.innerHTML = '';
+    [
+      { label: 'Tools',  val: p.tools  },
+      { label: 'Goal',   val: p.goal   },
+      { label: 'Result', val: p.result }
+    ].forEach(function (row) {
+      if (!row.val) return;
+      var el = document.createElement('div');
+      el.className = 'pview-meta-row';
+      el.innerHTML =
+        '<span class="pview-meta-label">' + escHtml(row.label) + '</span>' +
+        '<span class="pview-meta-val">'   + escHtml(row.val)   + '</span>';
+      pviewMetaEl.appendChild(el);
+    });
+
+    /* Thumbnails */
+    pviewThumbsEl.innerHTML = '';
+    var imgs = p.images && p.images.length ? p.images : (p.image_url ? [p.image_url] : []);
+    if (imgs.length > 1) {
+      imgs.forEach(function (src, ti) {
+        var btn = document.createElement('button');
+        btn.type      = 'button';
+        btn.className = 'pview-thumb' + (ti === 0 ? ' is-active' : '');
+        btn.setAttribute('aria-label', 'Image ' + (ti + 1));
+        var img       = document.createElement('img');
+        img.src       = src;
+        img.alt       = '';
+        img.loading   = 'lazy';
+        btn.appendChild(img);
+        btn.addEventListener('click', function () { switchPviewImg(src, btn); });
+        pviewThumbsEl.appendChild(btn);
+      });
+    }
+
+    /* Prev/Next button state */
+    if (pviewPrevBtn) pviewPrevBtn.disabled = (idx <= 0);
+    if (pviewNextBtn) pviewNextBtn.disabled = (idx >= pviewData.length - 1);
+
+    /* Show overlay */
+    prevFocusEl = document.activeElement;
+    pview.setAttribute('aria-hidden', 'false');
+    pview.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+
+    /* Focus the close button for keyboard users */
+    setTimeout(function () {
+      var closeBtn = pview.querySelector('[data-pview-close]');
+      if (closeBtn) closeBtn.focus();
+    }, 60);
+  }
+
+  function closePview() {
+    if (!pview) return;
+    pview.setAttribute('aria-hidden', 'true');
+    pview.classList.remove('is-open');
+    document.body.style.overflow = '';
+    if (prevFocusEl && prevFocusEl.focus) prevFocusEl.focus();
+  }
+
+  function switchPviewImg(src, thumbBtn) {
+    if (!pviewImgEl) return;
+    pviewImgEl.style.opacity = '0';
+    setTimeout(function () {
+      pviewImgEl.src = src;
+      pviewImgEl.style.opacity = '1';
+    }, 170);
+    pviewThumbsEl && Array.from(pviewThumbsEl.querySelectorAll('.pview-thumb')).forEach(function (t) {
+      t.classList.toggle('is-active', t === thumbBtn);
+    });
+  }
+
+  /* Wire up pview controls */
+  if (pview) {
+    /* Close buttons (including backdrop) */
+    pview.addEventListener('click', function (e) {
+      if (e.target.closest('[data-pview-close]') || e.target === pview.querySelector('[data-pview-backdrop]')) {
+        closePview();
+      }
+    });
+
+    /* Prev/Next */
+    if (pviewPrevBtn) pviewPrevBtn.addEventListener('click', function () { openPview(pviewCurrentIdx - 1); });
+    if (pviewNextBtn) pviewNextBtn.addEventListener('click', function () { openPview(pviewCurrentIdx + 1); });
+
+    /* Keyboard */
+    document.addEventListener('keydown', function (e) {
+      if (!pview.classList.contains('is-open')) return;
+      if (e.key === 'Escape')      { e.preventDefault(); closePview(); }
+      if (e.key === 'ArrowLeft')   { e.preventDefault(); if (pviewCurrentIdx > 0) openPview(pviewCurrentIdx - 1); }
+      if (e.key === 'ArrowRight')  { e.preventDefault(); if (pviewCurrentIdx < pviewData.length - 1) openPview(pviewCurrentIdx + 1); }
+    });
+
+    /* Prevent click propagation inside dialog */
+    var dialog = pview.querySelector('.pview-dialog');
+    if (dialog) dialog.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    /* Backdrop click */
+    var backdrop = pview.querySelector('[data-pview-backdrop]');
+    if (backdrop) backdrop.addEventListener('click', closePview);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     DOME GALLERY
+     Skip on mobile — CSS scroll-snap handles scroll there.
+     ════════════════════════════════════════════════════════════════ */
+  if (window.innerWidth <= 640) return;
 
   var stage = document.querySelector('[data-pgal-stage]');
   if (!stage) return;
@@ -16,19 +172,19 @@
   var cards = Array.from(stage.querySelectorAll('[data-pgal-card]'));
   if (!cards.length) return;
 
-  var count   = cards.length;
-  var offset  = Math.floor(count / 2); // start centered on middle card
-  var rafId   = null;
+  var count      = cards.length;
+  var offset     = Math.floor(count / 2);
+  var rafId      = null;
 
   /* Drag state */
-  var isDragging     = false;
-  var dragStartX     = 0;
-  var dragStartOff   = 0;
-  var dragDelta      = 0;
-  var lastX          = 0;
-  var lastT          = 0;
-  var velTracker     = 0;
-  var inertiaVel     = 0;
+  var isDragging   = false;
+  var dragStartX   = 0;
+  var dragStartOff = 0;
+  var dragDelta    = 0;
+  var lastX        = 0;
+  var lastT        = 0;
+  var velTracker   = 0;
+  var inertiaVel   = 0;
 
   /* ── Responsive spacing ── */
   function getSpacing() {
@@ -39,14 +195,7 @@
     return 228;
   }
 
-  function getCardW() {
-    var w = window.innerWidth;
-    if (w >= 1200) return 256;
-    if (w >=  900) return 220;
-    return 200;
-  }
-
-  /* ── Core transform computation ── */
+  /* ── Apply dome transforms ── */
   function applyTransforms(off) {
     off = (off !== undefined) ? off : offset;
     var sp      = getSpacing();
@@ -57,22 +206,11 @@
       var d  = i - off;
       var ad = Math.abs(d);
 
-      /* Horizontal spread */
       var tx = d * sp;
-
-      /* Downward arc from center — quadratic falloff */
       var ty = Math.min(ad * ad * 16, 92);
-
-      /* Depth: center is largest */
       var sc = Math.max(0.56, 1 - ad * 0.115);
-
-      /* Gentle Y-axis rotation for dome perspective */
       var ry = Math.max(-26, Math.min(26, d * -9));
-
-      /* Opacity: fade distant cards */
       var op = Math.max(0.22, 1 - ad * 0.22);
-
-      /* Stacking order: center on top */
       var zi = Math.max(0, Math.round(20 - ad * 3));
 
       card.style.transform =
@@ -86,37 +224,24 @@
 
       var isCenter = (i === centerI);
       card.classList.toggle('is-center', isCenter);
-
-      /* Only allow pointer interaction on center + immediate neighbours */
       card.style.pointerEvents = (ad < 1.5) ? 'auto' : 'none';
     });
 
-    /* Sync navigation dots */
     Array.from(dots).forEach(function (dot, i) {
-      var isActive = (i === centerI);
-      dot.classList.toggle('is-active', isActive);
-      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      var a = (i === centerI);
+      dot.classList.toggle('is-active', a);
+      dot.setAttribute('aria-selected', a ? 'true' : 'false');
     });
   }
 
-  /* ── Animate to target index (lerp) ── */
+  /* ── Animate to integer index (lerp) ── */
   function animateTo(target) {
     cancelAnimationFrame(rafId);
     target = Math.max(0, Math.min(count - 1, target));
-
-    if (noMotion) {
-      offset = target;
-      applyTransforms();
-      return;
-    }
-
+    if (noMotion) { offset = target; applyTransforms(); return; }
     function tick() {
       offset += (target - offset) * 0.14;
-      if (Math.abs(target - offset) < 0.002) {
-        offset = target;
-        applyTransforms();
-        return;
-      }
+      if (Math.abs(target - offset) < 0.002) { offset = target; applyTransforms(); return; }
       applyTransforms();
       rafId = requestAnimationFrame(tick);
     }
@@ -126,27 +251,19 @@
   /* ── Inertia + snap ── */
   function inertiaSnap() {
     cancelAnimationFrame(rafId);
-
-    if (noMotion || Math.abs(inertiaVel) < 0.004) {
-      animateTo(Math.round(Math.max(0, Math.min(count - 1, offset))));
-      return;
-    }
-
+    if (noMotion || Math.abs(inertiaVel) < 0.004) { animateTo(Math.round(Math.max(0, Math.min(count - 1, offset)))); return; }
     function tick() {
-      if (Math.abs(inertiaVel) < 0.005) {
-        animateTo(Math.round(Math.max(0, Math.min(count - 1, offset))));
-        return;
-      }
+      if (Math.abs(inertiaVel) < 0.005) { animateTo(Math.round(Math.max(0, Math.min(count - 1, offset)))); return; }
       offset    += inertiaVel;
       offset     = Math.max(-0.45, Math.min(count - 0.55, offset));
-      inertiaVel *= 0.88; // friction
+      inertiaVel *= 0.88;
       applyTransforms();
       rafId = requestAnimationFrame(tick);
     }
     tick();
   }
 
-  /* ── Pointer events (drag) ── */
+  /* ── Pointer drag ── */
   stage.addEventListener('pointerdown', function (e) {
     if (e.button !== 0) return;
     cancelAnimationFrame(rafId);
@@ -168,16 +285,9 @@
     dragDelta = dx;
     offset    = dragStartOff - dx / getSpacing();
     offset    = Math.max(-0.45, Math.min(count - 0.55, offset));
-
-    /* Rolling velocity (pixels per 16ms frame) */
-    var now = performance.now();
-    var dt  = now - lastT;
-    if (dt > 0 && dt < 120) {
-      velTracker = (lastX - e.clientX) / getSpacing() / (dt / 16.67);
-    }
-    lastX = e.clientX;
-    lastT = now;
-
+    var now = performance.now(), dt = now - lastT;
+    if (dt > 0 && dt < 120) velTracker = (lastX - e.clientX) / getSpacing() / (dt / 16.67);
+    lastX = e.clientX; lastT = now;
     applyTransforms();
   });
 
@@ -185,58 +295,48 @@
     if (!isDragging) return;
     isDragging = false;
     stage.classList.remove('is-dragging');
-
-    /* Tiny movement = no inertia, just snap */
-    if (Math.abs(dragDelta) < 6) {
-      inertiaVel = 0;
-      inertiaSnap();
-      return;
-    }
-    /* Clamp inertia so it doesn't fly too far */
+    if (Math.abs(dragDelta) < 6) { inertiaVel = 0; inertiaSnap(); return; }
     inertiaVel = Math.max(-0.55, Math.min(0.55, velTracker * 0.55));
     inertiaSnap();
-
-    /* Reset dragDelta after a tick so click handler fires correctly */
     setTimeout(function () { dragDelta = 0; }, 40);
   }
-
   stage.addEventListener('pointerup',     onRelease);
   stage.addEventListener('pointercancel', onRelease);
 
-  /* Prevent following link if we actually dragged */
+  /* Prevent link if dragged */
   stage.addEventListener('click', function (e) {
-    if (Math.abs(dragDelta) > 5) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    if (Math.abs(dragDelta) > 5) { e.preventDefault(); e.stopPropagation(); }
   }, true);
 
-  /* Click on non-center card → navigate to it (don't follow link yet) */
+  /* Card click: non-center → navigate gallery; center → open viewer */
   cards.forEach(function (card, i) {
     card.addEventListener('click', function (e) {
       if (Math.abs(dragDelta) > 5) return;
-      if (Math.round(offset) !== i) {
+      var centerI = Math.round(offset);
+      if (centerI !== i) {
+        /* Not center — navigate gallery to this card */
         e.preventDefault();
         animateTo(i);
+      } else if (pviewData.length > i) {
+        /* Center card — open popup viewer */
+        e.preventDefault();
+        openPview(i);
       }
-      /* If it IS the center card and no drag, link follows normally */
+      /* Fallback: if no pviewData, let href work normally */
     });
   });
 
-  /* ── Trackpad / mouse-wheel horizontal swipe ── */
+  /* ── Trackpad / wheel horizontal swipe ── */
   var wheelTimer;
   stage.addEventListener('wheel', function (e) {
-    /* Only handle primarily-horizontal scrolls */
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     e.preventDefault();
     cancelAnimationFrame(rafId);
-
     offset += e.deltaX / getSpacing() * 0.38;
     offset  = Math.max(0, Math.min(count - 1, offset));
     applyTransforms();
-
     clearTimeout(wheelTimer);
-    wheelTimer = setTimeout(function () { inertiaSnap(); }, 80);
+    wheelTimer = setTimeout(inertiaSnap, 80);
   }, { passive: false });
 
   /* ── Keyboard ── */
@@ -245,12 +345,12 @@
     var moved = false;
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { animateTo(Math.round(offset) - 1); moved = true; }
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { animateTo(Math.round(offset) + 1); moved = true; }
-    if (e.key === 'Home')  { animateTo(0);         moved = true; }
+    if (e.key === 'Home')  { animateTo(0); moved = true; }
     if (e.key === 'End')   { animateTo(count - 1); moved = true; }
-    if (e.key === 'Enter' || e.key === ' ') {
-      /* Follow link of center card */
-      var centerCard = stage.querySelector('.pgal-card.is-center');
-      if (centerCard) { centerCard.click(); moved = true; }
+    if ((e.key === 'Enter' || e.key === ' ') && pviewData.length > Math.round(offset)) {
+      e.preventDefault();
+      openPview(Math.round(offset));
+      moved = true;
     }
     if (moved) e.preventDefault();
   });
@@ -260,7 +360,7 @@
     dot.addEventListener('click', function () { animateTo(i); });
   });
 
-  /* ── Prev / Next buttons ── */
+  /* ── Prev / Next gallery buttons ── */
   var prevBtn = document.querySelector('[data-pgal-prev]');
   var nextBtn = document.querySelector('[data-pgal-next]');
   if (prevBtn) prevBtn.addEventListener('click', function () { animateTo(Math.round(offset) - 1); });
@@ -269,10 +369,9 @@
   /* ── Resize ── */
   var resizeTimer;
   window.addEventListener('resize', function () {
-    /* If viewport drops to mobile, bail — CSS takes over */
     if (window.innerWidth <= 640) return;
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { applyTransforms(); }, 120);
+    resizeTimer = setTimeout(applyTransforms, 120);
   }, { passive: true });
 
   /* ── Init ── */

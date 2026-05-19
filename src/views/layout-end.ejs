@@ -337,6 +337,26 @@
     });
 
     /* ─────────────────────────────────────────────────────────────
+       SCROLL STACK — active card highlight
+       Adds .is-active to whichever stack card is "on top" while sticky
+    ─────────────────────────────────────────────────────────────── */
+    (function () {
+      var sstackCards = $$('.sstack-card');
+      if (!sstackCards.length || noMotion) return;
+      function updateStack() {
+        sstackCards.forEach(function (card) {
+          var rect = card.getBoundingClientRect();
+          /* Card is "active" (stuck near top) when its top edge is close to its sticky offset */
+          var stickyTop = 88 + (parseInt(card.style.getPropertyValue('--idx') || '0', 10)) * 20;
+          var isStuck = rect.top <= stickyTop + 4;
+          card.classList.toggle('is-active', isStuck);
+        });
+      }
+      window.addEventListener('scroll', updateStack, { passive: true });
+      updateStack();
+    })();
+
+    /* ─────────────────────────────────────────────────────────────
        CONTACT CTA CLICK TRACKING
        sendBeacon is fire-and-forget — never blocks navigation.
     ─────────────────────────────────────────────────────────────── */
