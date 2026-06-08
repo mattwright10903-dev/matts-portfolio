@@ -11,10 +11,11 @@ export default function NewProjectPage() {
     const tags    = (fd.get('tags') as string || '').split(',').map((t) => t.trim()).filter(Boolean)
     const images  = (fd.get('project_images') as string || '').split('\n').map((t) => t.trim()).filter(Boolean)
     await createProject({
-      title:          (fd.get('title')       as string).trim(),
-      category:       (fd.get('category')    as string).trim(),
-      description:    (fd.get('description') as string || '').trim(),
-      image_url:      (fd.get('image_url')   as string || '').trim(),
+      title:          (fd.get('title')         as string).trim(),
+      category:       (fd.get('category')      as string).trim(),
+      description:    (fd.get('description')   as string || '').trim(),
+      image_url:      (fd.get('image_url')     as string || '').trim(),
+      thumbnail_url:  (fd.get('thumbnail_url') as string || '').trim(),
       project_images: images,
       tags,
       published: fd.get('published')  === 'true',
@@ -53,7 +54,20 @@ export default function NewProjectPage() {
         </div>
 
         <div>
-          <label className="form-label">Main Image URL</label>
+          <label className="form-label">
+            Thumbnail URL{' '}
+            <span style={{ color: 'var(--accent)', fontWeight: 400 }}>
+              (used in grids — must be a real URL, not base64)
+            </span>
+          </label>
+          <input className="form-input" name="thumbnail_url" type="text" placeholder="https://... (compressed/WebP version)" />
+          <p className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>
+            Set this to a small compressed image URL. If left blank and the main image is a base64 data URI, the grid will show a placeholder.
+          </p>
+        </div>
+
+        <div>
+          <label className="form-label">Main Image URL <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(full resolution)</span></label>
           <input className="form-input" name="image_url" type="text" placeholder="https://... or data:image/..." />
         </div>
 

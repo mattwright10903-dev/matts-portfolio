@@ -35,16 +35,12 @@ export default function AboutPage() {
                 often in the same project.
               </p>
               <p className="text-[16px] leading-[1.82]" style={{ color: 'var(--soft)' }}>
-                I run <strong className="text-white">Matt W Studio</strong> as a separate brand for
-                digital products, premade packs, and templates — you can find those at{' '}
-                <a
-                  href="https://studio.mattwright.online"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--accent)' }}
-                >
-                  studio.mattwright.online
-                </a>.
+                I also run a{' '}
+                <Link href="/store" style={{ color: 'var(--accent)' }}>
+                  GFX store
+                </Link>{' '}
+                with premade logos, branding packs, Discord graphics, and FiveM visual resources —
+                all available directly on this site.
               </p>
             </div>
 

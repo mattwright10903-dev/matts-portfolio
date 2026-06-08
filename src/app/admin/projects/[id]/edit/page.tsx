@@ -19,10 +19,11 @@ export default async function EditProjectPage({ params }: { params: { id: string
     const tags   = (fd.get('tags')           as string || '').split(',').map((t) => t.trim()).filter(Boolean)
     const images = (fd.get('project_images') as string || '').split('\n').map((t) => t.trim()).filter(Boolean)
     await updateProject(id, {
-      title:          (fd.get('title')       as string).trim(),
-      category:       (fd.get('category')    as string).trim(),
-      description:    (fd.get('description') as string || '').trim(),
-      image_url:      (fd.get('image_url')   as string || '').trim(),
+      title:          (fd.get('title')         as string).trim(),
+      category:       (fd.get('category')      as string).trim(),
+      description:    (fd.get('description')   as string || '').trim(),
+      image_url:      (fd.get('image_url')     as string || '').trim(),
+      thumbnail_url:  (fd.get('thumbnail_url') as string || '').trim() || null,
       project_images: images,
       tags,
       published: fd.get('published')  === 'true',
@@ -63,8 +64,26 @@ export default async function EditProjectPage({ params }: { params: { id: string
         </div>
 
         <div>
-          <label className="form-label">Main Image URL</label>
-          <input className="form-input" name="image_url" type="text" defaultValue={project.image_url ?? ''} />
+          <label className="form-label">
+            Thumbnail URL{' '}
+            <span style={{ color: 'var(--accent)', fontWeight: 400 }}>
+              (grid display — must be a real URL, not base64)
+            </span>
+          </label>
+          <input className="form-input" name="thumbnail_url" type="text" defaultValue={project.thumbnail_url ?? ''} placeholder="https://... (compressed/WebP)" />
+          <p className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>
+            Set this to a small image URL. If blank and main image is a data URI, grids will show a placeholder.
+          </p>
+        </div>
+
+        <div>
+          <label className="form-label">Main Image URL <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(full resolution)</span></label>
+          <input className="form-input" name="image_url" type="text" defaultValue={project.image_url?.startsWith('data:') ? '' : (project.image_url ?? '')} placeholder="https://... or paste base64 data URI" />
+          {project.image_url?.startsWith('data:') && (
+            <p className="text-[11px] mt-1" style={{ color: 'rgba(239,35,60,.7)' }}>
+              ⚠ Currently stored as a base64 data URI. Add a thumbnail URL above to fix grid display.
+            </p>
+          )}
         </div>
 
         <div>

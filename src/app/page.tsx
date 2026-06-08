@@ -8,13 +8,19 @@ export const metadata: Metadata = {
     'Matt Wright — freelance graphic designer, GFX creator, and FiveM server developer. Clean branding, Discord graphics, FiveM UI, and custom server development.',
 }
 
-interface Project { id: number; title: string; category: string; image_url: string }
+interface Project { id: number; title: string; category: string; grid_url: string | null }
 interface Product { id: number; title: string; category: string; price: string; image_url: string; original_price: string | null }
 
 async function getFeaturedProjects(): Promise<Project[]> {
   try {
     return await query<Project>(
-      `SELECT id, title, category, image_url
+      `SELECT
+         id, title, category,
+         CASE
+           WHEN thumbnail_url IS NOT NULL AND thumbnail_url != '' THEN thumbnail_url
+           WHEN image_url IS NOT NULL AND image_url NOT LIKE 'data:%' THEN image_url
+           ELSE NULL
+         END AS grid_url
        FROM projects
        WHERE featured = true AND published = true
        ORDER BY sort_order ASC, created_at DESC
@@ -117,7 +123,7 @@ export default async function HomePage() {
                   aria-label={p.title}
                 >
                   <img
-                    src={p.image_url || '/assets/project-placeholder.svg'}
+                    src={p.grid_url || '/assets/project-placeholder.svg'}
                     alt={p.title}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     decoding="async"
@@ -138,14 +144,14 @@ export default async function HomePage() {
         <div className="wrapper">
           <div className="section-head">
             <div>
-              <p className="eyebrow mb-3">Matt W Studio</p>
+              <p className="eyebrow mb-3">Premade GFX</p>
               <h2 className="text-[clamp(26px,3vw,42px)] font-black tracking-tighter">GFX Store</h2>
             </div>
-            <Link href="/store" className="btn btn-ghost btn-sm">Browse store →</Link>
+            <Link href="/store" className="btn btn-ghost btn-sm">Shop GFX →</Link>
           </div>
 
           {products.length === 0 ? (
-            /* Studio band / coming soon */
+            /* Coming-soon band */
             <div
               className="relative overflow-hidden rounded-3xl p-8 md:p-12 reveal"
               style={{
@@ -153,18 +159,23 @@ export default async function HomePage() {
                 border: '1px solid rgba(239,35,60,.20)',
               }}
             >
-              <div className="absolute right-0 top-0 w-64 h-64 rounded-full opacity-10 pointer-events-none"
-                   style={{ background: 'radial-gradient(circle, #ef233c, transparent 70%)', filter: 'blur(48px)', transform: 'translate(30%,-20%)' }} />
+              <div
+                className="absolute right-0 top-0 w-64 h-64 rounded-full opacity-10 pointer-events-none"
+                style={{ background: 'radial-gradient(circle, #ef233c, transparent 70%)', filter: 'blur(48px)', transform: 'translate(30%,-20%)' }}
+              />
               <div className="relative z-10 max-w-xl">
-                <p className="eyebrow mb-4">Coming soon</p>
+                <p className="eyebrow mb-4">Launching soon</p>
                 <p className="text-[clamp(22px,3vw,40px)] font-black tracking-tighter text-white leading-tight mb-4">
-                  Matt W Studio<span style={{ color: 'var(--accent)' }}>.</span>
+                  Premade logos &amp; GFX packs<span style={{ color: 'var(--accent)' }}>.</span>
                 </p>
                 <p className="text-[14px] leading-[1.72] mb-6" style={{ color: 'var(--soft)' }}>
-                  Premade logos, Tebex graphics, Discord branding packs, social media templates, and
-                  FiveM visual resources — available at the Matt W Studio store.
+                  Logos, Tebex product images, Discord branding packs, FiveM graphics, and social
+                  media templates — all available directly here.
                 </p>
-                <Link href="/store" className="btn btn-primary">Visit the Store</Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/store" className="btn btn-primary">Shop GFX</Link>
+                  <Link href="/custom-order" className="btn btn-ghost">Custom Order</Link>
+                </div>
               </div>
             </div>
           ) : (
@@ -184,7 +195,7 @@ export default async function HomePage() {
                     <p className="eyebrow mb-2">{p.category}</p>
                     <h3 className="font-black tracking-tight text-[16px] text-white mb-2">{p.title}</h3>
                     <div className="flex items-center gap-3 mt-3">
-                      <span className="font-black text-[18px] text-accent">
+                      <span className="font-black text-[18px]" style={{ color: 'var(--accent)' }}>
                         £{Number(p.price).toFixed(2)}
                       </span>
                       {p.original_price && (
@@ -304,26 +315,31 @@ export default async function HomePage() {
               className="absolute -top-20 -left-20 w-96 h-96 rounded-full pointer-events-none opacity-20"
               style={{ background: 'radial-gradient(circle, #ef233c, transparent 65%)', filter: 'blur(60px)' }}
             />
-            <div className="relative z-10 max-w-2xl">
-              <p className="eyebrow mb-4">Start a project</p>
-              <h2 className="text-[clamp(28px,4vw,54px)] font-black tracking-tighter leading-none mb-5">
-                Let's build something clean, sharp, and professional.
+            <div className="relative z-10">
+              <p className="eyebrow mb-4">Custom Orders</p>
+              <h2 className="text-[clamp(28px,4vw,54px)] font-black tracking-tighter leading-none mb-5 max-w-2xl">
+                Need something built from scratch?
               </h2>
-              <p className="text-[15px] leading-[1.78] mb-8" style={{ color: 'var(--soft)' }}>
-                Fill out the custom order form with your project details, budget, and timeline — I'll
-                get back to you directly.
+              <p className="text-[15px] leading-[1.78] mb-6 max-w-xl" style={{ color: 'var(--soft)' }}>
+                Logos, branding packs, FiveM graphics, Discord graphics, social media designs, and FiveM
+                server development — all available as custom projects. Fill in the form and I'll reply
+                within 24–48 hours.
               </p>
+              <div className="flex flex-wrap gap-2 mb-8">
+                {['Logo Design','Branding Packs','FiveM Graphics','Discord Graphics','Server Dev'].map((t) => (
+                  <span
+                    key={t}
+                    className="text-[11.5px] font-black px-3 py-1 rounded-full"
+                    style={{ background: 'rgba(239,35,60,.10)', border: '1px solid rgba(239,35,60,.20)', color: 'rgba(255,140,152,.9)' }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
               <div className="flex flex-wrap gap-3">
-                <Link href="/custom-order" className="btn btn-primary">Custom Order Form</Link>
-                <Link href="/contact"      className="btn btn-ghost">Contact Me</Link>
-                <a
-                  href="https://www.fiverr.com/s/yvkxr7Z"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost"
-                >
-                  Order on Fiverr ↗
-                </a>
+                <Link href="/custom-order" className="btn btn-primary">Start Custom Order</Link>
+                <Link href="/portfolio"    className="btn btn-ghost">View Portfolio</Link>
+                <Link href="/store"        className="btn btn-outline">Shop GFX</Link>
               </div>
             </div>
           </div>
@@ -346,7 +362,8 @@ export default async function HomePage() {
               </p>
               <p className="text-[15px] leading-[1.78] mb-8" style={{ color: 'var(--soft)' }}>
                 I work across both creative design and FiveM server development — which means I can
-                help with the look, the branding, and the actual in-game experience.
+                help with the look, the branding, and the actual in-game experience. Everything in
+                one place.
               </p>
               <div className="flex flex-wrap gap-2 mb-8">
                 {['Photoshop','Illustrator','Figma','VS Code','Lua','QBCore','HTML/CSS'].map((t) => (

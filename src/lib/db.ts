@@ -77,6 +77,7 @@ export async function initDb(): Promise<void> {
       category        VARCHAR(100) NOT NULL DEFAULT 'Design',
       description     TEXT,
       image_url       TEXT,
+      thumbnail_url   TEXT,
       project_images  TEXT[]       DEFAULT '{}',
       tags            TEXT[]       DEFAULT '{}',
       featured        BOOLEAN      DEFAULT false,
@@ -86,6 +87,9 @@ export async function initDb(): Promise<void> {
       updated_at      TIMESTAMPTZ  DEFAULT NOW()
     )
   `)
+
+  // Non-destructive migration for existing databases
+  await pool.query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS thumbnail_url TEXT`).catch(() => {})
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS site_content (
@@ -143,6 +147,7 @@ export async function initDb(): Promise<void> {
       original_price DECIMAL(10,2),
       category       VARCHAR(100)   NOT NULL DEFAULT 'Design',
       image_url      TEXT,
+      thumbnail_url  TEXT,
       product_images TEXT[]         DEFAULT '{}',
       includes       TEXT[]         DEFAULT '{}',
       license        TEXT           DEFAULT 'Personal use',
@@ -173,6 +178,8 @@ export async function initDb(): Promise<void> {
       created_at       TIMESTAMPTZ  DEFAULT NOW()
     )
   `)
+
+  await pool.query(`ALTER TABLE store_products ADD COLUMN IF NOT EXISTS thumbnail_url TEXT`).catch(() => {})
 
   console.log('[DB] Tables initialised')
 }

@@ -12,16 +12,17 @@ async function requireAdmin() {
 
 export async function createProject(data: {
   title: string; category: string; description?: string
-  image_url?: string; project_images?: string[]; tags?: string[]
+  image_url?: string; thumbnail_url?: string; project_images?: string[]; tags?: string[]
   published?: boolean; featured?: boolean; sort_order?: number
 }) {
   await requireAdmin()
   await query(
-    `INSERT INTO projects (title, category, description, image_url, project_images, tags, published, featured, sort_order)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    `INSERT INTO projects (title, category, description, image_url, thumbnail_url, project_images, tags, published, featured, sort_order)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
     [
       data.title, data.category, data.description || null,
       data.image_url || null,
+      data.thumbnail_url || null,
       data.project_images ?? [],
       data.tags ?? [],
       data.published ?? true, data.featured ?? false, data.sort_order ?? 0,
@@ -33,7 +34,7 @@ export async function createProject(data: {
 
 export async function updateProject(id: number, data: Partial<{
   title: string; category: string; description: string
-  image_url: string; project_images: string[]; tags: string[]
+  image_url: string; thumbnail_url: string | null; project_images: string[]; tags: string[]
   published: boolean; featured: boolean; sort_order: number
 }>) {
   await requireAdmin()
@@ -41,15 +42,16 @@ export async function updateProject(id: number, data: Partial<{
   const vals: unknown[] = []
   let i = 1
 
-  if (data.title       !== undefined) { sets.push(`title=$${i++}`);          vals.push(data.title) }
-  if (data.category    !== undefined) { sets.push(`category=$${i++}`);       vals.push(data.category) }
-  if (data.description !== undefined) { sets.push(`description=$${i++}`);    vals.push(data.description) }
-  if (data.image_url   !== undefined) { sets.push(`image_url=$${i++}`);      vals.push(data.image_url) }
+  if (data.title         !== undefined) { sets.push(`title=$${i++}`);         vals.push(data.title) }
+  if (data.category      !== undefined) { sets.push(`category=$${i++}`);      vals.push(data.category) }
+  if (data.description   !== undefined) { sets.push(`description=$${i++}`);   vals.push(data.description) }
+  if (data.image_url     !== undefined) { sets.push(`image_url=$${i++}`);     vals.push(data.image_url) }
+  if (data.thumbnail_url !== undefined) { sets.push(`thumbnail_url=$${i++}`); vals.push(data.thumbnail_url) }
   if (data.project_images !== undefined) { sets.push(`project_images=$${i++}`); vals.push(data.project_images) }
-  if (data.tags        !== undefined) { sets.push(`tags=$${i++}`);           vals.push(data.tags) }
-  if (data.published   !== undefined) { sets.push(`published=$${i++}`);      vals.push(data.published) }
-  if (data.featured    !== undefined) { sets.push(`featured=$${i++}`);       vals.push(data.featured) }
-  if (data.sort_order  !== undefined) { sets.push(`sort_order=$${i++}`);     vals.push(data.sort_order) }
+  if (data.tags          !== undefined) { sets.push(`tags=$${i++}`);          vals.push(data.tags) }
+  if (data.published     !== undefined) { sets.push(`published=$${i++}`);     vals.push(data.published) }
+  if (data.featured      !== undefined) { sets.push(`featured=$${i++}`);      vals.push(data.featured) }
+  if (data.sort_order    !== undefined) { sets.push(`sort_order=$${i++}`);    vals.push(data.sort_order) }
 
   if (sets.length === 0) return
   sets.push(`updated_at=NOW()`)

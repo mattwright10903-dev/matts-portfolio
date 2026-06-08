@@ -15,11 +15,11 @@ interface Product {
 const CATEGORIES = [
   'All',
   'Premade Logos',
-  'Discord Packs',
-  'FiveM Resources',
-  'Social Media',
-  'Branding Kits',
-  'Other',
+  'Tebex Product Images',
+  'Discord Graphics',
+  'Social Media Graphics',
+  'FiveM Branding Packs',
+  'Custom Graphics',
 ]
 
 export default function StoreGrid({ products }: { products: Product[] }) {

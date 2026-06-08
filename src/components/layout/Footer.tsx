@@ -13,25 +13,23 @@ export default function Footer() {
           <p className="mt-2 text-[13px]" style={{ color: 'var(--muted)' }}>
             Graphic Designer · GFX Creator<br />FiveM Server Developer
           </p>
-          <a
-            href="https://studio.mattwright.online"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/store"
             className="footer-studio-link inline-block mt-3 text-[12.5px] font-bold"
           >
-            Matt W Studio ↗
-          </a>
+            GFX Store →
+          </Link>
         </div>
 
         {/* Navigation */}
         <div className="flex flex-col gap-2.5">
           {[
-            ['/portfolio',     'Portfolio'],
-            ['/store',         'GFX Store'],
-            ['/services',      'Services'],
-            ['/about',         'About'],
-            ['/contact',       'Contact'],
-            ['/custom-order',  'Custom Order'],
+            ['/portfolio',    'Portfolio'],
+            ['/store',        'GFX Store'],
+            ['/services',     'Services'],
+            ['/custom-order', 'Custom Order'],
+            ['/about',        'About'],
+            ['/contact',      'Contact'],
           ].map(([href, label]) => (
             <Link
               key={href}
@@ -61,7 +59,7 @@ export default function Footer() {
             href="https://www.fiverr.com/s/yvkxr7Z"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[13px] font-bold transition-colors"
+            className="text-[13px] font-bold"
             style={{ color: 'rgba(29,191,115,.78)' }}
           >
             Fiverr ↗
@@ -70,7 +68,7 @@ export default function Footer() {
             href="https://discord.com/users/1128708778343280713"
             target="_blank"
             rel="noreferrer"
-            className="text-[13px] font-bold transition-colors"
+            className="text-[13px] font-bold"
             style={{ color: 'rgba(88,101,242,.88)' }}
           >
             Discord DM ↗
@@ -83,18 +81,9 @@ export default function Footer() {
         style={{ borderTop: '1px solid var(--border)', color: 'var(--muted)' }}
       >
         <span>© {year} Matt Wright. All rights reserved.</span>
-        <span>
-          Also at{' '}
-          <a
-            href="https://studio.mattwright.online"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-bold"
-            style={{ color: 'rgba(239,35,60,.7)' }}
-          >
-            studio.mattwright.online
-          </a>
-        </span>
+        <Link href="/custom-order" className="font-bold" style={{ color: 'var(--muted)' }}>
+          Start a project →
+        </Link>
       </div>
     </footer>
   )

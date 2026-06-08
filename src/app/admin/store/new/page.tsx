@@ -44,7 +44,7 @@ export default function NewProductPage() {
 
         <div><label className="form-label">Category *</label>
           <select className="form-input" name="category" required>
-            {['Premade Logos','Discord Packs','FiveM Resources','Social Media','Branding Kits','Other'].map((c) => (
+            {['Premade Logos','Tebex Product Images','Discord Graphics','Social Media Graphics','FiveM Branding Packs','Custom Graphics'].map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>

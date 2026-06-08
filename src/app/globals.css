@@ -256,8 +256,8 @@
   /* Scroll reveal — toggled by JS */
   .reveal {
     opacity: 0;
-    transform: translateY(18px);
-    transition: opacity .5s var(--ease), transform .5s var(--ease);
+    transform: translateY(14px);
+    transition: opacity .4s var(--ease), transform .4s var(--ease);
   }
   .reveal.visible {
     opacity: 1;
@@ -409,12 +409,15 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: transform 280ms var(--ease), border-color 280ms ease, box-shadow 280ms ease;
+  transition: transform 240ms var(--ease), border-color 240ms ease, box-shadow 240ms ease;
+  /* Skip painting for off-screen cards — big win when many projects are loaded */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px;
 }
 .project-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   border-color: var(--border-2);
-  box-shadow: 0 24px 64px rgba(0,0,0,.40);
+  box-shadow: 0 20px 48px rgba(0,0,0,.38);
 }
 
 .project-card-img {
@@ -511,10 +514,11 @@
   left: 12px; right: 12px; bottom: 12px;
   padding: 12px 16px;
   border-radius: 13px;
-  background: rgba(3,3,5,.78);
+  background: rgba(3,3,5,.85);
   border: 1px solid rgba(255,255,255,.09);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  /* backdrop-filter only where supported and not reduced-motion */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .bento-meta p { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .18em; color: var(--accent); }
 .bento-meta h3 { font-size: 16px; font-weight: 900; letter-spacing: -.04em; color: #fff; margin-top: 4px; }

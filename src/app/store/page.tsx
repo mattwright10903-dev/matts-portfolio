@@ -6,7 +6,7 @@ import StoreGrid from '@/components/store/StoreGrid'
 export const metadata: Metadata = {
   title: 'GFX Store',
   description:
-    'Matt W Studio GFX Store — premade logos, Discord branding packs, FiveM visual resources, and social media templates.',
+    'GFX Store — premade logos, Tebex product images, Discord branding packs, FiveM graphics, and social media templates by Matt Wright.',
 }
 
 interface Product {
@@ -36,13 +36,13 @@ export default async function StorePage() {
   return (
     <main>
       <div className="page-header wrapper">
-        <p className="eyebrow mb-4">Matt W Studio</p>
+        <p className="eyebrow mb-4">Premade GFX</p>
         <h1 className="text-[clamp(36px,6vw,72px)] font-black tracking-tighter leading-none mb-4">
           GFX Store<span style={{ color: 'var(--accent)' }}>.</span>
         </h1>
         <p className="max-w-lg text-[15px] leading-[1.78]" style={{ color: 'var(--soft)' }}>
-          Premade logos, Discord branding packs, FiveM visual resources, and social media
-          templates — ready to use, instantly available.
+          Premade logos, Tebex product images, Discord branding packs, FiveM graphics, and social
+          media templates — ready to use, instant delivery.
         </p>
       </div>
 

@@ -5,25 +5,40 @@ import PortfolioGrid from '@/components/portfolio/PortfolioGrid'
 export const metadata: Metadata = {
   title: 'Portfolio',
   description:
-    'Browse Matt Wright\'s design and development portfolio — logos, branding, FiveM graphics, Discord visuals, and more.',
+    "Browse Matt Wright's design and development portfolio — logos, branding, FiveM graphics, Discord visuals, and more.",
 }
 
-interface Project {
+export interface GridProject {
   id: number
   title: string
   category: string
-  image_url: string
+  /**
+   * Safe-to-display URL for the grid thumbnail.
+   * Never a base64 data URI — those stay on the detail page only.
+   * NULL means no thumbnail was set; the grid shows the placeholder.
+   */
+  grid_url: string | null
 }
 
-async function getAllProjects(): Promise<Project[]> {
+async function getAllProjects(): Promise<GridProject[]> {
   try {
-    return await query<Project>(
-      `SELECT id, title, category, image_url
+    return await query<GridProject>(
+      `SELECT
+         id,
+         title,
+         category,
+         CASE
+           WHEN thumbnail_url IS NOT NULL AND thumbnail_url != '' THEN thumbnail_url
+           WHEN image_url IS NOT NULL AND image_url NOT LIKE 'data:%' THEN image_url
+           ELSE NULL
+         END AS grid_url
        FROM projects
        WHERE published = true
        ORDER BY sort_order ASC, created_at DESC`
     )
-  } catch { return [] }
+  } catch {
+    return []
+  }
 }
 
 export default async function PortfolioPage() {
