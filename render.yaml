@@ -2,21 +2,20 @@ services:
   - type: web
     name: matt-wright-portfolio
     env: node
-    plan: starter
-    buildCommand: npm install --registry=https://registry.npmjs.org --no-audit --no-fund && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: ADMIN_EMAIL
-        value: mattwright10903@gmail.com
+      - key: DATABASE_URL
+        sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: matt-wright-portfolio-db
-          property: connectionString
-
-databases:
-  - name: matt-wright-portfolio-db
-    plan: starter
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      - key: BASE_URL
+        sync: false

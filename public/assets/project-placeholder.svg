@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
+  <rect width="800" height="500" fill="#0c0c14"/>
+  <rect x="1" y="1" width="798" height="498" rx="1" stroke="rgba(255,255,255,0.06)"/>
+  <rect x="340" y="200" width="120" height="90" rx="8" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <circle cx="366" cy="226" r="12" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <polyline points="340,280 372,248 400,268 430,235 460,280" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
+  <text x="400" y="330" text-anchor="middle" font-family="system-ui" font-size="13" fill="rgba(255,255,255,0.22)" font-weight="700" letter-spacing="0.1em">PROJECT IMAGE</text>
+</svg>
