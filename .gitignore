@@ -10,3 +10,7 @@ node_modules/
 .env
 .DS_Store
 __MACOSX/
+node_modules/
+.env
+.DS_Store
+__MACOSX/
