@@ -545,6 +545,8 @@ body.js-enabled .reveal-right.is-visible { opacity: 1; transform: translateX(0);
 .footer-contact span { color: var(--soft); font-size: 13px; }
 .footer-fiverr { color: rgba(29,191,115,.78); font-size: 13px; font-weight: 700; transition: color 180ms ease; }
 .footer-fiverr:hover { color: #1dbf73; }
+.footer-studio-link { display: inline-block; margin-top: .55rem; color: rgba(239,35,60,.7); font-size: 12.5px; font-weight: 800; letter-spacing: .02em; transition: color 180ms ease; }
+.footer-studio-link:hover { color: var(--red); }
 .footer-copy { grid-column: 1/-1; margin: .2rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--line); color: rgba(255,255,255,.34); font-size: 12px; }
 .back-top {
   width: max-content; margin-top: .4rem; border: 1px solid var(--line);
@@ -1032,3 +1034,321 @@ details label:last-child { margin-bottom: 14px; }
   .pview-dialog { transition: none !important; transform: none !important; }
   .existing-image-item.is-dragging { transition: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO V2 — discipline pills, role subtitle, studio button
+   ═══════════════════════════════════════════════════════════ */
+
+/* Dot after "Matt Wright" via CSS so the character-animation JS stays intact */
+.hero .hero-title::after {
+  content: ".";
+  color: var(--red);
+  display: inline;
+}
+
+/* Discipline pill row */
+.hero-disc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.hero-disc-sep {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  user-select: none;
+}
+
+.hero-disc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  white-space: nowrap;
+}
+
+.pill-gfx {
+  background: rgba(239,35,60,.11);
+  border: 1px solid rgba(239,35,60,.28);
+  color: rgba(255,140,152,.92);
+}
+
+.pill-design {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.13);
+  color: rgba(255,255,255,.76);
+}
+
+.pill-fivem {
+  background: rgba(52,199,89,.07);
+  border: 1px solid rgba(52,199,89,.18);
+  color: rgba(100,220,130,.82);
+}
+
+/* Role sub-heading beneath title */
+.hero-role-sub {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: .05em;
+  margin: 6px 0 18px;
+  text-transform: uppercase;
+}
+
+/* Studio CTA button in hero */
+.hero-studio-btn {
+  background: rgba(239,35,60,.07);
+  border-color: rgba(239,35,60,.20);
+  color: rgba(255,140,152,.90);
+}
+.hero-studio-btn:hover {
+  background: rgba(239,35,60,.15);
+  border-color: rgba(239,35,60,.40);
+  box-shadow: 0 8px 24px rgba(239,35,60,.18);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MATT W STUDIO BAND
+   ═══════════════════════════════════════════════════════════ */
+.studio-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding: clamp(26px,4vw,44px) clamp(24px,4vw,48px);
+  margin-bottom: clamp(56px,8vw,96px);
+  border: 1px solid rgba(239,35,60,.22);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse 65% 100% at 0% 55%, rgba(239,35,60,.09), transparent 62%),
+    var(--panel);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 32px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.055);
+  transition: border-color 280ms ease, box-shadow 280ms ease;
+}
+
+.studio-band:hover {
+  border-color: rgba(239,35,60,.38);
+  box-shadow: 0 8px 48px rgba(0,0,0,.32), 0 0 60px rgba(239,35,60,.07), inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+/* Ambient glow blob on the right */
+.studio-band::after {
+  content: "";
+  position: absolute;
+  right: -100px; top: 50%;
+  transform: translateY(-50%);
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239,35,60,.14), transparent 65%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.studio-band-left  { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.studio-band-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; }
+
+.studio-band-label { margin-bottom: 10px; }
+
+.studio-band-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  margin-bottom: 12px;
+}
+
+.studio-band-name {
+  font-size: clamp(22px, 3.5vw, 44px);
+  font-weight: 900;
+  letter-spacing: -.06em;
+  color: #fff;
+  line-height: 1;
+}
+
+.studio-band-dot {
+  color: var(--red);
+  font-size: clamp(22px, 3.5vw, 44px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.studio-band-desc {
+  color: rgba(255,255,255,.58);
+  font-size: 14px;
+  line-height: 1.72;
+  max-width: 480px;
+  margin: 0;
+}
+
+.studio-band-url {
+  color: rgba(255,255,255,.32);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  font-family: monospace;
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .studio-band { flex-direction: column; align-items: flex-start; }
+  .studio-band-right { align-items: flex-start; width: 100%; }
+  .studio-band-right .btn { width: 100%; justify-content: center; }
+  .studio-band-url { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PORTFOLIO IMPROVEMENTS — Phase 2
+   ═══════════════════════════════════════════════════════════ */
+
+/* Filter bar — better spacing */
+.port-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 6px 0;
+}
+
+/* Grid card — crisper image treatment */
+.port-grid-img img {
+  transition: transform 500ms var(--ease), opacity 300ms ease;
+}
+
+.port-grid-card:hover .port-grid-img img {
+  transform: scale(1.04);
+}
+
+/* Project detail — bigger hero title spacing */
+.case-hero {
+  padding-top: clamp(72px,10vw,120px);
+}
+
+.case-hero h1 {
+  margin-bottom: 1.2rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONTACT FORM — Phase 4
+   ═══════════════════════════════════════════════════════════ */
+.contact-form-section {
+  margin-top: 48px;
+  padding: clamp(28px,4vw,44px) clamp(24px,4vw,44px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 4px 28px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.contact-form-header {
+  margin-bottom: 28px;
+}
+
+.contact-form-header h2 {
+  font-size: clamp(20px,2.4vw,30px);
+  letter-spacing: -.054em;
+  line-height: 1.1;
+  margin: 6px 0 8px;
+}
+
+.contact-form-header > p {
+  color: rgba(255,255,255,.58);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+.contact-form {
+  display: grid;
+  gap: 16px;
+}
+
+.contact-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form textarea {
+  min-height: 130px;
+}
+
+.contact-form .btn {
+  width: max-content;
+}
+
+.contact-form .required {
+  color: var(--red);
+  font-size: 11px;
+}
+
+.contact-success {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  border: 1px solid rgba(52,199,89,.24);
+  border-radius: var(--radius);
+  background: rgba(52,199,89,.07);
+}
+
+.contact-success h3 {
+  font-size: 20px;
+  letter-spacing: -.04em;
+  margin: 0;
+  color: #34c759;
+}
+
+.contact-success p {
+  color: rgba(255,255,255,.72);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .contact-form .form-row { grid-template-columns: 1fr; }
+  .contact-form .btn { width: 100%; justify-content: center; }
+  .hero-disc-row { gap: 7px; }
+  .hero-disc-pill { font-size: 9.5px; padding: 5px 11px; letter-spacing: .13em; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT PAGE — Phase 3 polish
+   ═══════════════════════════════════════════════════════════ */
+.about-studio-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid rgba(239,35,60,.18);
+  border-radius: 14px;
+  background: rgba(239,35,60,.06);
+}
+
+.about-studio-note p {
+  color: rgba(255,255,255,.72);
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.about-studio-note a {
+  color: rgba(255,140,152,.92);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.about-studio-note a:hover { color: #fff; }

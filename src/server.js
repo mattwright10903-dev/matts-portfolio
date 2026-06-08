@@ -183,7 +183,7 @@ app.get('/about', async (req, res) => {
 app.get('/contact', async (req, res) => {
   const content = await getContent();
   logSite('Contact Page Visit', req).catch(() => {});
-  res.render('contact', locals(req, { page: 'contact', sent: false, content }));
+  res.render('contact', locals(req, { page: 'contact', sent: false, error: null, chatToken: null, content }));
 });
 
 app.get('/privacy', (_req, res) => {
@@ -221,7 +221,7 @@ app.post('/contact', async (req, res) => {
   const body    = req.body.body || '';
   if (!email || !body) {
     const content = await getContent();
-    return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.', content }));
+    return res.render('contact', locals(req, { page: 'contact', sent: false, error: 'Email and message are required.', chatToken: null, content }));
   }
 
   const token  = crypto.randomBytes(24).toString('hex');
@@ -233,7 +233,7 @@ app.post('/contact', async (req, res) => {
   await query('INSERT INTO messages (user_id, name, email, subject, body) VALUES ($1, $2, $3, $4, $5)', [null, name, email, subject, body]);
 
   const content = await getContent();
-  res.render('contact', locals(req, { page: 'contact', sent: true, chatToken: token, content }));
+  res.render('contact', locals(req, { page: 'contact', sent: true, chatToken: token, error: null, content }));
 });
 
 app.get('/chat/:token/messages', async (req, res) => {

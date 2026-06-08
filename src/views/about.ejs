@@ -14,12 +14,15 @@ const tools = ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua'
     <p class="eyebrow">About Me</p>
     <h1>Turning ideas into <span>visuals and systems</span> that feel professional.</h1>
     <div class="about-text-stack">
-      <p><%= content.about_body %></p>
+      <p><%= content.about_body || "I'm a freelance graphic designer and FiveM server developer with 5+ years of experience. I create clean branding, bold visuals, and custom FiveM systems for communities, creators, and businesses." %></p>
       <% if (content.about_extra) { %><p><%= content.about_extra %></p><% } %>
-      <p>I work across both creative design and FiveM server development, which means I can help with the look, the branding, and the actual in-game and community experience.</p>
+      <p>I work across both creative design and FiveM server development — which means I can help with the look, the branding, and the actual in-game and community experience.</p>
     </div>
     <div class="tool-cloud">
       <% tools.forEach(tool => { %><span><%= tool %></span><% }) %>
+    </div>
+    <div class="about-studio-note">
+      <p>Also available at <a href="https://studio.mattwright.online" target="_blank" rel="noopener noreferrer">Matt W Studio ↗</a> — premium graphics resources and design packages purpose-built for FiveM communities and digital creators.</p>
     </div>
   </div>
 
@@ -58,8 +61,9 @@ const tools = ['Photoshop', 'Illustrator', 'Figma', 'VS Code', 'HTML/CSS', 'Lua'
     <h2>Let's build something you're proud of.</h2>
     <p>Design, branding, FiveM graphics, or full server development — reach out via Discord or email and we'll get started.</p>
     <div class="hero-actions">
-      <a class="btn discord" href="/contact">Discord</a>
-      <a class="btn email" href="mailto:mattwright10903@gmail.com">Email Me</a>
+      <a class="btn primary" href="/contact">Start a Project</a>
+      <a class="btn discord" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">Discord</a>
+      <a class="btn ghost" href="https://studio.mattwright.online" target="_blank" rel="noopener noreferrer">Visit Matt W Studio ↗</a>
     </div>
   </div>
 </section>

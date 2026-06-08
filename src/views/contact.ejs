@@ -65,6 +65,50 @@
 
   </div>
 
+  <!-- Contact Form -->
+  <div class="contact-form-section">
+    <div class="contact-form-header">
+      <p class="eyebrow">Send a Message</p>
+      <h2>Write out your request</h2>
+      <p>Fill in the form below — include your project type, deadline, and budget. I'll reply to your email directly.</p>
+    </div>
+
+    <% if (locals.sent) { %>
+      <div class="contact-success">
+        <h3>Message sent!</h3>
+        <p>Thanks for reaching out. I'll get back to you at the email you provided. For faster responses, feel free to also add me on Discord: <strong>mjww0</strong>.</p>
+        <a class="btn ghost" href="/contact">Send another message</a>
+      </div>
+    <% } else { %>
+      <% if (locals.error) { %>
+        <div class="notice error" style="margin-bottom:16px;"><%= locals.error %></div>
+      <% } %>
+      <form class="contact-form" method="post" action="/contact">
+        <div class="form-row">
+          <label>
+            Your Name
+            <input type="text" name="name" placeholder="Your name" autocomplete="name">
+          </label>
+          <label>
+            Email Address <span class="required">*</span>
+            <input type="email" name="email" placeholder="your@email.com" required autocomplete="email">
+          </label>
+        </div>
+        <label>
+          Subject
+          <input type="text" name="subject" placeholder="Brief description — e.g. FiveM Loading Screen, Discord Branding">
+        </label>
+        <label>
+          Message <span class="required">*</span>
+          <textarea name="body" rows="6" placeholder="Tell me about your project — type, budget, deadline, style references, and anything else I should know." required></textarea>
+        </label>
+        <div>
+          <button class="btn primary" type="submit">Send Message</button>
+        </div>
+      </form>
+    <% } %>
+  </div>
+
   <!-- CTA -->
   <div class="contact-cta">
     <div class="contact-cta-text">

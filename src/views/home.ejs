@@ -1,15 +1,30 @@
 <%- include('layout-start') %>
 <% const featured = projects.slice(0, 4); %>
 
-<!-- Hero -->
+<!-- ════════════════════════════════════════════════════════
+     HERO
+     ════════════════════════════════════════════════════════ -->
 <section class="hero">
-  <p class="eyebrow">Matt Wright</p>
-  <h1 class="hero-title">Graphic Designer &amp; FiveM Server Developer</h1>
-  <p class="hero-lead">I create clean branding, FiveM graphics, Discord visuals, website assets, and custom FiveM development for communities, creators, and businesses.</p>
+  <div class="hero-disc-row reveal">
+    <span class="hero-disc-pill pill-gfx">GFX Creator</span>
+    <span class="hero-disc-sep">&bull;</span>
+    <span class="hero-disc-pill pill-design">Graphic Designer</span>
+    <span class="hero-disc-sep">&bull;</span>
+    <span class="hero-disc-pill pill-fivem">FiveM Developer</span>
+  </div>
+
+  <h1 class="hero-title">Matt Wright</h1>
+
+  <p class="hero-role-sub">Premium graphics &amp; custom FiveM development</p>
+
+  <p class="hero-lead">I create bold branding, FiveM graphics, Discord visuals, loading screens, and full FiveM server development for communities, creators, and businesses worldwide.</p>
+
   <div class="hero-actions">
     <a class="btn primary" href="/portfolio">View Portfolio</a>
-    <a class="btn ghost" href="/contact">Contact Me</a>
+    <a class="btn ghost"    href="/contact">Start a Project</a>
+    <a class="btn hero-studio-btn" href="https://studio.mattwright.online" target="_blank" rel="noopener noreferrer">Matt W Studio ↗</a>
   </div>
+
   <div class="stat-strip">
     <span>5+ Years Experience</span>
     <span>Design + Development</span>
@@ -17,7 +32,9 @@
   </div>
 </section>
 
-<!-- Featured Work -->
+<!-- ════════════════════════════════════════════════════════
+     FEATURED WORK
+     ════════════════════════════════════════════════════════ -->
 <section class="section-block">
   <div class="section-heading scroll-reveal">
     <div>
@@ -54,7 +71,26 @@
   </div>
 </section>
 
-<!-- Services -->
+<!-- ════════════════════════════════════════════════════════
+     MATT W STUDIO BAND
+     ════════════════════════════════════════════════════════ -->
+<div class="studio-band reveal">
+  <div class="studio-band-left">
+    <p class="studio-band-label eyebrow">Also by Matt Wright</p>
+    <div class="studio-band-brand">
+      <span class="studio-band-name">Matt W Studio</span><span class="studio-band-dot">.</span>
+    </div>
+    <p class="studio-band-desc">Premium graphics assets, branding packages, and visual resources — available at the studio brand. Purpose-built for FiveM communities and digital creators.</p>
+  </div>
+  <div class="studio-band-right">
+    <p class="studio-band-url">studio.mattwright.online</p>
+    <a class="btn primary" href="https://studio.mattwright.online" target="_blank" rel="noopener noreferrer">Visit Studio ↗</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SERVICES
+     ════════════════════════════════════════════════════════ -->
 <section class="section-block" id="services">
   <div class="section-heading scroll-reveal">
     <div>
@@ -66,7 +102,7 @@
 
   <div class="services-group-grid">
 
-    <!-- Left: Design -->
+    <!-- Design -->
     <div class="service-group stagger-item">
       <div class="service-group-header">
         <p class="eyebrow">Design</p>
@@ -118,7 +154,7 @@
       </div>
     </div>
 
-    <!-- Right: Development + FiveM Focus -->
+    <!-- Development + FiveM -->
     <div class="service-group stagger-item">
       <div class="service-group-header">
         <p class="eyebrow">Development</p>
@@ -152,7 +188,7 @@
         </div>
         <div class="fivem-mini-actions">
           <a class="btn primary" href="/contact">Get a quote</a>
-          <a class="btn ghost" href="/portfolio">See the work</a>
+          <a class="btn ghost"   href="/portfolio">See the work</a>
         </div>
       </div>
     </div>
@@ -160,7 +196,9 @@
   </div>
 </section>
 
-<!-- About + Contact -->
+<!-- ════════════════════════════════════════════════════════
+     ABOUT + CONTACT SPLIT
+     ════════════════════════════════════════════════════════ -->
 <section class="about-contact-section">
   <div class="section-heading scroll-reveal">
     <div>
@@ -169,21 +207,24 @@
     </div>
   </div>
   <div class="about-contact-grid">
+
     <div class="split-panel about-panel stagger-item">
       <p class="eyebrow">About</p>
       <h2>Freelance designer and developer focused on clean visuals and practical FiveM systems.</h2>
       <p>I'm a freelance designer and developer focused on clean visuals, bold branding, and practical FiveM systems. My work blends graphic design with server development so communities can look better and run smoother.</p>
       <div><a class="btn ghost" href="/about">About Me</a></div>
     </div>
+
     <div class="split-panel contact-panel stagger-item">
-      <p class="eyebrow">Have work you want to show better?</p>
+      <p class="eyebrow">Have a project in mind?</p>
       <h2>Let's build something clean, sharp, and professional.</h2>
       <div class="split-panel-actions">
-        <a class="btn discord" href="/contact">Discord</a>
-        <a class="btn email" href="mailto:mattwright10903@gmail.com">Email Me</a>
-        <a class="btn fiverr" href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer" aria-label="View Matt Wright on Fiverr">Order on Fiverr</a>
+        <a class="btn primary" href="/contact">Start a Project</a>
+        <a class="btn discord" href="https://discord.com/users/1128708778343280713" target="_blank" rel="noreferrer">Discord</a>
+        <a class="btn fiverr"  href="https://www.fiverr.com/s/yvkxr7Z" target="_blank" rel="noopener noreferrer" aria-label="View Matt Wright on Fiverr">Order on Fiverr</a>
       </div>
     </div>
+
   </div>
 </section>
 
